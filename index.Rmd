@@ -1,0 +1,44 @@
+--- 
+title: "DEQ Water Quality Automated Assessment User Manual"
+author: "Emma Jones and Kristen Bretz"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+# output: bookdown::gitbook
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+github-repo: openscapes/series
+description: "A companion document describing the WQA automated assessment methodology."
+split_by: "section"
+---
+
+# Introduction {#Introduction}
+
+This manual serves as a companion document to DEQ's Water Quality Assessment (WQA) automated assessment methodology. 
+
+
+
+
+## Acknowledgements {#Acknowledgements}
+
+Many WQA and Water Quality Standards (WQA) staff have contributed to this effort:
+
+* Kristen Bretz (kristen.bretz@deq.virginia.gov)
+* Jason Hill (jason.hill@deq.virginia.gov)
+* Sandy Mueller (sandra.mueller@deq.virginia.gov)
+* Cleo Baker (cleo.baker@deq.virginia.gov)
+* Amanda Shaver (amanda.shaver@deq.virginia.gov)
+* Tish Robertson (tish.robertson@deq.virginia.gov)
+* Paula Main (paula.main@deq.virginia.gov)
+* Mary Dail (mary.dail@deq.virginia.gov)
+* Martha Chapman (martha.chapman@deq.virginia.gov)
+* Sara Jordan (sara.jordan@deq.virginia.gov)
+* Kristie Britt (kristie.britt@deq.virginia.gov)
+* Jennifer Palmore (jennifer.palmore@deq.virginia.gov)
+* Kelley West (kelley.west@deq.virginia.gov)
+* Rebecca Shoemaker (rebecca.shoemaker@deq.virginia.gov)
+
+
+
+Please direct any questions to the project lead programmer, Emma Jones (emma.jones@deq.virginia.gov). 
