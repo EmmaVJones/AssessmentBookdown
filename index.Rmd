@@ -8,6 +8,7 @@ documentclass: book
 bibliography: [book.bib, packages.bib]
 biblio-style: apalike
 link-citations: yes
+colorlinks: yes
 github-repo: openscapes/series
 description: "A companion document describing the WQA automated assessment methodology."
 split_by: "section"

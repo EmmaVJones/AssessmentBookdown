@@ -3,7 +3,9 @@ bookdown::gitbook:
     - lib/css/bootstrap.min.css
     - lib/css/style.css
     - lib/css/lesson.css
-  includes:
+    - assets/style.css
+  includes: 
+    in_header: assets/header.html
   split_by: section
   config:
     toc:

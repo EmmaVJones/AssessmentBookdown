@@ -1,4 +1,4 @@
-# Data Organization {#DataOrganization}
+# Data Organization
 
 ```{r data organization setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -6,34 +6,42 @@ knitr::opts_chunk$set(echo = TRUE)
 
 development in progress...
 
-## Conventionals Data{#ConventionalsData}
+## Conventionals Data
 
 include scripts
 
-## Water Column Metals{#WaterColumnMetals}
+fake chunk to test copy scripts:
+
+```{r data organization test chunk}
+x <- 1
+print(x)
+```
+
+
+## Water Column Metals
 
 query from Roger, for now
 
-## Sediment Metals{#SedimentMetals}
+## Sediment Metals
 
 query from Roger, for now
 
-## Fish Tissue Data{#FishTissueData}
+## Fish Tissue Data
 
 provided by Rick & Gabe, for now
 
-## PCB Data{#PCBdata}
+## PCB Data
 
 From Mark Richards, not in CEDS
 
-## VDH Data{#VDHdata}
+## VDH Data
 
 Beach closure, HAB event
 
-## Citizen Monitoring Data{#CitizenMonitoringData}
+## Citizen Monitoring Data
 
 work with Reid for details on his progress with CMC API
 
-## Station Metadata{#StationMetadata}
+## Station Metadata
 
 lots to say
