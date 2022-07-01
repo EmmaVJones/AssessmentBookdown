@@ -1,0 +1,12 @@
+name: assessmentbookdown
+title: AssessmentBookdown
+username: ejones
+account: ejones
+server: rconnect.deq.virginia.gov
+hostUrl: https://rconnect.deq.virginia.gov/__api__
+appId: 330
+bundleId: 7030
+url: https://rconnect.deq.virginia.gov/content/330/
+when: 1656693154.13132
+asMultiple: FALSE
+asStatic: TRUE

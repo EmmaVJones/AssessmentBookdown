@@ -1,7 +1,7 @@
 --- 
 title: "DEQ Water Quality Automated Assessment User Manual"
-author: "Emma Jones and Kristen Bretz"
-date: "`r Sys.Date()`"
+author: "DEQ Automated Assessment Team"
+date: "Last Updated: `r Sys.Date()`"
 site: bookdown::bookdown_site
 # output: bookdown::gitbook
 documentclass: book
@@ -19,6 +19,9 @@ This manual serves as a companion document to DEQ's Water Quality Assessment (WQ
 
 Virginia has taken a hybrid approach to the process of automating the water quality assessments. DEQ relies upon an automated process to manipulate hundreds of thousands of water quality data collected throughout the state during a given assessment period (six year window). These scripts evaluate each record for exceedances of appropriate Water Quality Standards. Regional assessment staff may use interactive web-based analytical tools provide more context to tabular results of exceedance analyses to assist with Quality Assurance/Quality Control (QA/QC) prior to submitting data to EPA's [Assessment, Total Maximum Daily Load (TMDL) Tracking and Implementation System (ATTAINS)](https://www.epa.gov/waterdata/attains) system through DEQ's internal [Comprehensive Environmental Data System (CEDS)](https://ceds.deq.virginia.gov/ui#). This approach maximizes the benefits of each partner in the assessment process, allowing computers to excel at systematic and expedited data manipulation and analysis at scale and allowing humans to digest multiple lines of evidence to identify any potential data collection or analysis errors or areas of environmental concern. 
 
+## How to Use Document {#HowToUseDocument}
+
+The following report is an agency effort to facilitate the further adoption of automated assessment methods statewide. The intention of this project is to provide a non-programmer audience with accessible and understandable narratives describing the automated water quality assessment process. This document is not a comprehensive [WQA Guidance Manual](https://www.deq.virginia.gov/water/water-quality/assessments/wqa-guidance-manual), nor is it an introduction to using the R programming language. Here, we document the overall automated assessment process, explaining reasons certain decisions were made, and how to unpack analyses.
 
 ## Project History{#ProjectHistory}
 
@@ -38,8 +41,9 @@ To date, no estuarine-specific assessment methods have been completed, but the W
 
 ## Acknowledgements {#Acknowledgements}
 
-Many WQA and Water Quality Standards (WQA) staff have contributed to this effort:
+Many Water Quality Assessment (WQA) and Water Quality Standards (WQA) staff have contributed to this effort:
 
+* Emma Jones (emma.jones@deq.virginia.gov)
 * Kristen Bretz (kristen.bretz@deq.virginia.gov)
 * Jason Hill (jason.hill@deq.virginia.gov)
 * Sandy Mueller (sandra.mueller@deq.virginia.gov)

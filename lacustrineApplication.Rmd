@@ -1,0 +1,7 @@
+# Lacustrine Application
+
+```{r lacustrine setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## How To {#LacustrineAppHowTo}

@@ -1,0 +1,22 @@
+# Automated Assessment Methods
+
+```{r automated assessment setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Join WQS to Stations{#JoinWQStoStations}
+
+## Individual Parameter Analyses {#IndividualParameterAnalyses}
+
+### Temperature
+### Dissolved Oxygen
+### pH
+### Bacteria
+### Nutrients
+### Ammonia
+### PCB
+### Metals
+### Fish Tissue
+### Benthics
+
+## Automated Output {#AutomatedOutput}
