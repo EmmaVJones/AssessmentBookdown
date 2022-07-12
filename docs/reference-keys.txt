@@ -3,6 +3,8 @@ HowToUseDocument
 ProjectHistory
 Acknowledgements
 data-organization
+data-location
+data-availablility
 conventionals-data
 water-column-metals
 sediment-metals

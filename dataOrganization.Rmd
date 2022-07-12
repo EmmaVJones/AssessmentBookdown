@@ -4,18 +4,34 @@
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-development in progress...
+The assessment process requires hundreds of thousands of rows of data collected and stored by DEQ, other state agencies, and citizen partners. These disparate data sources require various levels of data manipulation prior to any analysis. SAS and R are used for the majority of the assessment data cleaning and manipulation processes. 
+
+### Data Location
+
+Most data used for assessments are stored in DEQ's internal [Comprehensive Environmental Data System (CEDS)](https://ceds.deq.virginia.gov/ui#) and made available through a direct connection to the reporting database known as ODS. The agency is working towards storing all data required for assessments in CEDS, but as of the time of writing the following datasets are stored in locations outside of CEDS:
+* Fish Tissue Data
+* PCB Data
+* VDH Data
+* Citizen Monitoring Data
+* Station Metadata
+
+It is important to note that although the data that consitute the conventionals dataset are derive from CEDS/ODS, official assessment records of this data are only stored locally in Microsoft Excel outputs. 
+
+### Data Availablility
+
+Most of the following data are provided at the beginning of the assessment process (approximately March of an assessment year). Any delays in data availability have ripple effects on the ability of regional assessors to complete their work on time. Should data be provided for assessment after the expected availability date, assessors may not be able to include said data in a given assessment window.
+
+Exceptions to the March data availability date usually apply to Citizen Monitoring, bioassessment, and fish tissue data. Citizen Monitoring data have historically been provided to regional assessment staff in April of a given assessment year. Bioassessment data for the most recent two years of an assessment window trickles in to the assessment process through the summer of a given assessment year due to the lengthy identification process associated with benthic macroinvertebrate samples. Fish tissue data requires protracted laboratory analyses before it is provided back to DEQ from contractor labs for assessment purposes.
+
+Due to these data delays, regional assessment staff generally have to delay certain assessment steps until all data is available for a given station/Assessment Unit, making automated assessment methods ever more important when data are provided.
 
 ## Conventionals Data
 
-include scripts
+The conventionals dataset contains the bulk of the data analyzed during any given assessment window. Historically, this dataset has been queried using SAS and a direct connection to the raw monitoring data in the ODS reporting database (the database that makes CEDS data accessible to reporting tools). Recently, efforts to streamline the assessment process and standardize data provided across agency programs produced an effort to convert these SAS scripts into R. 
 
-fake chunk to test copy scripts:
+The "conventionals query" combines WQM field and analyte data with data handling steps that standardize data discrepancies like multiple lab values returned for identical sample date/times, full parameter speciation but no total value, etc. This R query and data standardization method is considered to be under development as code review is a constant part of data improvement strategies. 
 
-```{r data organization test chunk}
-x <- 1
-print(x)
-```
+The current version of the R based conventionals query is available [here](https://github.com/EmmaVJones/WQMdataQueryTool/blob/main/conventionalsFunction02032022.R). In order to access the data the conventionals function calls, users must have a direct connection to ODS from their environment. Please see the [DEQ R Methods Encyclopedia article on ODS](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/vnbellzNy/connectToODS.html#connectToODS) for more information.
 
 
 ## Water Column Metals
@@ -40,7 +56,7 @@ Beach closure, HAB event
 
 ## Citizen Monitoring Data
 
-work with Reid for details on his progress with CMC API
+Citizen Monitoring data have historically been provided to DEQ in various data formats and schema using numerous digital and analog storage methods. This data system required multiple iterations of lengthy data standardization and QA/QC processes in order to ensure the data were utilized for assessments. A standardized system requiring citizen groups to either upload their data to the [Chesapeake Monitoring Cooperative (CMC) Data Explorer](https://www.chesapeakemonitoringcoop.org/services/chesapeake-data-explorer/) and DEQ  scraping the CMC API using automated R scripts or provide all data to DEQ in a standardized template has replaced previous data receiving methods. Citizen data not stored in the CMC database live on DEQ staff computers and require further storage solutions. 
 
 ## Station Metadata
 
