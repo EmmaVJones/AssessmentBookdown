@@ -1,5 +1,5 @@
 --- 
-title: "DEQ Water Quality Automated Assessment User Manual"
+title: "DEQ Water Quality Automated Assessment User Guide"
 author: "DEQ Automated Assessment Team"
 date: "Last Updated: `r Sys.Date()`"
 site: bookdown::bookdown_site

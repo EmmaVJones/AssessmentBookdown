@@ -2,6 +2,8 @@
 
 ```{r data organization setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(DT)
 ```
 
 The assessment process requires hundreds of thousands of rows of data collected and stored by DEQ, other state agencies, and citizen partners. These disparate data sources require various levels of data manipulation prior to any analysis. SAS and R are used for the majority of the assessment data cleaning and manipulation processes. 
@@ -34,6 +36,15 @@ The "conventionals query" combines WQM field and analyte data with data handling
 The current version of the R based conventionals query is available [here](https://github.com/EmmaVJones/WQMdataQueryTool/blob/main/conventionalsFunction02032022.R). In order to access the data the conventionals function calls, users must have a direct connection to ODS from their environment. Please see the [DEQ R Methods Encyclopedia article on ODS](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/vnbellzNy/connectToODS.html#connectToODS) for more information.
 
 
+A sample conventionals dataset is available in the exampleData directory for you to download and use when practicing the automated scripts. 
+
+```{r dataOrganization conventionals}
+conventionals <- readRDS('exampleData/conventionals.RDS')
+conventionals[1:50,] %>% # preview first 50 rows
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+
 ## Water Column Metals
 
 query from Roger, for now
@@ -58,6 +69,17 @@ Beach closure, HAB event
 
 Citizen Monitoring data have historically been provided to DEQ in various data formats and schema using numerous digital and analog storage methods. This data system required multiple iterations of lengthy data standardization and QA/QC processes in order to ensure the data were utilized for assessments. A standardized system requiring citizen groups to either upload their data to the [Chesapeake Monitoring Cooperative (CMC) Data Explorer](https://www.chesapeakemonitoringcoop.org/services/chesapeake-data-explorer/) and DEQ  scraping the CMC API using automated R scripts or provide all data to DEQ in a standardized template has replaced previous data receiving methods. Citizen data not stored in the CMC database live on DEQ staff computers and require further storage solutions. 
 
+A sample citizen monitoring dataset is available in the exampleData directory for you to download and use when practicing the automated scripts. 
+
+```{r dataOrganization citmon}
+citmon <-  readRDS('exampleData/citmon.RDS')
+citmon[1:50,] %>%  # preview first 50 rows
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+
 ## Station Metadata
 
-lots to say
+Station metadata are critical to ensuring that stations are assessed appropriately whether an assessment is conducted by hand or with automation. These metadata include the appropriate Assessment Unit and Water Quality Standard information that apply to the station. After this information is identified for a given station, it may be assessed according the the assessment rules that apply to those standards for the specified waterbody type. 
+
+Metadata are provided for stations through a combination of automated spatial analyses and human review. **No metadata are ever linked to stations without regional assessor review.** The [Metadata Attribution](#metadata-attribution) section covers the details of attributing metadata to each station. 
