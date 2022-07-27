@@ -83,6 +83,8 @@ The `Spatially Joined WQS Information` table details information about the WQS s
 
 **Users may click on more than one station and subsequently reveal information about more than one station in the `Stations Data and Spatially Joined WQS` tab below the map.** If more than one row is presented in a table, a y scroll bar on the right side of the table will automatically appear such that the user may access all the table information.
 
+#### Application Operation: Clear Selection
+
 To deselect a station or stations, click the blue `Clear Selection` button below the map. 
 ` 
 ![](images/metadata5.PNG)
@@ -95,18 +97,57 @@ Should a user select a station for review that snapped to 1 WQS segment, the pro
 
 #### Application Operation: Accept
 
-If the user is satisfied with the snapped WQS segment, they may press the blue `Accept` button to reveal a modal window named `Accept Snapped WQS`. This modal shows the information from the `Selected Station Information` table one last time for review. There is a textbox below the table where users may input any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing cancel if they choose to not proceed with that station.
+If the user is satisfied with the snapped WQS segment, they may press the blue `Accept` button to reveal a modal window named `Accept Snapped WQS`. This modal shows the information from the `Selected Station Information` table one last time for review. There is a textbox below the table where users may input any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing `Dismiss` or `Cancel` if they choose to not proceed with that station.
 
 ![](images/metadata7.PNG)
 
 Once the user presses the `Accept` button in the `Accept Snapped WQS` modal, the station and WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations "to do" in that category at the top of the page goes down by one. 
 
 
-#### Application Operation: Manual WQS Adjustment
+#### Application Operation: Manual WQS Adjustment (1 segment)
 
-If the user is not satisfied with the snapped WQS segment, they may press the blue `Manual WQS Adjustment` button to reveal a modal window named `Accept Snapped WQS`. This modal shows the information from the `Selected Station Information` table one last time for review. There is a textbox below the table where users may input any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing cancel if they choose to not proceed with that station.
+If the user is not satisfied with the snapped WQS segment, they may press the blue `Manual WQS Adjustment` button to reveal a modal window named `Manually Adjust WQS`. This modal shows the information from the `Selected Station Information` table one last time for review. There are two textboxes below the table where users may input the desired WQS_ID to attach to the StationID and any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing `Dismiss` or `Cancel` if they choose to not proceed with that station.
+
+**It is highly recommended that users copy and paste the desired WQS_ID from either this application or the GIS Web App to ensure the correct WQS_ID information is entered into the text box.** 
+
+
+**Pro Tip: By clicking the record in the WQS_ID cell of the table on the modal window three time quickly, the cell contents will be highlighted. Users may use the keyboard shortcuts to copy(ctrl+c)/paste(ctrl+v) this information into the text box below the table.**
 
 ![](images/metadata8.PNG)
 
+Once the user presses the `Accept` button in the `Manually Adjust WQS` modal, the station and manually entered WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations "to do" in that category at the top of the page goes down by one. 
 
-`Accept` or manually change  `Manual WQS Adjustment`
+
+#### Application Operation: Export Reviews
+
+All the work the user has completed so far accepting or manually adjusting WQS are only saved in the local application environment. **The only way to preserve the work completed in the application is to press the green `Export reviews` button.** It is highly recommended that users click the `Export reviews` button frequently (every 3-4 stations or after a particularly challenging review) to ensure their work is in fact saved on the server. 
+
+Users may "undo" any accidental work still in their local application environment by either closing the app or returning to the `Watershed Selection` tab without pressing the `Export reviews` button. This work flow would look like: 
+
+1. User selects station, Accept
+2. User selects station, Accept
+3. User selects station, Accept
+4. User presses `Export reviews` to save work to the R server
+5. User selects station, Accept- user realizes they made a mistake and doesn't want to save that accept to the server
+6. User closes the app or navigates back to the `Watershed Selection` tab without pressing the `Export reviews` button- **all information completed in the app since the last time `Export reviews` was pressed will not be saved**
+7. User opens the app or clicks the `Begin Review With Subbasin Selection (Retrieves Last Saved Result)` button on the `Watershed Selection` tab to pull the last information saved on the server
+8. User proceeds to the `Manual Review` tab and continues work
+
+
+### Application Operation: Station that Snapped to >1 WQS Segment
+
+Should a user select a station for review that snapped to >1 WQS segment, the process for QAing that station is relatively simple. With the station highlighted with the green halo, the user reviews all the information presented below the map in the `Stations Data and Spatially Joined WQS` tab. Additionally, when the `Plot stations that snapped to >1 WQS Segment` button was pressed, additional spatial layers became available in the layers drop down of the map. The user may now turn on the layer called `WQS Segments of Stations Snapped to >1 Segment` to reveal all the segments in that category. These segments are plotted on a color ramp to distinguish them from one another and may be clicked on in the map to reveal the same information from the `Selected Station Information` table in a popup on the map. The GIS Web App hyperlinks may also be useful to use at this stage. 
+
+![](images/metadata9.PNG)
+
+
+#### Application Operation: Manual WQS Adjustment (> 1 segment)
+
+If the user needs to choose between multiple WQS segments, they must press the blue `Manual WQS Adjustment` button to reveal a modal window named `Manually Adjust WQS`. **The user cannot accept a single StationID that is linked to multiple WQS_ID's using the `Accept` button. The `Manually Adjust WQS` modal shows the information from the `Selected Station Information` table one last time for review. There are two textboxes below the table where users may input the desired WQS_ID to attach to the StationID and any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing `Dismiss` or `Cancel` if they choose to not proceed with that station.
+
+**It is highly recommended that users copy and paste the desired WQS_ID from either this application or the GIS Web App to ensure the correct WQS_ID information is entered into the text box.** 
+
+**Pro Tip: By clicking the record in the WQS_ID cell of the table on the modal window three time quickly, the cell contents will be highlighted. Users may use the keyboard shortcuts to copy(ctrl+c)/paste(ctrl+v) this information into the text box below the table.**
+
+Once the user presses the `Accept` button in the `Manually Adjust WQS` modal, the station and manually entered WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations "to do" in that category at the top of the page goes down by one. 
+
