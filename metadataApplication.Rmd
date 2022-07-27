@@ -1,7 +1,37 @@
-# Regional Metadata Validation Tool
+# Regional Metadata Validation Tool How To
 
 ```{r metadata setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Regional Metadata Validation Tool How To
+The [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) is located on the R server.
+
+
+The purpose of this tool is to streamline the QA of metadata attached to individual stations that was performed by automated scripts. This metadata include Water Quality Standards (WQS) and Assessment Unit (AU) information that are necessary to properly analyze and organize assessment results. A scripted process automates the data organization of stations from disparate data sources, spatially joins these sites to the appropriate WQS and AUs where information is not available from previous cycles, and runs basic QA on the output to ensure all stations that were expected to receive metadata did in fact get attributed. These scripts are detailed in the [Metadata Attribution](#metadata-attribution) section. 
+
+It is the responsibility of each regional assessor to review the metadata linked through the automated snapping process to ensure the closest snapped information does in fact apply to the given station. This application offers an opportunity to perform QA on the spatial WQS and AU layers and communicate with Central Office Assessment/WQS staff when mistakes are found. 
+
+## Application Orientation
+
+This application expedites the review of the spatially joined output by organizing stations into the appropriate waterbody type, Assessment Region, and subbasin. The application is divided into two tabs (corresponding to AU review and WQS review) that can be navigated between using the navigation bar at the top of the page. The application opens to the Assessment Unit Review tab by default, but there is no specified order in which a reviewer must interact with either tab. Data for each tab are saved back to the R server independently. Each of these tabs have a drop down option that is accessible by clicking the triangle adjacent to the name of the tab. These options are identical for both the Assessment Unit QA and Water Quality Standards QA tabs. The top option called `Watershed Selection` allows users to choose certain types of stations to review and the bottom option called `Manual Review` allows users to visualize the stations selected in the `Watershed Selection` tab option in more detail. The final tab called "About" offers instructions to the user similar to what is detailed below.
+
+The following application workflow is applicable to both the Assessment Unit QA and Water Quality Standards QA sections of the application. For brevity, this user guide will only go over instructions for the WQS side of the application, but the application flow applied to the WQS side of the application mimics the application flow applied on the AU side of the application.
+
+## Application Use: Water Quality Standards QA- Watershed Selection Tab
+
+On load, the tab will provide three related drop down menus on the left hand side of the page. These interact in a top-down hierarchical system where the selection in the top drop down, `Select Waterbody Type`, dictates available options in the middle drop down, `Select DEQ Assessment Region`, which then dictates the available options in the bottom drop down, `Select Subbasin`. Users navigate through these cascading filters to identify the precise waterbody type (e.g. riverine, lacustrine, or estuarine), assessment region, and subbasin to tackle QA in a given session. 
+
+![](images/metadata1.PNG)
+
+Once the user is happy with their selection, they must click the `Begin Review With Subbasin Selection (Retrieves Last Saved Result)` button. This button uses the user provided information to retrieve all the applicable stations that require QA. This information is sourced from the R server in addition to all the applicable spatial layers necessary to produce meaningful maps in the subsequent `Manual Review` tab option. Once this information is retrieved from the R server, a basic interactive map of the selected subbasin populates the tab as well as verbal breakdowns of the type of information that needs to be reviewed for the selected subbasin (Preprocessing Data Recap for Selected Region/Subbasin/Type Combination).
+
+![](images/metadata2.PNG)
+
+Based on the summarized information about the stations in the selected subbasin, the user may choose to begin reviewing that subbasin or they might scroll through other waterbody type/region/subbasin combinations until a more desireable "to do list" is identified. 
+
+Once a user is ready to review the stations in the selected subbasin, the user must navigate to the `Manual Review` tab under the Water Quality Standards QA drop down on the navigation bar.
+
+
+## Application Use: Water Quality Standards QA- Manual Review Tab
+
+uffer all sites that don't fall into a polygon layer by a set sequence of distances. The output will add a field called `Buffer Distance` to the WQStable to indicate distance required for snapping. If more than one segment is found within a set buffer distance, then many rows will be attached to the WQStable with the single identifying station name. It is up to the QA tool to help the user determine which of these UID's are correct and drop the other records.

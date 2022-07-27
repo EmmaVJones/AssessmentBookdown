@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>4.1 Regional Metadata Validation Tool How To | DEQ Water Quality Automated Assessment User Guide</title>
+  <title>Chapter 4 Regional Metadata Validation Tool How To | DEQ Water Quality Automated Assessment User Guide</title>
   <meta name="description" content="A companion document describing the WQA automated assessment methodology." />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="4.1 Regional Metadata Validation Tool How To | DEQ Water Quality Automated Assessment User Guide" />
+  <meta property="og:title" content="Chapter 4 Regional Metadata Validation Tool How To | DEQ Water Quality Automated Assessment User Guide" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="openscapes/series" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="4.1 Regional Metadata Validation Tool How To | DEQ Water Quality Automated Assessment User Guide" />
+  <meta name="twitter:title" content="Chapter 4 Regional Metadata Validation Tool How To | DEQ Water Quality Automated Assessment User Guide" />
   
   <meta name="twitter:description" content="A companion document describing the WQA automated assessment methodology." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="regional-metadata-validation-tool.html"/>
-<link rel="next" href="riverine-application.html"/>
+<link rel="prev" href="automated-output.html"/>
+<link rel="next" href="application-orientation.html"/>
 <script src="libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -191,18 +191,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="3.3" data-path="automated-output.html"><a href="automated-output.html"><i class="fa fa-check"></i><b>3.3</b> Automated Output</a></li>
 </ul></li>
-<li class="chapter" data-level="4" data-path="regional-metadata-validation-tool.html"><a href="regional-metadata-validation-tool.html"><i class="fa fa-check"></i><b>4</b> Regional Metadata Validation Tool</a>
+<li class="chapter" data-level="4" data-path="regional-metadata-validation-tool-how-to.html"><a href="regional-metadata-validation-tool-how-to.html"><i class="fa fa-check"></i><b>4</b> Regional Metadata Validation Tool How To</a>
 <ul>
-<li class="chapter" data-level="4.1" data-path="regional-metadata-validation-tool-how-to.html"><a href="regional-metadata-validation-tool-how-to.html"><i class="fa fa-check"></i><b>4.1</b> Regional Metadata Validation Tool How To</a></li>
+<li class="chapter" data-level="4.1" data-path="application-orientation.html"><a href="application-orientation.html"><i class="fa fa-check"></i><b>4.1</b> Application Orientation</a></li>
+<li class="chapter" data-level="4.2" data-path="application-use-water-quality-standards-qa-watershed-selection-tab.html"><a href="application-use-water-quality-standards-qa-watershed-selection-tab.html"><i class="fa fa-check"></i><b>4.2</b> Application Use: Water Quality Standards QA- Watershed Selection Tab</a></li>
+<li class="chapter" data-level="4.3" data-path="application-use-water-quality-standards-qa-manual-review-tab.html"><a href="application-use-water-quality-standards-qa-manual-review-tab.html"><i class="fa fa-check"></i><b>4.3</b> Application Use: Water Quality Standards QA- Manual Review Tab</a></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="riverine-application.html"><a href="riverine-application.html"><i class="fa fa-check"></i><b>5</b> Riverine Application</a>
-<ul>
-<li class="chapter" data-level="5.1" data-path="riverine-app-how-to.html"><a href="riverine-app-how-to.html"><i class="fa fa-check"></i><b>5.1</b> Riverine App How To</a></li>
-</ul></li>
-<li class="chapter" data-level="6" data-path="lacustrine-application.html"><a href="lacustrine-application.html"><i class="fa fa-check"></i><b>6</b> Lacustrine Application</a>
-<ul>
-<li class="chapter" data-level="6.1" data-path="lake-app-how-to.html"><a href="lake-app-how-to.html"><i class="fa fa-check"></i><b>6.1</b> Lake App How To</a></li>
-</ul></li>
+<li class="chapter" data-level="5" data-path="riverine-application-how-to.html"><a href="riverine-application-how-to.html"><i class="fa fa-check"></i><b>5</b> Riverine Application How To</a></li>
+<li class="chapter" data-level="6" data-path="lacustrine-application-how-to.html"><a href="lacustrine-application-how-to.html"><i class="fa fa-check"></i><b>6</b> Lacustrine Application How To</a></li>
 <li class="divider"></li>
 <li><a href="https://bookdown.org" target="blank">Published with bookdown</a></li>
 
@@ -223,18 +219,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="regional-metadata-validation-tool-how-to" class="section level2" number="4.1">
-<h2><span class="header-section-number">4.1</span> Regional Metadata Validation Tool How To</h2>
-
+<div id="regional-metadata-validation-tool-how-to" class="section level1" number="4">
+<h1><span class="header-section-number">Chapter 4</span> Regional Metadata Validation Tool How To</h1>
+<p>The <a href="https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/">Regional Metadata Validation Tool</a> is located on the R server.</p>
+<p>The purpose of this tool is to streamline the QA of metadata attached to individual stations that was performed by automated scripts. This metadata include Water Quality Standards (WQS) and Assessment Unit (AU) information that are necessary to properly analyze and organize assessment results. A scripted process automates the data organization of stations from disparate data sources, spatially joins these sites to the appropriate WQS and AUs where information is not available from previous cycles, and runs basic QA on the output to ensure all stations that were expected to receive metadata did in fact get attributed. These scripts are detailed in the <a href="metadata-attribution.html#metadata-attribution">Metadata Attribution</a> section.</p>
+<p>It is the responsibility of each regional assessor to review the metadata linked through the automated snapping process to ensure the closest snapped information does in fact apply to the given station. This application offers an opportunity to perform QA on the spatial WQS and AU layers and communicate with Central Office Assessment/WQS staff when mistakes are found.</p>
 </div>
-<!-- </div> -->
             </section>
 
           </div>
         </div>
       </div>
-<a href="regional-metadata-validation-tool.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="riverine-application.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="automated-output.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="application-orientation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

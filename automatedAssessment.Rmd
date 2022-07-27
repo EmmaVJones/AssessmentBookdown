@@ -188,7 +188,7 @@ Now on to the more computationally heavy WQS line snapping methods. First we wil
 
 ##### Riverine Lines
 
-To do this join, we will buffer all sites that don't fall into a polygon layer by a set sequence of distances. The output will add a field called `Buffer Distance` to the WQStable to indicate distance required for snapping. This does not get transported to the data of record, but it is useful to keep for now for QA purposes. If more than one segment is found within a set buffer distance, then many rows will be attached to the WQStable with the single identifying station name. It is up to the QA tool to help the user determine which of these UID's are correct and drop the other records.
+To do this join, we will buffer all sites that don't fall into a polygon layer by a set sequence of distances. The output will add a field called `Buffer Distance` to the WQStable to indicate distance required for snapping. If more than one segment is found within a set buffer distance, then many rows will be attached to the WQStable with the single identifying station name. It is up to the QA tool to help the user determine which of these UID's are correct and drop the other records.
 
 We then remove any riverine sites from the data frame of unique sites that need WQS information (distinctSitesToDoWQS).
 

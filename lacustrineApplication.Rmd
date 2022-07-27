@@ -1,7 +1,8 @@
-# Lacustrine Application
+# Lacustrine Application How To
 
 ```{r lacustrine setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Lake App How To
+
+The [Lakes Assessment App](https://rconnect.deq.virginia.gov/IR2022LakesAssessmentApp/) is located on the R server. **update link to 2024 when pushed**

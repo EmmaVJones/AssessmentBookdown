@@ -41,5 +41,5 @@ vignettes/*.pdf
 data/
 rsconnect/
 config.yml
-
+images/
 exampleData/

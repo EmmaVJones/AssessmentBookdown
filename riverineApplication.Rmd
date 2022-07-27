@@ -1,7 +1,7 @@
-# Riverine Application
+# Riverine Application How To
 
 ```{r riverine setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Riverine App How To
+The [Riverine Assessment App](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/) is located on the R server. **update link to 2024 when pushed**

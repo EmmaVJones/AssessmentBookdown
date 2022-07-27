@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>2.2 Water Column Metals | DEQ Water Quality Automated Assessment User Guide</title>
+  <title>4.2 Application Use: Water Quality Standards QA- Watershed Selection Tab | DEQ Water Quality Automated Assessment User Guide</title>
   <meta name="description" content="A companion document describing the WQA automated assessment methodology." />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="2.2 Water Column Metals | DEQ Water Quality Automated Assessment User Guide" />
+  <meta property="og:title" content="4.2 Application Use: Water Quality Standards QA- Watershed Selection Tab | DEQ Water Quality Automated Assessment User Guide" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="openscapes/series" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="2.2 Water Column Metals | DEQ Water Quality Automated Assessment User Guide" />
+  <meta name="twitter:title" content="4.2 Application Use: Water Quality Standards QA- Watershed Selection Tab | DEQ Water Quality Automated Assessment User Guide" />
   
   <meta name="twitter:description" content="A companion document describing the WQA automated assessment methodology." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="conventionals-data.html"/>
-<link rel="next" href="sediment-metals.html"/>
+<link rel="prev" href="application-orientation.html"/>
+<link rel="next" href="application-use-water-quality-standards-qa-manual-review-tab.html"/>
 <script src="libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -219,17 +219,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="water-column-metals" class="section level2" number="2.2">
-<h2><span class="header-section-number">2.2</span> Water Column Metals</h2>
-<p>query from Roger, for now</p>
+<div id="application-use-water-quality-standards-qa--watershed-selection-tab" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Application Use: Water Quality Standards QA- Watershed Selection Tab</h2>
+<p>On load, the tab will provide three related drop down menus on the left hand side of the page. These interact in a top-down hierarchical system where the selection in the top drop down, <code>Select Waterbody Type</code>, dictates available options in the middle drop down, <code>Select DEQ Assessment Region</code>, which then dictates the available options in the bottom drop down, <code>Select Subbasin</code>. Users navigate through these cascading filters to identify the precise waterbody type (e.g. riverine, lacustrine, or estuarine), assessment region, and subbasin to tackle QA in a given session.</p>
+<p><img src="images/metadata1.PNG" /></p>
+<p>Once the user is happy with their selection, they must click the <code>Begin Review With Subbasin Selection (Retrieves Last Saved Result)</code> button. This button uses the user provided information to retrieve all the applicable stations that require QA. This information is sourced from the R server in addition to all the applicable spatial layers necessary to produce meaningful maps in the subsequent <code>Manual Review</code> tab option. Once this information is retrieved from the R server, a basic interactive map of the selected subbasin populates the tab as well as verbal breakdowns of the type of information that needs to be reviewed for the selected subbasin (Preprocessing Data Recap for Selected Region/Subbasin/Type Combination).</p>
+<p><img src="images/metadata2.PNG" /></p>
+<p>Based on the summarized information about the stations in the selected subbasin, the user may choose to begin reviewing that subbasin or they might scroll through other waterbody type/region/subbasin combinations until a more desireable “to do list” is identified.</p>
+<p>Once a user is ready to review the stations in the selected subbasin, the user must navigate to the <code>Manual Review</code> tab under the Water Quality Standards QA drop down on the navigation bar.</p>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="conventionals-data.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="sediment-metals.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="application-orientation.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="application-use-water-quality-standards-qa-manual-review-tab.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

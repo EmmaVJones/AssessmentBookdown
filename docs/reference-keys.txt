@@ -39,9 +39,9 @@ metals
 fish-tissue
 benthics
 automated-output
-regional-metadata-validation-tool
 regional-metadata-validation-tool-how-to
-riverine-application
-riverine-app-how-to
-lacustrine-application
-lake-app-how-to
+application-orientation
+application-use-water-quality-standards-qa--watershed-selection-tab
+application-use-water-quality-standards-qa--manual-review-tab
+riverine-application-how-to
+lacustrine-application-how-to
