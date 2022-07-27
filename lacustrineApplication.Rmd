@@ -4,4 +4,4 @@
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## How To {#LacustrineAppHowTo}
+## Lake App How To

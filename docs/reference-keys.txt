@@ -17,7 +17,7 @@ automated-assessment-methods
 metadata-attribution
 distinct-sites
 join-assessment-region-and-subbasin-information
-join-wqs-to-stations
+join-stations-to-wqs
 spatially-join-polygons
 estuarine-polygons
 lake-polygons
@@ -25,7 +25,8 @@ spatially-join-wqs-lines
 riverine-lines
 estuarine-lines
 assign-something-to-wqs_id-so-sites-will-not-fall-through-the-cracks-when-application-filtering-occurs
-join-au-to-stations
+join-stations-to-aus
+where-does-this-information-go
 individual-parameter-analyses
 temperature
 dissolved-oxygen
@@ -38,7 +39,9 @@ metals
 fish-tissue
 benthics
 automated-output
+regional-metadata-validation-tool
+regional-metadata-validation-tool-how-to
 riverine-application
-RiverineAppHowTo
+riverine-app-how-to
 lacustrine-application
-LacustrineAppHowTo
+lake-app-how-to

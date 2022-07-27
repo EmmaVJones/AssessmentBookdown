@@ -4,4 +4,4 @@
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## How To {#RiverineAppHowTo}
+## Riverine App How To

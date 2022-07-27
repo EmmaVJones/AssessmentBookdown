@@ -15,6 +15,7 @@ The automated assessment scripts are trained to systematically apply assessment 
 
 The automated assessment process hinges on each station having the appropriate metadata to analyze all raw data. The required metadata for each station include what Water Quality Standards apply to the station and which Assessment Unit(s) describe the station. One or more station can be included in an Assessment Units. It is ultimately the Assessment Units that are used to determine whether or not designated uses are met, which is where the automation stops and the human analysis component is required. 
 
+In practice, metadata are spatially joined to stations by a rigorous data organization, spatial joining, and QA process that is detailed below. This automated process runs on the Assessment Data Analyst's computer and results are provided to regional assessment staff for individual review. This application is known as the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) and is hosted on the R server. It is up to each regional assessor to manually review each suggested metadata link prior to the assessment start date. After stations have completed the manual review process, they can be analyzed using the automated assessment scripts. Detailed intructions on how to use the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) is available in the [Regional Metadata Validation Tool How To](#regional-metadata-validation-tool-how-to) section.
 
 ### Distinct Sites
 
@@ -102,7 +103,7 @@ if(nrow(distinctSites_sf) < nrow(distinctSites)){
 ```
 
 
-### Join WQS to Stations
+### Join Stations to WQS
 
 All stations are then spatially joined to the current WQS spatial layers to link each unique StationID to a unique WQS_ID. 
 
@@ -265,7 +266,7 @@ distinctSitesToDoWQS <- filter(distinctSitesToDoWQS, ! StationID %in% WQStable$S
 
 Double check no stations were lost in these processes. 
 
-```{r double check no one lost}
+```{r double check no one lost, eval = F}
 #Make sure all stations from original distinct station list have some sort of record (blank or populated) int the WQStable.
 
 distinctSitesToDoWQS <- filter(distinctSitesToDo, ! FDT_STA_ID  %in% WQStableExisting$StationID)
@@ -302,7 +303,7 @@ WQStable <- filter(WQStable, !is.na(WQS_ID)) %>%
 
 
 
-### Join AU to Stations
+### Join Stations to AUs
 
 
 
@@ -310,7 +311,7 @@ WQStable <- filter(WQStable, !is.na(WQS_ID)) %>%
 
 The above analyses help populate the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/). After assessors manually review each station that requires WQS/AU information, this data is consolidated and stored on the R server as a pinned dataset. That dataset feeds subsequent tools including the [Riverine Assessment App](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/), [Lakes Assessment App](https://rconnect.deq.virginia.gov/IR2022LakesAssessmentApp/), and [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2022BioassessmentDashboard/) in addition to querying tools including the [CEDS WQM Data Query Tool](https://rconnect.deq.virginia.gov/CEDSWQMDataQueryTool/) and [CEDS Benthic Data Query Tool](https://rconnect.deq.virginia.gov/CEDSBenthicDataQueryTool/). The data is provided via the internal GIS services in the WQM Stations (All stations with full attributes) layer hosted on the [GIS REST service](https://gis.deq.virginia.gov/arcgis/rest/services/staff/DEQInternalDataViewer/MapServer/104) and [GIS Staff Application](https://gis.deq.virginia.gov/GISStaffApplication/). In addition to the published tools that source this data, the dataset is included in countless data analysis projects and products. The entire dataset may be pulled from the R Connect service using the following script. Please see the [DEQ R Methods Encyclopedia](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/connectToConnectPins.html) for information on how to retrieve pinned data from the server.
 
-```{r automatedAssessment pull pinned WQS data}
+```{r automatedAssessment pull pinned WQS data, eval=F}
 pin_get('ejones/WQSlookup', board = 'rsconnect') # raw lookup table
 pin_get("ejones/WQSlookup-withStandards", board = "rsconnect") # lookup table with WQS information joined 
 ```

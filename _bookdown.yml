@@ -6,6 +6,7 @@ rmd_files: [
   "index.Rmd",
   "dataOrganization.Rmd",
   "automatedAssessment.Rmd",
+  "metadataApplication.Rmd",
   "riverineApplication.Rmd",
   "lacustrineApplication.Rmd"
 ]
