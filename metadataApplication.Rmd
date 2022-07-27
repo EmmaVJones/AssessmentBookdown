@@ -167,3 +167,14 @@ Once the user has chosen an appropriate WQS segment, they must press the blue `M
 
 Once the user presses the `Accept` button in the `Manually Adjust WQS` modal, the station and manually entered WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations "to do" in that category at the top of the page goes down by one. 
 
+
+### Application Operation: There are no more stations to attribute
+
+Congratulations! That means you have completed the review of all the stations in this subbasin. Make sure you press the `Export reviews` button one more time to ensure all your hard work is saved on the server.
+
+At this point, the user may navigate back to the `Watershed selection` tab to choose another subbasin to review or close the application to end their metadata review session.
+
+
+## Having problems?
+
+Please contact Emma Jones (emma.jones@deq.virginia.gov) should you encounter any problems using the application, wonky situations to review, or long rendering times/app crashing. 

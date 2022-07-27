@@ -31,7 +31,7 @@
   
   
 <link rel="prev" href="application-use-water-quality-standards-qa-watershed-selection-tab.html"/>
-<link rel="next" href="riverine-application-how-to.html"/>
+<link rel="next" href="having-problems.html"/>
 <script src="libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -195,7 +195,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul>
 <li class="chapter" data-level="4.1" data-path="application-orientation.html"><a href="application-orientation.html"><i class="fa fa-check"></i><b>4.1</b> Application Orientation</a></li>
 <li class="chapter" data-level="4.2" data-path="application-use-water-quality-standards-qa-watershed-selection-tab.html"><a href="application-use-water-quality-standards-qa-watershed-selection-tab.html"><i class="fa fa-check"></i><b>4.2</b> Application Use: Water Quality Standards QA- Watershed Selection Tab</a></li>
-<li class="chapter" data-level="4.3" data-path="application-use-water-quality-standards-qa-manual-review-tab.html"><a href="application-use-water-quality-standards-qa-manual-review-tab.html"><i class="fa fa-check"></i><b>4.3</b> Application Use: Water Quality Standards QA- Manual Review Tab</a></li>
+<li class="chapter" data-level="4.3" data-path="application-use-water-quality-standards-qa-manual-review-tab.html"><a href="application-use-water-quality-standards-qa-manual-review-tab.html"><i class="fa fa-check"></i><b>4.3</b> Application Use: Water Quality Standards QA- Manual Review Tab</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="application-use-water-quality-standards-qa-manual-review-tab.html"><a href="application-use-water-quality-standards-qa-manual-review-tab.html#map-orientation"><i class="fa fa-check"></i><b>4.3.1</b> Map Orientation</a></li>
+<li class="chapter" data-level="4.3.2" data-path="application-use-water-quality-standards-qa-manual-review-tab.html"><a href="application-use-water-quality-standards-qa-manual-review-tab.html#what-do-the-buttons-do"><i class="fa fa-check"></i><b>4.3.2</b> What do the buttons do?</a></li>
+<li class="chapter" data-level="4.3.3" data-path="application-use-water-quality-standards-qa-manual-review-tab.html"><a href="application-use-water-quality-standards-qa-manual-review-tab.html#application-operation"><i class="fa fa-check"></i><b>4.3.3</b> Application Operation</a></li>
+<li class="chapter" data-level="4.3.4" data-path="application-use-water-quality-standards-qa-manual-review-tab.html"><a href="application-use-water-quality-standards-qa-manual-review-tab.html#application-operation-station-that-snapped-to-1-wqs-segment"><i class="fa fa-check"></i><b>4.3.4</b> Application Operation: Station that Snapped to 1 WQS Segment</a></li>
+<li class="chapter" data-level="4.3.5" data-path="application-use-water-quality-standards-qa-manual-review-tab.html"><a href="application-use-water-quality-standards-qa-manual-review-tab.html#application-operation-station-that-snapped-to-1-wqs-segment-1"><i class="fa fa-check"></i><b>4.3.5</b> Application Operation: Station that Snapped to &gt;1 WQS Segment</a></li>
+<li class="chapter" data-level="4.3.6" data-path="application-use-water-quality-standards-qa-manual-review-tab.html"><a href="application-use-water-quality-standards-qa-manual-review-tab.html#application-operation-station-that-snapped-to-0-wqs-segments"><i class="fa fa-check"></i><b>4.3.6</b> Application Operation: Station that Snapped to 0 WQS Segments</a></li>
+<li class="chapter" data-level="4.3.7" data-path="application-use-water-quality-standards-qa-manual-review-tab.html"><a href="application-use-water-quality-standards-qa-manual-review-tab.html#application-operation-there-are-no-more-stations-to-attribute"><i class="fa fa-check"></i><b>4.3.7</b> Application Operation: There are no more stations to attribute</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="having-problems.html"><a href="having-problems.html"><i class="fa fa-check"></i><b>4.4</b> Having problems?</a></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="riverine-application-how-to.html"><a href="riverine-application-how-to.html"><i class="fa fa-check"></i><b>5</b> Riverine Application How To</a></li>
 <li class="chapter" data-level="6" data-path="lacustrine-application-how-to.html"><a href="lacustrine-application-how-to.html"><i class="fa fa-check"></i><b>6</b> Lacustrine Application How To</a></li>
@@ -221,17 +231,120 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="application-use-water-quality-standards-qa--manual-review-tab" class="section level2" number="4.3">
 <h2><span class="header-section-number">4.3</span> Application Use: Water Quality Standards QA- Manual Review Tab</h2>
-<p>uffer all sites that don’t fall into a polygon layer by a set sequence of distances. The output will add a field called <code>Buffer Distance</code> to the WQStable to indicate distance required for snapping. If more than one segment is found within a set buffer distance, then many rows will be attached to the WQStable with the single identifying station name. It is up to the QA tool to help the user determine which of these UID’s are correct and drop the other records.</p>
-
+<p>On load, the <code>Manual Review</code> tab renders three buttons, an interactive map of Virginia, and an area for output information from the map that is blank until user input dictates.</p>
+<div id="map-orientation" class="section level3" number="4.3.1">
+<h3><span class="header-section-number">4.3.1</span> Map Orientation</h3>
+<p>The map allows users to zoom and pan interactively with the mouse. In the top left corner there are a number of tools to aid users. The plus and minus buttons offer fixed zoom in/out. The home button returns the map orientation to the original zoom level in case a user gets lost. The magnifying glass button allows users to search for and zoom to a selected station. To use this feature, click on the magnifying glass, begin typing the StationID of interest in the text box (after each character entered, a dropdown of options based on the characters entered appears), once a station is selected, the map will zoom to that station and highlight it with a red circle. You may notice that if there isn’t the <code>All Stations in Basin</code> layer on, then no station point appears inside the red circle. Additional layers available in the map (by hovering over the layers button on the left side) include <code>All Stations in Basin</code> (all other stations identified in the basin with data for the given IR window) and <code>Assessment Regions</code> (regional assessment boundaries).</p>
+<p><img src="images/metadata3.PNG" /></p>
 </div>
-<!-- </div> -->
+<div id="what-do-the-buttons-do" class="section level3" number="4.3.2">
+<h3><span class="header-section-number">4.3.2</span> What do the buttons do?</h3>
+<p>The three buttons correspond to the station snapping summaries presented on the <code>Watershed Selection</code> tab. In the example above, we can see this subbasin has:
+* There are 8 stations that snapped to 1 WQS segment in preprocessing.
+* There are 1 stations that snapped to &gt; 1 WQS segment in preprocessing.
+* There are 1 stations that snapped to 0 WQS segments in preprocessing.</p>
+<p>By clicking the <code>Plot stations that snapped to 1 WQS Segment</code>, users will see all the stations that only retrieved one WQS segment in the spatial snapping process. They are colored from green to light red based on the buffer distance required to snap to a segment (within the smallest set buffer distance of the sequence dictated to the automated snapping functions). Green stations snapped to segments at closer distances compared to red sites. The legend for the buffer distance stations colors is presented in the right corner of the app.</p>
+<p>By clicking the <code>Plot stations that snapped to &gt;1 WQS Segment</code>, users will see all the stations that retrieved multiple WQS segments in the spatial snapping process (within the smallest set buffer distance of the sequence dictated to the automated snapping functions). They are colored to red to indicate these stations need more attention.</p>
+<p>By clicking the <code>Plot stations that snapped to 0 WQS Segment</code>, users will see all the stations that retrieved no WQS segments in the spatial snapping process (within the largest buffer distance of the sequence dictated to the automated snapping functions). They are colored to orange to indicate these stations need the most attention.</p>
+<p>If any of the categories listed above had 0 stations, a warning message will appear in the lower right corner of the app indicating there is nothing for the button to plot.</p>
+<p><img src="images/metadata4.PNG" /></p>
+</div>
+<div id="application-operation" class="section level3" number="4.3.3">
+<h3><span class="header-section-number">4.3.3</span> Application Operation</h3>
+<p>The goal of this section of the application is to review each station and either accept or adjust the provided WQS information snapped to the site. To review a site, users may zoom to a selected map area and click on a site. By clicking a site, users are selecting a site to QA, as indicated by the green halo around the selected site. The associated metadata is now populated in the <code>Stations Data and Spatially Joined WQS</code> tab below the map.</p>
+<p>The <code>Selected Station Information</code> table details information about the station including:
+* the WQS_ID of snapped segment(s)
+* the Buffer Distance (distance required to snap to the linked segment(s))
+* n (the number of segments linked to the station during spatial processing)
+* a hyperlink to the internal GIS Web Application that pulls up the appropriate WQS layer and station information in a new browser tab
+* additional station metadata information</p>
+<p>The <code>Spatially Joined WQS Information</code> table details information about the WQS segment(s) attached to the selected station including:
+* WQS_ID (unique code attributed to each WQS segment)
+* GNIS_Name (name of the WQS segment)
+* SEC (WQS section)
+* CLASS (WQS class)
+* SPSTDS (WQS special standards)
+* SECTION_DESCRIPTION (narrative description of the section location)
+* PWS (whether or not the section is designated as a Public Water Supply)
+* Tier_III (whether or not the section is designated as a Tier III water)
+* additional WQS segment information</p>
+<p><strong>Users may click on more than one station and subsequently reveal information about more than one station in the <code>Stations Data and Spatially Joined WQS</code> tab below the map.</strong> If more than one row is presented in a table, a y scroll bar on the right side of the table will automatically appear such that the user may access all the table information.</p>
+<div id="application-operation-clear-selection" class="section level4" number="4.3.3.1">
+<h4><span class="header-section-number">4.3.3.1</span> Application Operation: Clear Selection</h4>
+<p>To deselect a station or stations, click the blue <code>Clear Selection</code> button below the map.
+`
+<img src="images/metadata5.PNG" /></p>
+</div>
+</div>
+<div id="application-operation-station-that-snapped-to-1-wqs-segment" class="section level3" number="4.3.4">
+<h3><span class="header-section-number">4.3.4</span> Application Operation: Station that Snapped to 1 WQS Segment</h3>
+<p>Should a user select a station for review that snapped to 1 WQS segment, the process for QAing that station is simple. With the station highlighted with the green halo, the user reviews all the information presented below the map in the <code>Stations Data and Spatially Joined WQS</code> tab. Additionally, when the <code>Plot stations that snapped to 1 WQS Segment</code> button was pressed, additional spatial layers became available in the layers drop down of the map. The user may now turn on the layer called <code>WQS Segments of Stations Snapped to 1 Segment</code> to reveal all the segments in that category. These segments may be clicked on in the map to reveal the same information from the <code>Selected Station Information</code> table in a popup on the map.</p>
+<p><img src="images/metadata6.PNG" /></p>
+<div id="application-operation-accept" class="section level4" number="4.3.4.1">
+<h4><span class="header-section-number">4.3.4.1</span> Application Operation: Accept</h4>
+<p>If the user is satisfied with the snapped WQS segment, they may press the blue <code>Accept</code> button to reveal a modal window named <code>Accept Snapped WQS</code>. This modal shows the information from the <code>Selected Station Information</code> table one last time for review. There is a textbox below the table where users may input any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing <code>Dismiss</code> or <code>Cancel</code> if they choose to not proceed with that station.</p>
+<p><img src="images/metadata7.PNG" /></p>
+<p>Once the user presses the <code>Accept</code> button in the <code>Accept Snapped WQS</code> modal, the station and WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations “to do” in that category at the top of the page goes down by one.</p>
+</div>
+<div id="application-operation-manual-wqs-adjustment-1-segment" class="section level4" number="4.3.4.2">
+<h4><span class="header-section-number">4.3.4.2</span> Application Operation: Manual WQS Adjustment (1 segment)</h4>
+<p>If the user is not satisfied with the snapped WQS segment, they may press the blue <code>Manual WQS Adjustment</code> button to reveal a modal window named <code>Manually Adjust WQS</code>. This modal shows the information from the <code>Selected Station Information</code> table one last time for review. There are two textboxes below the table where users may input the desired WQS_ID to attach to the StationID and any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing <code>Dismiss</code> or <code>Cancel</code> if they choose to not proceed with that station.</p>
+<p><strong>It is highly recommended that users copy and paste the desired WQS_ID from either this application or the GIS Web App to ensure the correct WQS_ID information is entered into the text box.</strong></p>
+<p><strong>Pro Tip: By clicking the record in the WQS_ID cell of the table on the modal window three time quickly, the cell contents will be highlighted. Users may use the keyboard shortcuts to copy(ctrl+c)/paste(ctrl+v) this information into the text box below the table.</strong></p>
+<p><img src="images/metadata8.PNG" /></p>
+<p>Once the user presses the <code>Accept</code> button in the <code>Manually Adjust WQS</code> modal, the station and manually entered WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations “to do” in that category at the top of the page goes down by one.</p>
+</div>
+<div id="application-operation-export-reviews" class="section level4" number="4.3.4.3">
+<h4><span class="header-section-number">4.3.4.3</span> Application Operation: Export Reviews</h4>
+<p>All the work the user has completed so far accepting or manually adjusting WQS are only saved in the local application environment. <strong>The only way to preserve the work completed in the application is to press the green <code>Export reviews</code> button.</strong> It is highly recommended that users click the <code>Export reviews</code> button frequently (every 3-4 stations or after a particularly challenging review) to ensure their work is in fact saved on the server.</p>
+<p>Users may “undo” any accidental work still in their local application environment by either closing the app or returning to the <code>Watershed Selection</code> tab without pressing the <code>Export reviews</code> button. This work flow would look like:</p>
+<ol style="list-style-type: decimal">
+<li>User selects station, Accept</li>
+<li>User selects station, Accept</li>
+<li>User selects station, Accept</li>
+<li>User presses <code>Export reviews</code> to save work to the R server</li>
+<li>User selects station, Accept- user realizes they made a mistake and doesn’t want to save that accept to the server</li>
+<li>User closes the app or navigates back to the <code>Watershed Selection</code> tab without pressing the <code>Export reviews</code> button- <strong>all information completed in the app since the last time <code>Export reviews</code> was pressed will not be saved</strong></li>
+<li>User opens the app or clicks the <code>Begin Review With Subbasin Selection (Retrieves Last Saved Result)</code> button on the <code>Watershed Selection</code> tab to pull the last information saved on the server</li>
+<li>User proceeds to the <code>Manual Review</code> tab and continues work</li>
+</ol>
+</div>
+</div>
+<div id="application-operation-station-that-snapped-to-1-wqs-segment-1" class="section level3" number="4.3.5">
+<h3><span class="header-section-number">4.3.5</span> Application Operation: Station that Snapped to &gt;1 WQS Segment</h3>
+<p>Should a user select a station for review that snapped to &gt;1 WQS segment, the process for QAing that station is relatively simple. With the station highlighted with the green halo, the user reviews all the information presented below the map in the <code>Stations Data and Spatially Joined WQS</code> tab. Additionally, when the <code>Plot stations that snapped to &gt;1 WQS Segment</code> button was pressed, additional spatial layers became available in the layers drop down of the map. The user may now turn on the layer called <code>WQS Segments of Stations Snapped to &gt;1 Segment</code> to reveal all the segments in that category. These segments are plotted on a color ramp to distinguish them from one another and may be clicked on in the map to reveal the same information from the <code>Selected Station Information</code> table in a popup on the map. The GIS Web App hyperlinks may also be useful to use at this stage.</p>
+<p><img src="images/metadata9.PNG" /></p>
+<div id="application-operation-manual-wqs-adjustment-1-segment-1" class="section level4" number="4.3.5.1">
+<h4><span class="header-section-number">4.3.5.1</span> Application Operation: Manual WQS Adjustment (&gt; 1 segment)</h4>
+<p>If the user needs to choose between multiple WQS segments, they must press the blue <code>Manual WQS Adjustment</code> button to reveal a modal window named <code>Manually Adjust WQS</code>. <strong>The user cannot accept a single StationID that is linked to multiple WQS_ID’s using the <code>Accept</code> button.</strong> The <code>Manually Adjust WQS</code> modal shows the information from the <code>Selected Station Information</code> table one last time for review. There are two textboxes below the table where users may input the desired WQS_ID to attach to the StationID and any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing <code>Dismiss</code> or <code>Cancel</code> if they choose to not proceed with that station.</p>
+<p><strong>It is highly recommended that users copy and paste the desired WQS_ID from either this application or the GIS Web App to ensure the correct WQS_ID information is entered into the text box.</strong></p>
+<p><strong>Pro Tip: By clicking the record in the WQS_ID cell of the table on the modal window three time quickly, the cell contents will be highlighted. Users may use the keyboard shortcuts to copy(ctrl+c)/paste(ctrl+v) this information into the text box below the table.</strong></p>
+<p>Once the user presses the <code>Accept</code> button in the <code>Manually Adjust WQS</code> modal, the station and manually entered WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations “to do” in that category at the top of the page goes down by one.</p>
+</div>
+</div>
+<div id="application-operation-station-that-snapped-to-0-wqs-segments" class="section level3" number="4.3.6">
+<h3><span class="header-section-number">4.3.6</span> Application Operation: Station that Snapped to 0 WQS Segments</h3>
+<p>Should a user select a station for review that snapped to no WQS segments, the process for QAing that station is more involved. With the station highlighted with the green halo, the user reviews all the information presented below the map in the <code>Stations Data and Spatially Joined WQS</code> tab. To preserve application rendering time, additional spatial layers are not available in the layers drop down of the map for this scenario. Instead, the user should click the <code>Open Link In New Tab</code> button in the <code>Selected Station Information</code> table to navigate to the GIS Web App to visualize all WQS segments around the station.</p>
+<div id="application-operation-manual-wqs-adjustment-0-segments" class="section level4" number="4.3.6.1">
+<h4><span class="header-section-number">4.3.6.1</span> Application Operation: Manual WQS Adjustment (0 segments)</h4>
+<p>Once the user has chosen an appropriate WQS segment, they must press the blue <code>Manual WQS Adjustment</code> button to reveal a modal window named <code>Manually Adjust WQS</code>. <strong>The user cannot accept a single StationID that is linked to no WQS_ID’s using the <code>Accept</code> button.</strong> The <code>Manually Adjust WQS</code> modal shows the information from the <code>Selected Station Information</code> table one last time for review. This will show information about the station but no WQS_ID. There are two textboxes below the table where users may input the desired WQS_ID to attach to the StationID and any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing <code>Dismiss</code> or <code>Cancel</code> if they choose to not proceed with that station.</p>
+<p><strong>It is highly recommended that users copy and paste the desired WQS_ID from either this application or the GIS Web App to ensure the correct WQS_ID information is entered into the text box.</strong></p>
+<p>Once the user presses the <code>Accept</code> button in the <code>Manually Adjust WQS</code> modal, the station and manually entered WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations “to do” in that category at the top of the page goes down by one.</p>
+</div>
+</div>
+<div id="application-operation-there-are-no-more-stations-to-attribute" class="section level3" number="4.3.7">
+<h3><span class="header-section-number">4.3.7</span> Application Operation: There are no more stations to attribute</h3>
+<p>Congratulations! That means you have completed the review of all the stations in this subbasin. Make sure you press the <code>Export reviews</code> button one more time to ensure all your hard work is saved on the server.</p>
+<p>At this point, the user may navigate back to the <code>Watershed selection</code> tab to choose another subbasin to review or close the application to end their metadata review session.</p>
+</div>
+</div>
             </section>
 
           </div>
         </div>
       </div>
 <a href="application-use-water-quality-standards-qa-watershed-selection-tab.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="riverine-application-how-to.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="having-problems.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
