@@ -105,7 +105,14 @@ if(nrow(distinctSites_sf) < nrow(distinctSites)){
 
 ### Join Stations to WQS
 
-All stations are then spatially joined to the current WQS spatial layers to link each unique StationID to a unique WQS_ID. 
+All stations are then spatially joined to the current WQS spatial layers to link each unique StationID to a unique WQS_ID. These unique WQS_ID's are a concatination of the waterbody type, basin code (e.g. 2A, 2B, 2C, etc.), and a number associated with each segment in the spatial layer.
+
+Waterbody types include:
+* RL = Riverine Line
+* LP = Lacustrine Polygon
+* EL = Estuarine Line
+* EP = Estuarine Polygon
+
 
 Since transitioning the WQS storage from local (individual assessor files) to a centralized system (on the R server for multiple program uses), the number of stations that require WQS attribution decreases significantly each IR cycle. To attribute each station to WQS information, we first need to do all spatial joins to new WQS layer to get appropriate UID information, then we can send that information to an interactive application for humans to manually verify.
 

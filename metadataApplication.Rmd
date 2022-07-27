@@ -27,11 +27,64 @@ Once the user is happy with their selection, they must click the `Begin Review W
 
 ![](images/metadata2.PNG)
 
-Based on the summarized information about the stations in the selected subbasin, the user may choose to begin reviewing that subbasin or they might scroll through other waterbody type/region/subbasin combinations until a more desireable "to do list" is identified. 
+Based on the summarized information about the stations in the selected subbasin, the user may choose to begin reviewing that subbasin or they might scroll through other waterbody type/region/subbasin combinations until a more desirable "to do list" is identified. Each time a user changes any of the drop down inputs, they must press the `Begin Review With Subbasin Selection (Retrieves Last Saved Result)` button to retrieve the associated station breakdown from the chosen subbasin. A small progress bar appears in the lower right corner of the browser window to communicate that large spatial data are being transmitted to the app. The popup disappears when the map re-renders and loads the new spatial information.
 
 Once a user is ready to review the stations in the selected subbasin, the user must navigate to the `Manual Review` tab under the Water Quality Standards QA drop down on the navigation bar.
 
 
 ## Application Use: Water Quality Standards QA- Manual Review Tab
 
-uffer all sites that don't fall into a polygon layer by a set sequence of distances. The output will add a field called `Buffer Distance` to the WQStable to indicate distance required for snapping. If more than one segment is found within a set buffer distance, then many rows will be attached to the WQStable with the single identifying station name. It is up to the QA tool to help the user determine which of these UID's are correct and drop the other records.
+On load, the `Manual Review` tab renders three buttons, an interactive map of Virginia, and an area for output information from the map that is blank until user input dictates. 
+
+### Map Orientation
+
+The map allows users to zoom and pan interactively with the mouse. In the top left corner there are a number of tools to aid users. The plus and minus buttons offer fixed zoom in/out. The home button returns the map orientation to the original zoom level in case a user gets lost. The magnifying glass button allows users to search for and zoom to a selected station. To use this feature, click on the magnifying glass, begin typing the StationID of interest in the text box (after each character entered, a dropdown of options based on the characters entered appears), once a station is selected, the map will zoom to that station and highlight it with a red circle. You may notice that if there isn't the `All Stations in Basin` layer on, then no station point appears inside the red circle. Additional layers available in the map (by hovering over the layers button on the left side) include `All Stations in Basin` (all other stations identified in the basin with data for the given IR window) and `Assessment Regions` (regional assessment boundaries). 
+
+![](images/metadata3.PNG)
+
+### What do the buttons do?
+
+The three buttons correspond to the station snapping summaries presented on the `Watershed Selection` tab. In the example above, we can see this subbasin has: 
+* There are 8 stations that snapped to 1 WQS segment in preprocessing.
+* There are 1 stations that snapped to > 1 WQS segment in preprocessing.
+* There are 1 stations that snapped to 0 WQS segments in preprocessing.
+
+By clicking the `Plot stations that snapped to 1 WQS Segment`, users will see all the stations that only retrieved one WQS segment in the spatial snapping process. They are colored from green to light red based on the buffer distance required to snap to a segment  (within the smallest set buffer distance of the sequence dictated to the automated snapping functions). Green stations snapped to segments at closer distances compared to red sites. The legend for the buffer distance stations colors is presented in the right corner of the app.
+
+By clicking the `Plot stations that snapped to >1 WQS Segment`, users will see all the stations that retrieved multiple WQS segments in the spatial snapping process  (within the smallest set buffer distance of the sequence dictated to the automated snapping functions). They are colored to red to indicate these stations need more attention. 
+
+By clicking the `Plot stations that snapped to 0 WQS Segment`, users will see all the stations that retrieved no WQS segments in the spatial snapping process (within the largest buffer distance of the sequence dictated to the automated snapping functions). They are colored to orange to indicate these stations need the most attention. 
+
+If any of the categories listed above had 0 stations, a warning message will appear in the lower right corner of the app indicating there is nothing for the button to plot.
+
+![](images/metadata4.PNG)
+
+### Application Operation
+
+The goal of this section of the application is to review each station and either accept or adjust the provided WQS information snapped to the site. To review a site, users may zoom to a selected map area and click on a site. By clicking a site, users are selecting a site to QA, as indicated by the green halo around the selected site. The associated metadata is now populated in the `Stations Data and Spatially Joined WQS` tab below the map. 
+
+The `Selected Station Information` table details information about the station including:
+* the WQS_ID of snapped segment(s)
+* the Buffer Distance (distance required to snap to the linked segment(s))
+* n (the number of segments linked to the station during spatial processing)
+* a hyperlink to the internal GIS Web Application that pulls up the appropriate WQS layer and station information in a new browser tab
+* additional station metadata information
+
+The `Spatially Joined WQS Information` table details information about the WQS segment(s) attached to the selected station including:
+* WQS_ID (unique code attributed to each WQS segment)
+* GNIS_Name (name of the WQS segment)
+* SEC (WQS section)
+* CLASS (WQS class)
+* SPSTDS (WQS special standards)
+* SECTION_DESCRIPTION (narrative description of the section location)
+* PWS (whether or not the section is designated as a Public Water Supply)
+* Tier_III (whether or not the section is designated as a Tier III water)
+* additional WQS segment information
+
+**Users may click on more than one station and subsequently reveal information about more than one station in the `Stations Data and Spatially Joined WQS` tab below the map.**
+
+To deselect a station or stations, click the blue `Clear Selection` button below the map. 
+` 
+
+
+`Accept` or manually change  `Manual WQS Adjustment`
