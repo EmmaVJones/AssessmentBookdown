@@ -113,7 +113,6 @@ Waterbody types include:
 * EL = Estuarine Line
 * EP = Estuarine Polygon
 
-
 Since transitioning the WQS storage from local (individual assessor files) to a centralized system (on the R server for multiple program uses), the number of stations that require WQS attribution decreases significantly each IR cycle. To attribute each station to WQS information, we first need to do all spatial joins to new WQS layer to get appropriate UID information, then we can send that information to an interactive application for humans to manually verify.
 
 Where WQS_ID information is already available for stations, they are first removed from the WQS snapping process as to not repeat efforts unnecessarily. WQS_ID's are maintained across WQS layer updates, so any new WQS information will be updated when the stations are joined to the WQS metadata.

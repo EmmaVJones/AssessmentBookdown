@@ -81,10 +81,32 @@ The `Spatially Joined WQS Information` table details information about the WQS s
 * Tier_III (whether or not the section is designated as a Tier III water)
 * additional WQS segment information
 
-**Users may click on more than one station and subsequently reveal information about more than one station in the `Stations Data and Spatially Joined WQS` tab below the map.**
+**Users may click on more than one station and subsequently reveal information about more than one station in the `Stations Data and Spatially Joined WQS` tab below the map.** If more than one row is presented in a table, a y scroll bar on the right side of the table will automatically appear such that the user may access all the table information.
 
 To deselect a station or stations, click the blue `Clear Selection` button below the map. 
 ` 
+![](images/metadata5.PNG)
+
+### Application Operation: Station that Snapped to 1 WQS Segment
+
+Should a user select a station for review that snapped to 1 WQS segment, the process for QAing that station is simple. With the station highlighted with the green halo, the user reviews all the information presented below the map in the `Stations Data and Spatially Joined WQS` tab. Additionally, when the `Plot stations that snapped to 1 WQS Segment` button was pressed, additional spatial layers became available in the layers drop down of the map. The user may now turn on the layer called `WQS Segments of Stations Snapped to 1 Segment` to reveal all the segments in that category. These segments may be clicked on in the map to reveal the same information from the `Selected Station Information` table in a popup on the map.
+
+![](images/metadata6.PNG)
+
+#### Application Operation: Accept
+
+If the user is satisfied with the snapped WQS segment, they may press the blue `Accept` button to reveal a modal window named `Accept Snapped WQS`. This modal shows the information from the `Selected Station Information` table one last time for review. There is a textbox below the table where users may input any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing cancel if they choose to not proceed with that station.
+
+![](images/metadata7.PNG)
+
+Once the user presses the `Accept` button in the `Accept Snapped WQS` modal, the station and WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations "to do" in that category at the top of the page goes down by one. 
+
+
+#### Application Operation: Manual WQS Adjustment
+
+If the user is not satisfied with the snapped WQS segment, they may press the blue `Manual WQS Adjustment` button to reveal a modal window named `Accept Snapped WQS`. This modal shows the information from the `Selected Station Information` table one last time for review. There is a textbox below the table where users may input any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing cancel if they choose to not proceed with that station.
+
+![](images/metadata8.PNG)
 
 
 `Accept` or manually change  `Manual WQS Adjustment`
