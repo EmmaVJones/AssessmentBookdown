@@ -248,7 +248,7 @@ WQStable <- snapAndOrganizeWQS(filter(distinctSitesToDoWQS, SUBBASIN %in% c("Pot
                                                                             "Appomattox River",
                                                                             "Chowan River", 
                                                                             "Atlantic Ocean - South" ,
-                                                                            "Dismal Swamp/Albemarle Sound"))[1:25,],
+                                                                            "Dismal Swamp/Albemarle Sound")),
                                'StationID', estuarineLines, 
                                bufferDistances = seq(20,80,by=20),  # buffering by 20m from 20 - 80 meters
                                WQStable)
@@ -259,10 +259,18 @@ rm(estuarineLines)
 Remove stations that attached to estuarine segments from the 'to do' list.
 
 ```{r automatedAssessment remove estuary line sites, eval = F}
-distinctSitesToDo <- filter(distinctSitesToDo, ! StationID %in% WQStable$StationID)
+distinctSitesToDoWQS <- filter(distinctSitesToDoWQS, ! StationID %in% WQStable$StationID)
 ```
 
 
+Double check no stations were lost in these processes. 
+
+```{r double check no one lost}
+#Make sure all stations from original distinct station list have some sort of record (blank or populated) int the WQStable.
+
+distinctSitesToDoWQS <- filter(distinctSitesToDo, ! FDT_STA_ID  %in% WQStableExisting$StationID)
+distinctSitesToDoWQS$FDT_STA_ID[!(distinctSitesToDoWQS$FDT_STA_ID %in% unique(WQStable$StationID))]
+```
 
 ### Assign something to WQS_ID so sites will not fall through the cracks when application filtering occurs
 
@@ -295,6 +303,18 @@ WQStable <- filter(WQStable, !is.na(WQS_ID)) %>%
 
 
 ### Join AU to Stations
+
+
+
+### Where does this information go?
+
+The above analyses help populate the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/). After assessors manually review each station that requires WQS/AU information, this data is consolidated and stored on the R server as a pinned dataset. That dataset feeds subsequent tools including the [Riverine Assessment App](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/), [Lakes Assessment App](https://rconnect.deq.virginia.gov/IR2022LakesAssessmentApp/), and [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2022BioassessmentDashboard/) in addition to querying tools including the [CEDS WQM Data Query Tool](https://rconnect.deq.virginia.gov/CEDSWQMDataQueryTool/) and [CEDS Benthic Data Query Tool](https://rconnect.deq.virginia.gov/CEDSBenthicDataQueryTool/). The data is provided via the internal GIS services in the WQM Stations (All stations with full attributes) layer hosted on the [GIS REST service](https://gis.deq.virginia.gov/arcgis/rest/services/staff/DEQInternalDataViewer/MapServer/104) and [GIS Staff Application](https://gis.deq.virginia.gov/GISStaffApplication/). In addition to the published tools that source this data, the dataset is included in countless data analysis projects and products. The entire dataset may be pulled from the R Connect service using the following script. Please see the [DEQ R Methods Encyclopedia](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/connectToConnectPins.html) for information on how to retrieve pinned data from the server.
+
+```{r automatedAssessment pull pinned WQS data}
+pin_get('ejones/WQSlookup', board = 'rsconnect') # raw lookup table
+pin_get("ejones/WQSlookup-withStandards", board = "rsconnect") # lookup table with WQS information joined 
+```
+
 
 ## Individual Parameter Analyses
 
