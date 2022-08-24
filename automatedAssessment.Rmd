@@ -342,7 +342,7 @@ After all stations for a given assessment window have the appropriate WQS and AU
 
 A server administrator must retrieve all the WQS/AU information from the attribution application. This directory is consolidated into a single dataset of all new StationID-WQS/AU records. It is important to verify that all expected StationIDs (all distinct stations from the conventionals and citizen monitoring datasets) have WQS and AU information before proceeding. If stations lack this information they will not be assessed accurately.
 
-#### Adding new WQS/AU data to pinned datasets
+#### Adding new WQS data to pinned datasets
 
 Once WQS/AU information is available for all stations, the data is appended to the master WQS information pin on the R server in the case of WQS information. AU information can change cycle to cycle, so the IR year for the StationID-AU information is added to the dataset before pinning back to the master AU information pin. 
 
@@ -389,6 +389,7 @@ WQSlookup_withStandards_pin <- bind_rows(WQSlookup_withStandards, WQSlookupFull)
 # pin to server
 pin(WQSlookup_withStandards, description = "WQS lookup table with Standards from metadata attribution application", board = "rsconnect")
 ```
+
 
 
 ### Reorganize Conventionals Dataset
@@ -464,6 +465,18 @@ IR 2022 had to use fuzzyjoining to get PCB StationID to a real DEQ StationID for
 
 Who knows what this will look like. We really need a better system for updating data.
 
+### stationsTablebegin
+
+**No scripts/data here on purpose bc method in flux since moved to CEDS WQA**
+
+The so called "stationsTablebegin" dataset contains all the stations that need to be addressed in a given IR cycle. This is not limited to just stations with data in that window, however. The stations that are included in this dataset are all the unique stations from the current cycle's conventionals dataset (conventionals + citizen monitoring data) and any stations from the previous assessment cycle that might need to be carried over. AU information will accompany a dataset of distinct stations and pertinent metadata that need assessment information for the forthcoming cycle. WQS information is only joined to the conventionals dataset at a later step and does not accompany the aforementioned station information. The format of this dataset mimics the CEDS bulk upload template. 
+
+To help identify any stations that need to be carried over from one cycle to the next, we start with the previous cycle's final stations table and look for any stations that aren't Fully Supporting. These stations are added to the distinct stations from the conventionals dataset. 
+
+The above data are manipulated to match the bulk data upload template. This is where AU information is joined in from the previous assessment cycle. If a station wasn't sampled last assessment (and had AU information from the metadata attribution process) it is then joined to the dataset.
+
+This dataset is the start of the automated assessment process. It is saved as a .csv and used for upload to both the automated assessment scripts and the riverine and lacustrine applications. The reason the data are stored in .csv and not on the server is to enable individual assessors to adjust AU information manually whenever needed. If this data were stored on the server then the Assessment Data Analyst would need to be involved anytime an assessor needed to adjust which AU(s) a station is connected to. This data is available for download from each of the riverine and lacustrine assessment applications.
+
 
 ### Pin Official Clean IR data to R server
 
@@ -474,12 +487,83 @@ The official assessment data pinned to the R server include:
 * Conventionals dataset (including citizen monitoring data)
 * Water Column Metals
 * Sediment Metals
-* PCB data
-* Fish Tissue Data
 
 ## Automated Assessment
 
 Now that data are prepped for analysis, the last step is to bring all the data together, complete a few more manipulation steps, and feed the data through a process that assesses the data. To minimize the coding experience required to run the automated assessment process, the operation is written as a loop instead of as a function. Loops are inherently slow and sometimes confusing, but for this specific use case housing all operations inside a single loop increases the visibility of the order of operations and decreases the amount of coding experience users need to understand what is happening when. All individual parameter analyses are programmed as efficient functions and are detailed in the [Individual Parameter Analyses](#individual-parameter-analyses) section.
+
+
+
+Bring in pinned data and local data.
+
+
+```{r automated assessment pull pins}
+# official March Data releases for IR 2022
+conventionals <- pin_get("conventionals2022IRfinalWithSecchi", board = "rsconnect")
+conventionals_distinct <- pin_get("conventionals-distinct-final", board = "rsconnect")
+stations2020IR <- pin_get("stations2020IR-sf-final", board = "rsconnect")
+WQMstationFull <- pin_get("WQM-Station-Full", board = "rsconnect")
+VSCIresults <- pin_get("VSCIresults", board = "rsconnect") %>%
+  filter( between(`Collection Date`, assessmentPeriod[1], assessmentPeriod[2]) )
+VCPMI63results <- pin_get("VCPMI63results", board = "rsconnect") %>%
+  filter( between(`Collection Date`, assessmentPeriod[1], assessmentPeriod[2]) )
+VCPMI65results <- pin_get("VCPMI65results", board = "rsconnect") %>%
+  filter( between(`Collection Date`, assessmentPeriod[1], assessmentPeriod[2]) ) 
+WCmetals <- pin_get("WCmetals-2022IRfinal",  board = "rsconnect")
+Smetals <- pin_get("Smetals-2022IRfinal",  board = "rsconnect")
+
+markPCB <- read_excel('data/2022 IR PCBDatapull_EVJ.xlsx', sheet = '2022IR Datapull EVJ')
+fishPCB <- read_excel('data/FishTissuePCBsMetals_EVJ.xlsx', sheet= 'PCBs')
+fishMetals <- read_excel('data/FishTissuePCBsMetals_EVJ.xlsx', sheet= 'Metals')
+
+```
+
+
+Bring in Station Table Bulk Upload Template
+
+```{r automated assessment bulk upload template}
+stationsTemplate <- read_excel('WQA_CEDS_templates/WQA_Bulk_Station_Upload_Final.xlsx',#'WQA_CEDS_templates/WQA_Bulk_Station_Upload (3).xlsx', 
+                               sheet = 'Stations', col_types = "text")[0,] %>% 
+  mutate(LATITUDE = as.numeric(LATITUDE), LONGITUDE = as.numeric(LONGITUDE)) %>% 
+  mutate_at(vars(contains('_EXC')), as.integer) %>% 
+  mutate_at(vars(contains('_SAMP')), as.integer) %>% 
+  # new addition that breaks station table upload template but very helpful for assessors
+  mutate(BACTERIADECISION = as.character(NA),
+         BACTERIASTATS = as.character(NA),
+         `Date Last Sampled` = as.character(NA))
+```
+
+
+
+## Bring in Station Table from two previous assessments 
+
+```{r stations table 2018}
+historicalStationsTable2 <- read_excel('data/tbl_ir_mon_stations2018IRfinal.xlsx')
+```
+
+
+## Bring in lake nutrient standards
+
+```{r lake nutrient standards}
+lakeNutStandards <- read_csv('data/9VAC25-260-187lakeNutrientStandards.csv')
+```
+
+
+
+# Workflow
+
+The following steps complete the automated assessment.
+
+## Bring in user station table data
+
+This information communicates to the scripts which stations should be assessed and where they should be organized (AUs). It also has data from the last cycle to populate the historical station information table in the application
+
+```{r stationTable, echo = FALSE}
+#stationTable <- read_csv('processedStationData/stationsTable2022begin_CitmonJames.csv')
+
+stationTable <- read_csv('processedStationData/stationsTable2022begin.csv')# %>% 
+  #filter(STATION_ID %in% kristie$StationID)
+```
 
 ## Individual Parameter Analyses
 
