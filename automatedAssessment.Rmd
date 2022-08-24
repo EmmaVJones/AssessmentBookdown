@@ -537,7 +537,7 @@ stationsTemplate <- read_excel('WQA_CEDS_templates/WQA_Bulk_Station_Upload_Final
 
 ## Bring in Station Table from two previous assessments 
 
-```{r stations table 2018}
+```{r automated assessment stations table 2018}
 historicalStationsTable2 <- read_excel('data/tbl_ir_mon_stations2018IRfinal.xlsx')
 ```
 
