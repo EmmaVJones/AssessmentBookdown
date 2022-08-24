@@ -108,6 +108,7 @@ if(nrow(distinctSites_sf) < nrow(distinctSites)){
 All stations are then spatially joined to the current WQS spatial layers to link each unique StationID to a unique WQS_ID. These unique WQS_ID's are a concatination of the waterbody type, basin code (e.g. 2A, 2B, 2C, etc.), and a number associated with each segment in the spatial layer.
 
 Waterbody types include:
+
 * RL = Riverine Line
 * LP = Lacustrine Polygon
 * EL = Estuarine Line
@@ -315,13 +316,170 @@ WQStable <- filter(WQStable, !is.na(WQS_ID)) %>%
 
 ### Where does this information go?
 
-The above analyses help populate the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/). After assessors manually review each station that requires WQS/AU information, this data is consolidated and stored on the R server as a pinned dataset. That dataset feeds subsequent tools including the [Riverine Assessment App](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/), [Lakes Assessment App](https://rconnect.deq.virginia.gov/IR2022LakesAssessmentApp/), and [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2022BioassessmentDashboard/) in addition to querying tools including the [CEDS WQM Data Query Tool](https://rconnect.deq.virginia.gov/CEDSWQMDataQueryTool/) and [CEDS Benthic Data Query Tool](https://rconnect.deq.virginia.gov/CEDSBenthicDataQueryTool/). The data is provided via the internal GIS services in the WQM Stations (All stations with full attributes) layer hosted on the [GIS REST service](https://gis.deq.virginia.gov/arcgis/rest/services/staff/DEQInternalDataViewer/MapServer/104) and [GIS Staff Application](https://gis.deq.virginia.gov/GISStaffApplication/). In addition to the published tools that source this data, the dataset is included in countless data analysis projects and products. The entire dataset may be pulled from the R Connect service using the following script. Please see the [DEQ R Methods Encyclopedia](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/connectToConnectPins.html) for information on how to retrieve pinned data from the server.
+The above analyses help populate the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/). After assessors manually review each station that requires WQS/AU information, this data is consolidated and stored on the R server as a pinned dataset (see []() for details on that process). That dataset feeds subsequent tools including the [Riverine Assessment App](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/), [Lakes Assessment App](https://rconnect.deq.virginia.gov/IR2022LakesAssessmentApp/), and [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2022BioassessmentDashboard/) in addition to querying tools including the [CEDS WQM Data Query Tool](https://rconnect.deq.virginia.gov/CEDSWQMDataQueryTool/) and [CEDS Benthic Data Query Tool](https://rconnect.deq.virginia.gov/CEDSBenthicDataQueryTool/). The data is provided via the internal GIS services in the WQM Stations (All stations with full attributes) layer hosted on the [GIS REST service](https://gis.deq.virginia.gov/arcgis/rest/services/staff/DEQInternalDataViewer/MapServer/104) and [GIS Staff Application](https://gis.deq.virginia.gov/GISStaffApplication/). In addition to the published tools that source this data, the dataset is included in countless data analysis projects and products. The entire dataset may be pulled from the R Connect service using the following script. Please see the [DEQ R Methods Encyclopedia](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/connectToConnectPins.html) for information on how to retrieve pinned data from the server.
 
 ```{r automatedAssessment pull pinned WQS data, eval=F}
 pin_get('ejones/WQSlookup', board = 'rsconnect') # raw lookup table
 pin_get("ejones/WQSlookup-withStandards", board = "rsconnect") # lookup table with WQS information joined 
 ```
 
+
+## Organize Metadata
+
+After all stations for a given assessment window have the appropriate WQS and AU information attributed, there are a number of data organization steps that still need to happen before the data are ready for the automated assessment scripts. These steps include:
+
+* Organizing all new WQS/AU metadata from the R server and adding new data to pinned datasets
+* Reorganizing the conventionals dataset to match schema for automated assessment scripts
+* Add Citizen Monitoring Data to conventionals
+* Adding Secchi Depth to conventionals dataset
+* Clean up PCB dataset 
+* Clean up Fish Tissue dataset
+
+**The sections below are purposefully sparse as the methods are in flux given that new data are available in ODS. Stay tuned to see how these methods flesh out for more streamlined data organization in future cycles.**
+
+
+### Organizing all new WQS/AU metadata from the R server
+
+A server administrator must retrieve all the WQS/AU information from the attribution application. This directory is consolidated into a single dataset of all new StationID-WQS/AU records. It is important to verify that all expected StationIDs (all distinct stations from the conventionals and citizen monitoring datasets) have WQS and AU information before proceeding. If stations lack this information they will not be assessed accurately.
+
+#### Adding new WQS/AU data to pinned datasets
+
+Once WQS/AU information is available for all stations, the data is appended to the master WQS information pin on the R server in the case of WQS information. AU information can change cycle to cycle, so the IR year for the StationID-AU information is added to the dataset before pinning back to the master AU information pin. 
+
+To expedite the transfer of actual WQS information, another pin contains the actual WQS metadata as well as relevant StationID. All new stations attributed need to be joined to the relevant WQS layer to extract this metadata before it can be appended to the master WQS information pin with standards. The script below details this process by bringing in each necessary WQS layer, joining it to the WQSlookup information, and then pinning it to the R server. 
+
+```{r automated assessment pin WQS, eval = F}
+# table with StationID and WQS_ID information that needs actual WQS metadata
+WQSlookupToDo <- tibble(StationID = NA, WQS_ID = NA) # blank for example purposes
+
+#bring in Riverine layers, valid for the assessment window
+riverine <- st_read('C:/HardDriveBackup/GIS/WQS/WQS_layers_05082020.gdb', layer = 'riverine_05082020') %>%
+  st_drop_geometry() # only care about data not geometry
+
+WQSlookupFull <- left_join(WQSlookupToDo, riverine) %>%
+  filter(!is.na(CLASS)) # drop sites that didn't actually join 
+rm(riverine)
+
+lacustrine <- st_read('C:/HardDriveBackup/GIS/WQS/WQS_layers_05082020.gdb', layer = 'lakes_reservoirs_05082020') %>%
+  st_drop_geometry() # only care about data not geometry
+
+WQSlookupFull <- left_join(WQSlookupToDo, lacustrine) %>%
+  filter(!is.na(CLASS)) %>% # drop sites that didn't actually join 
+  bind_rows(WQSlookupFull) # add these to the larger dataset
+rm(lacustrine)
+
+estuarineLines <- st_read('C:/HardDriveBackup/GIS/WQS/WQS_layers_05082020.gdb', layer = 'estuarinelines_05082020') %>%
+  st_drop_geometry() # only care about data not geometry
+
+WQSlookupFull <- left_join(WQSlookupToDo, estuarineLines) %>%
+  filter(!is.na(CLASS)) %>% # drop sites that didn't actually join 
+  bind_rows(WQSlookupFull) # add these to the larger dataset
+rm(estuarineLines)
+
+estuarinePolys <- st_read('C:/HardDriveBackup/GIS/WQS/WQS_layers_05082020.gdb', layer = 'estuarinepolygons_05082020') %>%
+  st_drop_geometry() # only care about data not geometry
+
+WQSlookupFull <- left_join(WQSlookupToDo, estuarinePolys) %>%
+  filter(!is.na(CLASS)) %>% # drop sites that didn't actually join 
+  bind_rows(WQSlookupFull) # add these to the larger dataset
+rm(estuarinePolys)
+
+WQSlookup_withStandards_pin <- bind_rows(WQSlookup_withStandards, WQSlookupFull) # for pin
+
+# pin to server
+pin(WQSlookup_withStandards, description = "WQS lookup table with Standards from metadata attribution application", board = "rsconnect")
+```
+
+
+### Reorganize Conventionals Dataset
+
+The official (SAS) conventionals data schema tends to vary from IR to IR. It is essential that this data are provided to the R scripts exactly how the scripts expect data, so each cycle the provided conventionals dataset must be meticulously QAed to ensure all data are of expected name/type. Additionally, in order to automate the assessment of citizen monitoring data, we must augment the provided conventionals dataset to accommodate the level schema for each citizen monitoring parameter. 
+
+The nuanced data manipulation steps required to convert the conventionals data and citizen monitoring data from the provided format to the required format for automated analyses are beyond the scope of this book. Instead, the required data schema for automated assessment is provided below.
+
+```{r automatedAssessment conventional schema}
+conventionalsSchema <- readRDS('exampleData/schemaFin.RDS')
+
+conventionalsSchema %>% # preview data
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+###  Add Citizen Monitoring Data to conventionals
+
+Once the citizen monitoring data is queried, QAed, and matches the required conventionals schema (above), the data can be appended to the conventionals dataset for automated analysis.
+
+
+### Adding Secchi Depth to conventionals dataset
+
+This data are not included in the official (SAS) conventionals data pull but are required for Trophic State Index (TSI) analyses for some lacustrine stations. The below script will only work if a user's credentials have access to production ODS wqm data. The example script below first finds all unique stations in the conventionals dataset before querying secchi depth information for those stations for the given assessment window. The date range requires updating each assessment cycle.
+
+```{r automated assesssment ODS secchi query, eval=FALSE}
+# dataset of all the unique stations that we need to organize
+conventionals_distinct <- conventionals %>%
+  distinct(FDT_STA_ID, .keep_all = T) %>%
+  # remove any data to avoid confusion
+  dplyr::select(FDT_STA_ID:FDT_COMMENT, Latitude:Data_Source) %>%
+  filter(!is.na(FDT_STA_ID))
+
+# Query secchi data for unique conventionals stations in the appropriate data window
+library(pool)
+library(dbplyr)
+### connect to Production Environment
+pool <- dbPool(
+  drv = odbc::odbc(),
+  Driver = "ODBC Driver 11 for SQL Server",
+  Server= "DEQ-SQLODS-PROD,50000",
+  dbname = "ODS",
+  trusted_connection = "yes"
+)
+
+stationSecchiDepth <- pool %>% tbl(in_schema('wqm', "Wqm_Field_Data_View")) %>%
+  filter(Fdt_Sta_Id %in% !! conventionals_distinct$FDT_STA_ID & 
+           between(as.Date(Fdt_Date_Time), "2014-12-31", "2020-12-31") &
+           !is.na(Fdt_Secchi_Depth)) %>% # x >= left & x <= right
+  dplyr::select(Fdt_Sta_Id, Fdt_Date_Time, Fdt_Depth, Fdt_Secchi_Depth) %>%
+  as_tibble() %>%
+  mutate(Date = as.Date(Fdt_Date_Time)) %>%
+    dplyr::select(FDT_STA_ID = Fdt_Sta_Id, Date, FDT_DEPTH = Fdt_Depth, Fdt_Secchi_Depth) 
+```
+
+
+Once the secchi data is acquired, it can be attached to the original conventionals dataset carefully as detailed below.
+
+```{r  automated assesssment ODS secchi data smash, eval=FALSE}
+conventionalsArchive <- conventionals %>%
+  mutate(Date = as.Date(FDT_DATE_TIME))
+
+conventionals <- left_join(conventionalsArchive, stationSecchiDepth, by = c('FDT_STA_ID', 'Date', 'FDT_DEPTH')) %>%
+  mutate(SECCHI_DEPTH_M = Fdt_Secchi_Depth) %>%
+  dplyr::select(-c(Fdt_Secchi_Depth, Date))
+```
+
+
+### Clean up PCB dataset 
+
+IR 2022 had to use fuzzyjoining to get PCB StationID to a real DEQ StationID for the data to show up in apps.
+
+### Clean up Fish Tissue dataset
+
+Who knows what this will look like. We really need a better system for updating data.
+
+
+### Pin Official Clean IR data to R server
+
+By cleaning up all provided data and then pinning to the R server, we can easily distribute and archive all data required and sourced by automated scripts in on secure location. The assessment applications source the pinned data to expedite application rendering time. 
+
+The official assessment data pinned to the R server include:
+
+* Conventionals dataset (including citizen monitoring data)
+* Water Column Metals
+* Sediment Metals
+* PCB data
+* Fish Tissue Data
+
+## Automated Assessment
+
+Now that data are prepped for analysis, the last step is to bring all the data together, complete a few more manipulation steps, and feed the data through a process that assesses the data. To minimize the coding experience required to run the automated assessment process, the operation is written as a loop instead of as a function. Loops are inherently slow and sometimes confusing, but for this specific use case housing all operations inside a single loop increases the visibility of the order of operations and decreases the amount of coding experience users need to understand what is happening when. All individual parameter analyses are programmed as efficient functions and are detailed in the [Individual Parameter Analyses](#individual-parameter-analyses) section.
 
 ## Individual Parameter Analyses
 

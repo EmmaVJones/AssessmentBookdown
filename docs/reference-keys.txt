@@ -27,6 +27,14 @@ estuarine-lines
 assign-something-to-wqs_id-so-sites-will-not-fall-through-the-cracks-when-application-filtering-occurs
 join-stations-to-aus
 where-does-this-information-go
+organize-metadata
+section
+organizing-all-new-wqsau-metadata-from-the-r-server
+adding-new-wqsau-data-to-pinned-datasets
+reorganizing-the-conventionals-dataset-to-match-schema-for-automated-assessment-script
+adding-secchi-depth-to-conventionals-dataset
+clean-up-pcb-dataset
+clean-up-fish-tissue-dataset
 individual-parameter-analyses
 temperature
 dissolved-oxygen
