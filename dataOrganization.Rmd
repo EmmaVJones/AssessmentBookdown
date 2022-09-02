@@ -8,9 +8,10 @@ library(DT)
 
 The assessment process requires hundreds of thousands of rows of data collected and stored by DEQ, other state agencies, and citizen partners. These disparate data sources require various levels of data manipulation prior to any analysis. SAS and R are used for the majority of the assessment data cleaning and manipulation processes. 
 
-### Data Location
+#### Data Location
 
 Most data used for assessments are stored in DEQ's internal [Comprehensive Environmental Data System (CEDS)](https://ceds.deq.virginia.gov/ui#) and made available through a direct connection to the reporting database known as ODS. The agency is working towards storing all data required for assessments in CEDS, but as of the time of writing the following datasets are stored in locations outside of CEDS:
+
 * Fish Tissue Data
 * PCB Data
 * VDH Data
@@ -19,7 +20,7 @@ Most data used for assessments are stored in DEQ's internal [Comprehensive Envir
 
 It is important to note that although the data that consitute the conventionals dataset are derive from CEDS/ODS, official assessment records of this data are only stored locally in Microsoft Excel outputs. 
 
-### Data Availablility
+#### Data Availablility
 
 Most of the following data are provided at the beginning of the assessment process (approximately March of an assessment year). Any delays in data availability have ripple effects on the ability of regional assessors to complete their work on time. Should data be provided for assessment after the expected availability date, assessors may not be able to include said data in a given assessment window.
 
@@ -35,10 +36,17 @@ The "conventionals query" combines WQM field and analyte data with data handling
 
 The current version of the R based conventionals query is available [here](https://github.com/EmmaVJones/WQMdataQueryTool/blob/main/conventionalsFunction02032022.R). In order to access the data the conventionals function calls, users must have a direct connection to ODS from their environment. Please see the [DEQ R Methods Encyclopedia article on ODS](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/vnbellzNy/connectToODS.html#connectToODS) for more information.
 
+Once the official conventionals dataset is provided for a given assessment window, it is stored on the R server as a pinned dataset to preserve a standardized data version (the data of record) in a centralized location accessible by all DEQ staff. This expedites the amount of time it takes to pull the data into an R environment as well as improves assessment application rendering time. 
 
-A sample conventionals dataset is available in the exampleData directory for you to download and use when practicing the automated scripts. 
+An example conventionals dataset is available on the R server and may be retrieved using the script below. Please see the [DEQ R Methods Encyclopedia article on pinned data sources](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/connectToConnectPins.html#connectToConnectPins) for more infomation on how to connect your local system to the R server to query this data. This version of the dataset is used for feature enhancements and application development for the IR2024 cycle. However, this is not the official IR2024 conventionals dataset.
 
-```{r dataOrganization conventionals}
+```{r dataOrganization conventionals, eval=FALSE}
+conventionals <- pin_get('ejones/conventionals2024draft', board = 'rsconnect')
+conventionals[1:50,] %>% # preview first 50 rows
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r dataOrganization conventionals real, echo=FALSE}
 conventionals <- readRDS('exampleData/conventionals.RDS')
 conventionals[1:50,] %>% # preview first 50 rows
   DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))

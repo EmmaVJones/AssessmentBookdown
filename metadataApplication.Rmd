@@ -1,4 +1,4 @@
-# Regional Metadata Validation Tool How To
+# Regional Metadata Validation <br>Tool How To
 
 ```{r metadata setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -17,7 +17,7 @@ This application expedites the review of the spatially joined output by organizi
 
 The following application workflow is applicable to both the Assessment Unit QA and Water Quality Standards QA sections of the application. For brevity, this user guide will only go over instructions for the WQS side of the application, but the application flow applied to the WQS side of the application mimics the application flow applied on the AU side of the application.
 
-## Application Use: Water Quality Standards QA- Watershed Selection Tab
+## Application Use: <br>Water Quality Standards QA- <br>Watershed Selection Tab
 
 On load, the tab will provide three related drop down menus on the left hand side of the page. These interact in a top-down hierarchical system where the selection in the top drop down, `Select Waterbody Type`, dictates available options in the middle drop down, `Select DEQ Assessment Region`, which then dictates the available options in the bottom drop down, `Select Subbasin`. Users navigate through these cascading filters to identify the precise waterbody type (e.g. riverine, lacustrine, or estuarine), assessment region, and subbasin to tackle QA in a given session. 
 
@@ -32,7 +32,7 @@ Based on the summarized information about the stations in the selected subbasin,
 Once a user is ready to review the stations in the selected subbasin, the user must navigate to the `Manual Review` tab under the Water Quality Standards QA drop down on the navigation bar.
 
 
-## Application Use: Water Quality Standards QA- Manual Review Tab
+## Application Use: <br>Water Quality Standards QA- <br>Manual Review Tab
 
 On load, the `Manual Review` tab renders three buttons, an interactive map of Virginia, and an area for output information from the map that is blank until user input dictates. 
 
@@ -89,7 +89,7 @@ To deselect a station or stations, click the blue `Clear Selection` button below
 ` 
 ![](images/metadata5.PNG)
 
-### Application Operation: Station that Snapped to 1 WQS Segment
+### Application Operation: <br>Station that Snapped to 1 WQS Segment
 
 Should a user select a station for review that snapped to 1 WQS segment, the process for QAing that station is simple. With the station highlighted with the green halo, the user reviews all the information presented below the map in the `Stations Data and Spatially Joined WQS` tab. Additionally, when the `Plot stations that snapped to 1 WQS Segment` button was pressed, additional spatial layers became available in the layers drop down of the map. The user may now turn on the layer called `WQS Segments of Stations Snapped to 1 Segment` to reveal all the segments in that category. These segments may be clicked on in the map to reveal the same information from the `Selected Station Information` table in a popup on the map.
 
@@ -134,7 +134,7 @@ Users may "undo" any accidental work still in their local application environmen
 8. User proceeds to the `Manual Review` tab and continues work
 
 
-### Application Operation: Station that Snapped to >1 WQS Segment
+### Application Operation: <br>Station that Snapped to >1 WQS Segment
 
 Should a user select a station for review that snapped to >1 WQS segment, the process for QAing that station is relatively simple. With the station highlighted with the green halo, the user reviews all the information presented below the map in the `Stations Data and Spatially Joined WQS` tab. Additionally, when the `Plot stations that snapped to >1 WQS Segment` button was pressed, additional spatial layers became available in the layers drop down of the map. The user may now turn on the layer called `WQS Segments of Stations Snapped to >1 Segment` to reveal all the segments in that category. These segments are plotted on a color ramp to distinguish them from one another and may be clicked on in the map to reveal the same information from the `Selected Station Information` table in a popup on the map. The GIS Web App hyperlinks may also be useful to use at this stage. 
 
@@ -153,7 +153,7 @@ Once the user presses the `Accept` button in the `Manually Adjust WQS` modal, th
 
 
 
-### Application Operation: Station that Snapped to 0 WQS Segments
+### Application Operation: <br>Station that Snapped to 0 WQS Segments
 
 Should a user select a station for review that snapped to no WQS segments, the process for QAing that station is more involved. With the station highlighted with the green halo, the user reviews all the information presented below the map in the `Stations Data and Spatially Joined WQS` tab. To preserve application rendering time, additional spatial layers are not available in the layers drop down of the map for this scenario. Instead, the user should click the `Open Link In New Tab` button in the `Selected Station Information` table to navigate to the GIS Web App to visualize all WQS segments around the station. 
 
@@ -168,7 +168,7 @@ Once the user has chosen an appropriate WQS segment, they must press the blue `M
 Once the user presses the `Accept` button in the `Manually Adjust WQS` modal, the station and manually entered WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations "to do" in that category at the top of the page goes down by one. 
 
 
-### Application Operation: There are no more stations to attribute
+### Application Operation: <br>There are no more stations to attribute
 
 Congratulations! That means you have completed the review of all the stations in this subbasin. Make sure you press the `Export reviews` button one more time to ensure all your hard work is saved on the server.
 
