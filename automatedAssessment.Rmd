@@ -157,11 +157,11 @@ WQStable <- tibble(StationID = NA, WQS_ID = NA)
 ```
 
 
-### Spatially Join Polygons
+#### Spatially Join Polygons
 
 Since it is much faster to look for spatial joins by polygons compared to snapping to lines, we will run spatial joins by estuarine polys and reservoir layers first.
 
-##### Estuarine Polygons
+###### Estuarine Polygons
 
 Here we find any sites that fall into an estuary WQS polygon. This method is only applied to subbasins that intersect estuarine areas. This process also removes any estuarine sites from the data frame of unique sites that need WQS information (distinctSitesToDoWQS).
 
@@ -212,7 +212,7 @@ distinctSitesToDoWQS <- filter(distinctSitesToDoWQS, ! FDT_STA_ID %in% WQStable$
 ```
 
 
-### Spatially Join WQS Lines
+#### Spatially Join WQS Lines
 
 Now on to the more computationally heavy WQS line snapping methods. First we will try to attach riverine WQS and where stations remain we will try the estuarine WQS snap.
 
@@ -303,9 +303,9 @@ distinctSitesToDoWQS <- filter(distinctSitesToDo, ! FDT_STA_ID  %in% WQStableExi
 distinctSitesToDoWQS$FDT_STA_ID[!(distinctSitesToDoWQS$FDT_STA_ID %in% unique(WQStable$StationID))]
 ```
 
-### Assign something to WQS_ID so sites will not fall through the cracks when application filtering occurs
+#### Assign something to WQS_ID so sites will not fall through the cracks when application filtering occurs
 
-We don't want to give everyone all the stations that didn't snap to something, so we need to at least partially assign a WQS_ID so the stations get into the correct subbasin on initial filter.
+We don't want to give all the assessors statewide all the stations that didn't snap to something, so we need to at least partially assign a WQS_ID so the stations get into the correct subbasin on initial filter.
 
 If a station snapped to nothing, we will assigning it a RL WQS_ID and subbasin it falls into by default.
 
@@ -335,6 +335,73 @@ WQStable <- filter(WQStable, !is.na(WQS_ID)) %>%
 
 ### Join Stations to AUs
 
+Assessment Units (AU) are different from WQS attribution steps because these links can change cycle to cycle as new AUs are broken off from existing AUs to more appropriately represent . Thus, a single record of all AUs linked to StationIDs like the WQSlookup table is not a good solution for this use case. Instead the AU to StationID link is stored in a more temporary format (Station Table Excel file) such that regional assessment staff can easily update the AU information on the fly as they assess stations. 
+
+Generally, the logic holds that **the provided AUs are a starting point for an upcoming assessment cycle, not necessarily the final AU for said assessment cycle.** The process to link unique stations in an assessment window (`distinctSites_sf`) to AU information begins by joining all sites in an upcoming window to the Stations Table from the most recent assessment cycle. If a station does not join to a previous assessment cycle Stations Table that means that the station either has not been sample before (e.g. a new station for Probabilistic Monitoring or a special study) or has not been sampled in a long time such that is outside the last assessment window and has not been carried over from a previous assessment cycle for any reason. It is these sites that did not join to the last cycle's Stations Table where we will focus our efforts in the subsequent spatial joining steps. 
+
+#### Identify which stations need AU information
+
+First, bring in the final Stations Table from the most recently completed IR cycle. For this example, we are sourcing the IR2022 final Stations Table (presented as a spatial object in a file geodatabase). We are also going to rename the friendly publication field names to a more standardized format that the automated assessment functions were built upon (read: we are changing field names to match previous versions of the Stations Table schema since the assessment functions were built on that data schema).
+
+```{r automatedAssessment 2022 final stations, eval=FALSE}
+
+final2022 <- st_read('C:/HardDriveBackup/GIS/Assessment/2022IR_final/2022IR_GISData/va_ir22_wqms.gdb',
+                     layer = 'va_ir22_wqms') %>% 
+  st_drop_geometry() %>% # only need tabular data from here out
+  # change names of ID305B columns to format required by automated methods
+  rename(ID305B_1 = Assessment_Unit_ID_1, TYPE_1 = Station_Type_1,
+         ID305B_2 = Assessment_Unit_ID_2, TYPE_2 = Station_Type_2,
+         ID305B_3 = Assessment_Unit_ID_3, TYPE_3 = Station_Type_3,
+         ID305B_4 = Assessment_Unit_ID_4, TYPE_4 = Station_Type_4,
+         ID305B_5 = Assessment_Unit_ID_5, TYPE_5 = Station_Type_5,
+         ID305B_6 = Assessment_Unit_ID_6, TYPE_6 = Station_Type_6,
+         ID305B_7 = Assessment_Unit_ID_7, TYPE_7 = Station_Type_7,
+         ID305B_8 = Assessment_Unit_ID_8, TYPE_8 = Station_Type_8,
+         ID305B_9 = Assessment_Unit_ID_9, TYPE_9 = Station_Type_9,
+         ID305B_10 = Assessment_Unit_ID_10, TYPE_10 = Station_Type_10)
+```
+
+Now we will join distinct sites to AU information to get all available data to start the assessment process. Note: Assessors may attribute stations to different VAHU6's compared to strictly where the site is located spatially to communicate that said stations (usually that lie close to VAHU6 border) are used to make assessment decisions about the designated VAHU6. For this reason, we use the VAHU6 designation from the previous assessment cycle over the VAHU6 retrieved from CEDS. If the station does not have a record in the previous assessment cycle Stations Table, the VAHU6 designation stored in CEDS is used. 
+
+The last rows of the below chunk ensure that each station is only listed once in the resultant table. In previous assessment cycles, stations could be assessed for multiple waterbody types (e.g. riverine and lacustrine assessment uses). Since the assessment database was moved from MS Access to CEDS WQA, this duplication is no longer allowed and thus each station should only have one record.
+
+```{r automatedAssessment AU join, eval=FALSE}
+distinctSites_AUall <- distinctSites_sf %>% 
+  st_drop_geometry() %>%
+  left_join(final2022 %>% 
+              dplyr::select(-c(Latitude, Longitude)), # drop duplicate lat/lng fields to avoid join issues
+            by = c('FDT_STA_ID' = 'Station_ID')) %>%
+  dplyr::select(FDT_STA_ID : VAHU6.y) %>% # drop the last cycle's results, not important now
+  mutate(VAHU6 = ifelse(is.na(VAHU6.y), as.character(VAHU6.x), as.character(VAHU6.y))) %>% # use last cycle's VAHU6 designation over CEDS designation by default if available
+  dplyr::select(-c(VAHU6.x, VAHU6.y)) %>%
+  group_by(FDT_STA_ID) %>%
+  mutate(n = n()) %>% ungroup()
+
+# Find any duplicates
+View(filter(distinctSites_AUall, n >1)) # 0 rows, cool
+
+# above n> 1 used to be stations that were riverine and lacustrine makes sense, these sites are being used for riverine and lacustrine assessment
+# for IR2024 this should all be cleaned up bc new WQA CEDS rules, but always good to double check
+```
+
+Next we will organize stations by whether or not they have AU data based on the previous join. We will call the stations that need AU information `distinctSites_AUtoDo`. We only test this using the ID305B_1 column because we only need each station to be attributed to at least one AU.  
+
+```{r automatedAssessment AU haves and have nots, eval = F}
+distinctSites_AUtoDo <- filter(distinctSites_AUall, is.na(ID305B_1)) %>%
+  st_as_sf(coords = c("Longitude", "Latitude"),  # make spatial layer using these columns
+           remove = F, # don't remove these lat/lon cols from df
+           crs = 4326)
+
+# These sites are all good for automated assessment  (once we join WQS info from WQSlookup table)
+distinctSites_AU <- filter(distinctSites_AUall, !is.na(ID305B_1)) 
+
+# Quick QA: double check the math works out
+nrow(distinctSites_AU) + nrow(distinctSites_AUtoDo) == nrow(distinctSites_AUall)
+```
+
+As with the WQS spatial attribution process, we will first join these sites to polygon layers and then line features to minimize any unnecessary computational load. 
+
+#### Spatially Join Polygons
 
 
 ### Where does this information go?
@@ -890,7 +957,7 @@ fishMetals <- read_excel('data/FishTissuePCBsMetals_EVJ.xlsx', sheet= 'Metals')
 
 Bring in Station Table Bulk Upload Template
 
-```{r automated assessment bulk upload template, eval = F}
+```{r automated assessment bulk upload template 2, eval = F}
 stationsTemplate <- read_excel('WQA_CEDS_templates/WQA_Bulk_Station_Upload_Final.xlsx',#'WQA_CEDS_templates/WQA_Bulk_Station_Upload (3).xlsx', 
                                sheet = 'Stations', col_types = "text")[0,] %>% 
   mutate(LATITUDE = as.numeric(LATITUDE), LONGITUDE = as.numeric(LONGITUDE)) %>% 
