@@ -157,11 +157,11 @@ WQStable <- tibble(StationID = NA, WQS_ID = NA)
 ```
 
 
-#### Spatially Join Polygons
+#### Spatially Join WQS Polygons
 
 Since it is much faster to look for spatial joins by polygons compared to snapping to lines, we will run spatial joins by estuarine polys and reservoir layers first.
 
-###### Estuarine Polygons
+###### Estuarine Polygons (WQS)
 
 Here we find any sites that fall into an estuary WQS polygon. This method is only applied to subbasins that intersect estuarine areas. This process also removes any estuarine sites from the data frame of unique sites that need WQS information (distinctSitesToDoWQS).
 
@@ -182,12 +182,12 @@ rm(estuarinePolys) # clean up workspace
 
 Remove stations that fell inside estuarine polygons from the 'to do' list.
 
-```{r automatedAssessment remove estuary poly sites, eval = F}
+```{r automatedAssessment remove estuary poly sites WQS, eval = F}
 distinctSitesToDoWQS <- filter(distinctSitesToDoWQS, ! FDT_STA_ID %in% WQStable$StationID)
 ```
 
 
-##### Lake Polygons
+##### Lake Polygons (WQS)
 
 Next find any sites that fall into a lake WQS polygon. This method is applied to all subbasins at once as it is a simple spatial join. You can see the latest version of the sourced script in [this repository.](https://github.com/EmmaVJones/IR2024/tree/main/1.preprocessData)
 
@@ -216,7 +216,7 @@ distinctSitesToDoWQS <- filter(distinctSitesToDoWQS, ! FDT_STA_ID %in% WQStable$
 
 Now on to the more computationally heavy WQS line snapping methods. First we will try to attach riverine WQS and where stations remain we will try the estuarine WQS snap.
 
-##### Riverine Lines
+##### Riverine Lines (WQS)
 
 To do this join, we will buffer all sites that don't fall into a polygon layer by a set sequence of distances. The output will add a field called `Buffer Distance` to the WQStable to indicate distance required for snapping. If more than one segment is found within a set buffer distance, then many rows will be attached to the WQStable with the single identifying station name. It is up to the QA tool to help the user determine which of these UID's are correct and drop the other records.
 
@@ -257,7 +257,7 @@ distinctSitesToDoWQS <- filter(WQStable, `Buffer Distance` =='No connections wit
 
 
 
-##### Estuarine Lines
+##### Estuarine Lines (WQS)
 
 If a site doesn't attach to a riverine segment, our last step is to try to attach estuary line segments before throwing an empty site to the users for the wild west of manual QA. Only send sites that could be in estuarine subbasin to this function to not waste time.
 Removes any estuary lines sites from the data frame of unique sites that need WQS information.
@@ -341,7 +341,7 @@ Generally, the logic holds that **the provided AUs are a starting point for an u
 
 #### Identify which stations need AU information
 
-First, bring in the final Stations Table from the most recently completed IR cycle. For this example, we are sourcing the IR2022 final Stations Table (presented as a spatial object in a file geodatabase). We are also going to rename the friendly publication field names to a more standardized format that the automated assessment functions were built upon (read: we are changing field names to match previous versions of the Stations Table schema since the assessment functions were built on that data schema).
+First, bring in the final Stations Table from the most recently completed IR cycle. For this example, we are sourcing the IR2022 final Stations Table (presented as a spatial object in a file geodatabase but we will strip off the spatial data first thing since it is unnecessary for this purpose). We are also going to rename the friendly publication field names to a more standardized format that the automated assessment functions were built upon (read: we are changing field names to match previous versions of the Stations Table schema since the assessment functions were built on that data schema).
 
 ```{r automatedAssessment 2022 final stations, eval=FALSE}
 
@@ -401,8 +401,181 @@ nrow(distinctSites_AU) + nrow(distinctSites_AUtoDo) == nrow(distinctSites_AUall)
 
 As with the WQS spatial attribution process, we will first join these sites to polygon layers and then line features to minimize any unnecessary computational load. 
 
-#### Spatially Join Polygons
+#### Spatially Join AU Polygons
 
+Since it is much faster to look for spatial joins by polygons compared to snapping to lines, we will run spatial joins by estuarine polys and reservoir layers first.
+
+##### Estuarine Polygons (AU)
+
+We will now find any sites that fall into an estuary AU polygon. This method is only applied to subbasins that intersect estuarine areas and then removes any estuarine sites from the data frame of unique sites that need AU information (`distinctSites_AUtoDo`). The chunk below sources a custom function for handling AU polygon information [available for download here](https://github.com/EmmaVJones/IR2024/blob/main/1.preprocessData/preprocessingModules/AU_Poly.R). 
+
+```{r automatedAssessment estuary methods AU, eval=FALSE}
+source('preprocessingModules/AU_Poly.R')
+
+# Bring in estuary layer
+estuaryPolysAU <- st_read('../va_aus_estuarine.shp') %>%
+   st_transform( 4326 ) %>%
+   st_cast("MULTIPOLYGON") # special step for weird WKB error reading in geodatabase, never encountered before, fix from: https://github.com/r-spatial/sf/issues/427
+  
+estuaryPolysAUjoin <- polygonJoinAU(estuaryPolysAU, distinctSites_AUtoDo, estuaryTorF = T) %>%
+  mutate(ID305B_1 = ID305B) %>%
+  dplyr::select(names(distinctSites_AU)) %>%
+  group_by(FDT_STA_ID) %>%
+  mutate(n = n(),
+         `Buffer Distance` = 'In polygon') %>%
+  ungroup() 
+
+rm(estuaryPolysAU) # clean up workspace
+```
+
+Now we add the newly identified estuary stations to `distinctSites_AU`.
+
+```{r automatedAssessment add estuary AU sites, eval=FALSE}
+distinctSites_AU <- bind_rows(distinctSites_AU, estuaryPolysAUjoin %>% st_drop_geometry())
+```
+
+
+And then remove stations that fell inside estuarine polygons from our 'to do' list.
+
+```{r automatedAssessment remove estuary poly sites AU, eval=FALSE}
+distinctSites_AUtoDo <- filter(distinctSites_AUtoDo, ! FDT_STA_ID %in% estuaryPolysAUjoin$FDT_STA_ID)
+
+nrow(distinctSites_AU) + nrow(distinctSites_AUtoDo) == nrow(distinctSites_AUall)
+```
+
+
+##### Lake Polygons (AU)
+
+Next we identify any sites that fall into a lake AU polygon. This method is applied to all subbasins, unlike the previous estuary step. We then remove any lake sites from the data frame of unique sites that need AU information. The chunk below sources the same custom function for handling AU polygon information as above [available for download here](https://github.com/EmmaVJones/IR2024/blob/main/1.preprocessData/preprocessingModules/AU_Poly.R). 
+
+
+```{r automatedAssessment lake methods AU, eval=FALSE}
+source('preprocessingModules/AU_Poly.R')
+
+# Bring in Lakes layer
+lakesPolyAU <-  st_read('../va_aus_reservoir.shp') %>%
+   st_transform( 4326 ) %>%
+   st_cast("MULTIPOLYGON") # special step for weird WKB error reading in geodatabase, never encountered before, fix from: https://github.com/r-spatial/sf/issues/427
+
+lakesPolysAUjoin <- polygonJoinAU(lakesPolyAU, distinctSites_AUtoDo, estuaryTorF = T)%>%
+  mutate(ID305B_1 = ID305B,
+         `Buffer Distance` = 'In polygon') %>%
+  dplyr::select(names(distinctSites_AU)) %>%
+  group_by(FDT_STA_ID) %>%
+  mutate(n = n()) %>%
+  ungroup() 
+
+rm(lakesPolyAU) # clean up workspace
+```
+
+Now add the lake stations to `distinctSites_AU`.
+
+```{r automatedAssessment add lake AU sites, eval=FALSE}
+distinctSites_AU <- bind_rows(distinctSites_AU, lakesPolysAUjoin %>% st_drop_geometry())
+```
+
+And we remove stations that fell inside lake polygons from the 'to do' list. This is also a good time to double check that we haven't lost any sites in the above process.
+
+```{r automatedAssessment remove lake poly sites AU, eval=FALSE}
+distinctSites_AUtoDo <- filter(distinctSites_AUtoDo, ! FDT_STA_ID %in% lakesPolysAUjoin$FDT_STA_ID)
+
+# Double check all sites are still there
+nrow(distinctSites_AU) + nrow(distinctSites_AUtoDo) == nrow(distinctSites_AUall)
+
+
+rm(lakesPolysAUjoin);rm(estuaryPolysAUjoin) # clean up workspace
+```
+
+
+
+#### Spatially Join AU Lines
+
+Now on to the more computationally heavy AU line snapping methods. We can only try to attach riverine AUs since there is not a published estuarine lines AU spatial layer (like there is for WQS information). All sites that do not snap to a riverine line within a set buffer distance will be flagged with comment saying so and the regional assessors will sort out the most appropriate AU manually in the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/). 
+
+##### Riverine Lines (AU)
+
+Time to run all the sites that didn't fall into an AU polygon through our [polyline snapping buffering script](https://github.com/EmmaVJones/IR2024/blob/main/1.preprocessData/snappingFunctions/snapPointToStreamNetwork.R). This function is slightly different from the WQS buffering function in that it is flexible enough link any chosen fields from the two input arguments. The output of the function will add a field called `Buffer Distance` to `distinctSites_AU` to indicate the  distance required for snapping. This does not get transported to the data of record, but it is useful to keep for now for QA purposes. If more than one segment is found within a set buffer distance, that many rows will be attached to the `snapTable` with the identifying station name. It is up to the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) to help the user determine which of these AU's are correct and subsequently drop all other records.
+
+
+```{r automatedAssessment riverine methods AU, eval=FALSE}
+source('snappingFunctions/snapPointToStreamNetwork.R')
+
+riverineAU <- st_read('../va_aus_riverine.shp') %>%
+     st_transform(102003)
+  
+snapTable <- snapAndOrganize(distinctSites_AUtoDo, 'FDT_STA_ID', riverineAU, 
+                             bufferDistances = seq(20,80,by=20),  # buffering by 20m from 20 - 80 meters
+                             tibble(StationID = character(), ID305B = character(), `Buffer Distance` = character()),
+                             "ID305B")
+
+
+snapTable <- snapTable %>%
+  left_join(distinctSites_AUtoDo, by = c('StationID' = 'FDT_STA_ID')) %>% # get station information
+  rename('FDT_STA_ID' = 'StationID') %>%
+  mutate(ID305B_1 = ID305B) %>%
+  dplyr::select(names(distinctSites_AU), `Buffer Distance`) %>%
+  group_by(FDT_STA_ID) %>%
+  mutate(n = n()) %>%
+  ungroup()
+  
+  
+rm(riverineAU) # clean up workspace
+```
+
+Now we can add these sites to the sites with AU information.
+
+```{r automatedAssessment add to AU table, eval=FALSE}
+distinctSites_AU <- bind_rows(distinctSites_AU , snapTable )
+```
+
+And then remove stations that attached to riverine segments from the 'to do' list.
+
+```{r automatedAssessment remove riverine snapped AU sites, eval=FALSE}
+distinctSites_AUtoDo <- filter(distinctSites_AUtoDo, ! FDT_STA_ID %in% snapTable$FDT_STA_ID)
+```
+
+We don't have estuarine lines AU information, so the sites that don't connect to any AU's at the max buffer distance will have to be sorted out by the assessors.
+
+```{r automatedAssessment final distinctSites_AU, eval=FALSE}
+distinctSites_AU <- distinctSites_AU %>%
+  group_by(FDT_STA_ID) %>%
+  mutate(n=n())
+```
+
+We then make sure all stations from original distinct station list (`distinctSites_AUall`) have some sort of record (blank or populated) in the `distinctSites_AU` dataset.
+
+```{r automatedAssessment double check no one lost AU, eval=FALSE}
+
+# check everyone dealt with
+nrow(distinctSites_AU) + nrow(distinctSites_AUtoDo) == nrow(distinctSites_AUall)
+
+distinctSites_AU$FDT_STA_ID[!(distinctSites_sf$FDT_STA_ID %in% unique(distinctSites_AU$FDT_STA_ID))]
+
+if(nrow(distinctSites_AUtoDo) == 0){rm(distinctSites_AUtoDo)} # clean up workspace if QA check good
+```
+
+
+One last step to make sure buffer distances save correctly for future mapping needs.
+
+```{r automatedAssessment buffer distance to factor, eval=FALSE}
+unique(distinctSites_AU$`Buffer Distance`)
+
+distinctSites_AU$`Buffer Distance` <- as.character(distinctSites_AU$`Buffer Distance`)
+```
+
+So, what does the end result look like? 
+
+```{r automatedAssessment sites ready for app review, eval=FALSE}
+distinctSites_AU[1:50,] %>% # preview first 50 rows
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r automatedAssessment sites ready for app review real, echo=FALSE}
+distinctSites_AU <- readRDS('exampleData/distinctSites_AU.RDS') 
+
+distinctSites_AU[1:50,] %>% # preview first 50 rows
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
 
 ### Where does this information go?
 
