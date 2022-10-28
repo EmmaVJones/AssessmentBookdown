@@ -457,7 +457,7 @@ lakesPolyAU <-  st_read('../va_aus_reservoir.shp') %>%
    st_transform( 4326 ) %>%
    st_cast("MULTIPOLYGON") # special step for weird WKB error reading in geodatabase, never encountered before, fix from: https://github.com/r-spatial/sf/issues/427
 
-lakesPolysAUjoin <- polygonJoinAU(lakesPolyAU, distinctSites_AUtoDo, estuaryTorF = T)%>%
+lakesPolysAUjoin <- polygonJoinAU(lakesPolyAU, distinctSites_AUtoDo, estuaryTorF = F)%>%
   mutate(ID305B_1 = ID305B,
          `Buffer Distance` = 'In polygon') %>%
   dplyr::select(names(distinctSites_AU)) %>%

@@ -13,6 +13,10 @@ pcb-data
 vdh-data
 citizen-monitoring-data
 station-metadata
+low-flow-7q10-data
+q10-method
+usgs-site-data-gathering
+important-7q10-calculation-notes
 automated-assessment-methods
 metadata-attribution
 distinct-sites

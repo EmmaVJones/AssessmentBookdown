@@ -91,3 +91,246 @@ citmon[1:50,] %>%  # preview first 50 rows
 Station metadata are critical to ensuring that stations are assessed appropriately whether an assessment is conducted by hand or with automation. These metadata include the appropriate Assessment Unit and Water Quality Standard information that apply to the station. After this information is identified for a given station, it may be assessed according the the assessment rules that apply to those standards for the specified waterbody type. 
 
 Metadata are provided for stations through a combination of automated spatial analyses and human review. **No metadata are ever linked to stations without regional assessor review.** The [Metadata Attribution](#metadata-attribution) section covers the details of attributing metadata to each station. 
+
+## Low Flow (7Q10) Data
+
+The 2024 IR is the first assessment window to use a standardized low flow analysis process. **Information presented below is still under review by regional assessment staff.** 
+
+The workflow first analyzes a 7Q10 low flow statistic for all available gages in VA based on the last 50 years of water data. The functions called to analyze the xQy flow statistics are identical to DEQ's Water Permitting protocols and were written by Connor Brogan. The water data is provided by the USGS NWIS data repository and is called in the xQy function by the USGS dataRetreival package. [Important assumptions of the xQy program are identified below.](#important-7q10-calculation-notes)
+
+Once flow statistics are generated for all available gages statewide, this information is compared to available flow data during a given assessment window. Any gages identified below the 7Q10 statistic are flagged for the appropriate time period. This information is spatially joined to the assessment watersheds (VAHU6) to extrapolate available flow data to areas without gaging stations. This is not an ideal extrapolation of flow data, but it serves as a decent initial flag for assessors to know when/where to investigate further. 
+
+These temporal low flow flags are joined to individual site monitoring data by VAHU6 and VAHU5 during the automated assessment process. If parameters used to assess aquatic life condition are collected during low flow periods, then the data are flagged inside the assessment applications, indicating further review is necessary prior to accepting the automated assessment exceedance calculations for that site.
+
+### 7Q10 Method
+
+The method for identifying low flow information for the assessment period is detailed below. The [DFLOW_CoreFunctions_EVJ.R script](https://github.com/EmmaVJones/IR2024/blob/main/2.organizeMetadata/7Q10/DFLOW_CoreFunctions_EVJ.R) is an assessment-specific adaptation of Connor Brogan's xQy protocols that allow for minor adjustments to the DFLOW procedure to allow for assessment purposes (for more information on these changes, see the [Important 7Q10 Calculation Notes](#important-7q10-calculation-notes) section below. 
+
+This analysis needs to be performed on or after April 2 of each assessment window cutoff to ensure the entire final water year is included in the analysis. The results are posted on the R server for inclusion in the automated assessment methods.
+
+```{r dataOrganization 7q10setup, eval=F}
+library(tidyverse)
+library(zoo)
+library(dataRetrieval)
+library(e1071)
+library(sf)
+library(leaflet)
+library(inlmisc)
+library(DT)
+
+source('DFLOW_CoreFunctions_EVJ.R')
+```
+
+
+### USGS Site Data Gathering
+
+All USGS gage information sampled in the last 50 years need to be collected from USGS NWIS. We can use the whatNWISsites() function to identify which sites have daily discharge data (00060) in a designated area (stateCd = 'VA').
+
+```{r dataOrganization pull available gage numbers, eval = F}
+sites <- whatNWISsites(stateCd="VA",
+                       parameterCd="00060",
+                       hasDataTypeCd="dv") %>% 
+  filter(site_tp_cd %in% c('ST', 'SP')) # only keep ST (stream) and SP (spring) sites
+
+sites_sf <- sites %>% 
+   st_as_sf(coords = c("dec_long_va", "dec_lat_va"), 
+               remove = F, # don't remove these lat/lon cols from df
+               crs = 4326) # add projection, needs to be geographic for now bc entering lat/lng
+
+```
+
+Now we will pull daily flow data for each site identified and calculate 7Q10. This is saved in the local environment as a list object with each gage a unique list element.
+
+```{r dataOrganization 7Q10, eval = F}
+# store it somewhere
+flowAnalysis <- list()
+
+for(i in unique(sites$site_no)){
+  print(i)
+  siteFlow <- xQy_EVJ(gageID = i,#USGS Gage ID
+    DS="1972-03-31",#Date to limit the lower end of usgs gage data download in yyyy-mm-dd
+    DE="2023-04-01",#Date to limit the upper end of USGS gage data download in yyyy-mm-dd
+    WYS="04-01",#The start of the analysis season in mm-dd. Defaults to April 1.
+    WYE="03-31",#The end of the analysis season in mm-dd. Defaults to March 31.
+    x=7,#If you want to include a different xQY then the defaults, enter x here
+    y=10,
+    onlyUseAcceptedData = F )
+  
+  flowAnalysis[i] <- list(siteFlow)
+}
+```
+
+Using the purrr library, we can extract just the flow metric information for each gage and store in a tibble for use later.
+
+```{r dataOrganization 7Q10 extraction, eval = F}
+# extract 7Q10 by gageNo
+x7Q10 <- map_df(flowAnalysis, "Flows") # EVJ added in gageNo to xQy_EVJ()
+
+x7Q10[1:50,] %>% # preview first 50 rows
+    DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r dataOrganization 7Q10 extraction real, echo = F}
+readRDS('exampleData/x7Q10.RDS') %>% 
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+
+And we need the actual daily flow data to compare to the low flow metrics, so we will extract that next. 
+
+```{r dataOrganization extract flow data, eval = F}
+# now to extract flow data already pulled by function
+flows <- map_df(flowAnalysis, "outdat") 
+
+flows[1:50,] %>% # preview first 50 rows
+    DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r dataOrganization extract flow data real, echo = F}
+readRDS('exampleData/flows.RDS') %>% 
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+Since we only really care about flow data from our assessment window, let's extract just the flow data and filter to our IR window of interest. We can then join the low flow metrics by gage number and flag any daily average flow data that falls below the gage's 7Q10 metric.
+
+```{r dataOrganization assessment window, eval = F}
+# now just grab flow data in assessment window, join in 7Q10, identify any measures below 7Q10
+assessmentFlows <- map_df(flowAnalysis, "outdat") %>% 
+  filter(between(Date, as.Date("2017-01-01"), as.Date("2022-12-31"))) %>% 
+  left_join(x7Q10, by = c('Gage ID' = "gageNo")) %>% 
+  mutate(`7Q10 Flag` = case_when(Flow <= n7Q10 ~ '7Q10 Flag',
+                                 TRUE ~ as.character(NA)))
+
+assessmentFlows[1:50,] %>% # preview first 50 rows
+    DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r dataOrganization assessment window real, echo = F}
+readRDS('exampleData/assessmentFlows.RDS') %>% 
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+Here we limit our assessmentFlows object to just the rows where a 7Q10 flag is encountered. We can review these low flow events by organizing them by gage and date. 
+
+```{r dataOrganization 7Q10 flag, eval = F}
+# anything below 7Q10?
+lowAssessmentFlows <- filter(assessmentFlows, `7Q10 Flag` == '7Q10 Flag')
+unique(lowAssessmentFlows$`Gage ID`) # what gages do these occur at?
+
+# organize low flow events by Gage ID
+lowAssessmentFlows %>% 
+  arrange(`Gage ID`, Date))[1:50,] %>% # preview first 50 rows
+    DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```  
+
+```{r dataOrganization 7Q10 flag real, echo = F}
+readRDS('exampleData/lowAssessmentFlows1.RDS') %>% 
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+Next, let's review the low flow gages visually on a map. First, we need to transform this low flow information into a spatial object. 
+
+```{r dataOrganization low flow sites, eval = F}
+# see where spatially
+lowFlowSites <- lowAssessmentFlows %>% 
+  distinct(`Gage ID`) %>% 
+  left_join(sites_sf, by = c('Gage ID' = 'site_no')) %>% 
+  st_as_sf()
+```
+
+We will bring in assessment watersheds to better understand how these low flow events happen across the landscape.
+
+```{r dataOrganization watersheds, eval = F}
+vahu6 <- st_read('../data/GIS/VA_SUBWATERSHED_6TH_ORDER_STG.shp') # this version of vahu6 layer goes outside state boundary
+vahu5 <- vahu6 %>% 
+  group_by(VAHU5) %>% 
+  summarise()
+```
+
+```{r dataOrganization watersheds real, echo = F, warning=F, message=F }
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(inlmisc)
+vahu6 <- readRDS('exampleData/vahu6.RDS') # this version of vahu6 layer goes outside state boundary
+vahu5 <- vahu6 %>% 
+  group_by(VAHU5) %>% 
+  summarise() 
+
+lowFlowSites <- readRDS('exampleData/lowFlowSites.RDS') 
+sites_sf <- readRDS('exampleData/sites_sf.RDS') 
+```
+
+And here is a map of the assessment watersheds (VAHU5 and VAHU6) with all Virginia USGS gages (`USGS sites`) and just USGS gages with low flow events in the IR window (`Low Flow USGS sites`). 
+
+```{r dataOrganization map}
+CreateWebMap(maps = c("Topo","Imagery","Hydrography"), collapsed = TRUE,
+             options= leafletOptions(zoomControl = TRUE,minZoom = 5, maxZoom = 20,
+                                     preferCanvas = TRUE)) %>%
+  setView(-79.1, 37.7, zoom=7)  %>%
+  addCircleMarkers(data = sites_sf, color='gray', fillColor='gray', radius = 4,
+                   fillOpacity = 0.8,opacity=0.8,weight = 2,stroke=T, group="USGS sites",
+                   label = ~site_no)  %>% 
+  addCircleMarkers(data = lowFlowSites, color='gray', fillColor='red', radius = 4,
+                   fillOpacity = 0.8,opacity=0.8,weight = 2,stroke=T, group="Low Flow USGS sites",
+                   label = ~`Gage ID`)  %>% 
+  addPolygons(data= vahu5,  color = 'black', weight = 1,
+              fillColor= 'blue', fillOpacity = 0.5,stroke=0.1,
+              group="vahu5", label = ~VAHU5) %>% hideGroup("vahu5") %>%  
+    addPolygons(data= vahu6,  color = 'black', weight = 1,
+              fillColor= 'blue', fillOpacity = 0.5,stroke=0.1,
+              group="vahu6", label = ~VAHU6) %>% hideGroup("vahu6") %>% 
+  addLayersControl(baseGroups=c("Topo","Imagery","Hydrography"),
+                   overlayGroups = c("Low Flow USGS sites","USGS sites","vahu5","vahu6"),
+                   options=layersControlOptions(collapsed=T),
+                   position='topleft')
+```
+
+Now we need to join the watershed information to the low flow analysis so we can easily incorporate this information to all monitoring sites that fall in the watershed. 
+
+```{r dataOrganization low flow watershed, eval = F}
+lowFlowSitesHUC <- st_intersection(lowFlowSites, vahu6) %>%  # this layer incorporates VAHU5 and VAHU6 information so dont need to join twice
+  st_drop_geometry() %>% # for this analysis we don't actually need the spatial information
+  dplyr::select(`Gage ID` = `Gage.ID`, # spatial joins change tibble names, changing back to name we want
+                agency_cd:dec_long_va, VAHU5, VAHU6)
+
+lowAssessmentFlows <- left_join(lowAssessmentFlows, lowFlowSitesHUC, by = 'Gage ID') %>% 
+  dplyr::select(Agency, `Gage ID`, `Station Name` = station_nm, `Site Type` = site_tp_cd,
+                Latitude = dec_lat_va, Longitude = dec_long_va, Date:Status, 
+                `Water Year` = WY, n7Q10, `7Q10 Flag`, VAHU5, VAHU6)
+
+
+```
+
+
+This information is pinned to the R server so we can use it during the automated assessment process.
+
+```{r dataOrganization pin, eval=FALSE}
+pin_get('ejones/AssessmentWindowLowFlows', 'rsconnect')[1:50,] %>% # preview first 50 rows
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r dataOrganization pin real, echo = F}
+readRDS('exampleData/lowAssessmentFlows.RDS') %>% 
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+### Important 7Q10 Calculation Notes
+
+Information from the chief flow statistic programmer (Connor Brogan) about the assumptions of the 7Q10 function used in this analysis:
+
+1. Desired exceedance probability evaluation in check.fs() must be between 0 and 1 
+2. Only complete analysis years are included for calculation of both the Harmonic Mean and all low flows. Years with minimum flow of 0 are removed, but compensated for via USGS probability adjustment 
+3. Must have at least 2 analysis years of complete data (line 133) to calculate xQy flows (not necessary for Harmonic Mean)
+4. Provisional gage flow data is removed
+5. Negative flows (e.g. tidally reversed) are treated as NA following the USGS SW Toolbox
+6. Function only uses gage data where the water year is within the range of the years of DS and DE
+7. The gage data is filtered to only include data after the first date of the first analysis season and before the last date of the last analysis season. For instance, if WYS = “04-01” and WYE = “03-31” and DS and DE were 1972 to 2022, then the gage data would be limited to the dates between and including 1972-04-01 and 2022-03-31
+8. The start and end dates of the data must include one at least one instance of WYE
+9. The last few days in the analysis season are removed to ensure statistical independence between years
+10. Analysis season must have sufficient days to calculate a minimum flow such that at least 7-days are required to calculate a 7-day flow
+
+Based on the changes Emma Jones made to the original function for Water Quality Assessment purposes, here are important assumptions to know (numbered according to system above):
+
+3. Must have at least 10 analysis years of complete data to calculate xQy flows 
+4. Provisional gage flow data is accepted. This is important so water years can be calculated as soon as possible for assessment purposes. Waiting until all data are approved will result in too little time for assessors to review the data. Storm events usually are corrected in the provisional to accepted stage in the USGS QA process, so since we are interested in low flow events, this is not a major concern when using provisional data.
