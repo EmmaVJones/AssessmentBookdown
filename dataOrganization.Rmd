@@ -238,12 +238,11 @@ lowFlowSites <- lowAssessmentFlows %>%
   st_as_sf()
 ```
 
-We will bring in assessment watersheds to better understand how these low flow events happen across the landscape.
+We will bring in major river subbasins to better understand how these low flow events happen across the landscape.
 
 ```{r dataOrganization watersheds, eval = F}
-vahu6 <- st_read('../data/GIS/VA_SUBWATERSHED_6TH_ORDER_STG.shp') # this version of vahu6 layer goes outside state boundary
-vahu5 <- vahu6 %>% 
-  group_by(VAHU5) %>% 
+basins <- st_as_sf(pin_get("ejones/DEQ_VAHUSB_subbasins_EVJ", board = "rsconnect")) %>% 
+  group_by(BASIN_CODE, BASIN_NAME) %>% 
   summarise()
 ```
 
@@ -252,36 +251,34 @@ library(tidyverse)
 library(sf)
 library(leaflet)
 library(inlmisc)
-vahu6 <- readRDS('exampleData/vahu6.RDS') # this version of vahu6 layer goes outside state boundary
-vahu5 <- vahu6 %>% 
-  group_by(VAHU5) %>% 
-  summarise() 
+basins <- readRDS('exampleData/basins.RDS') %>% 
+  group_by(BASIN_CODE, BASIN_NAME) %>% 
+  summarise()
 
 lowFlowSites <- readRDS('exampleData/lowFlowSites.RDS') 
 sites_sf <- readRDS('exampleData/sites_sf.RDS') 
 ```
 
-And here is a map of the assessment watersheds (VAHU5 and VAHU6) with all Virginia USGS gages (`USGS sites`) and just USGS gages with low flow events in the IR window (`Low Flow USGS sites`). 
+And here is a map of the major river subbasins with all Virginia USGS gages (`USGS sites`) and just USGS gages with low flow events in the IR window (`Low Flow USGS sites`). 
 
 ```{r dataOrganization map}
 CreateWebMap(maps = c("Topo","Imagery","Hydrography"), collapsed = TRUE,
              options= leafletOptions(zoomControl = TRUE,minZoom = 5, maxZoom = 20,
                                      preferCanvas = TRUE)) %>%
   setView(-79.1, 37.7, zoom=7)  %>%
+  
+  addPolygons(data= basins,  color = 'black', weight = 1,
+              fillColor= 'blue', fillOpacity = 0.4,stroke=0.1,
+              group="Major River SubBasins", label = ~BASIN_NAME) %>% 
   addCircleMarkers(data = sites_sf, color='gray', fillColor='gray', radius = 4,
                    fillOpacity = 0.8,opacity=0.8,weight = 2,stroke=T, group="USGS sites",
-                   label = ~site_no)  %>% 
+                   label = ~site_no)  %>%
   addCircleMarkers(data = lowFlowSites, color='gray', fillColor='red', radius = 4,
                    fillOpacity = 0.8,opacity=0.8,weight = 2,stroke=T, group="Low Flow USGS sites",
                    label = ~`Gage ID`)  %>% 
-  addPolygons(data= vahu5,  color = 'black', weight = 1,
-              fillColor= 'blue', fillOpacity = 0.5,stroke=0.1,
-              group="vahu5", label = ~VAHU5) %>% hideGroup("vahu5") %>%  
-    addPolygons(data= vahu6,  color = 'black', weight = 1,
-              fillColor= 'blue', fillOpacity = 0.5,stroke=0.1,
-              group="vahu6", label = ~VAHU6) %>% hideGroup("vahu6") %>% 
+
   addLayersControl(baseGroups=c("Topo","Imagery","Hydrography"),
-                   overlayGroups = c("Low Flow USGS sites","USGS sites","vahu5","vahu6"),
+                   overlayGroups = c("Low Flow USGS sites","USGS sites","Major River SubBasins"),
                    options=layersControlOptions(collapsed=T),
                    position='topleft')
 ```
@@ -289,15 +286,15 @@ CreateWebMap(maps = c("Topo","Imagery","Hydrography"), collapsed = TRUE,
 Now we need to join the watershed information to the low flow analysis so we can easily incorporate this information to all monitoring sites that fall in the watershed. 
 
 ```{r dataOrganization low flow watershed, eval = F}
-lowFlowSitesHUC <- st_intersection(lowFlowSites, vahu6) %>%  # this layer incorporates VAHU5 and VAHU6 information so dont need to join twice
+lowFlowSitesHUC <- st_intersection(lowFlowSites, basins) %>%  
   st_drop_geometry() %>% # for this analysis we don't actually need the spatial information
   dplyr::select(`Gage ID` = `Gage.ID`, # spatial joins change tibble names, changing back to name we want
-                agency_cd:dec_long_va, VAHU5, VAHU6)
+                agency_cd:dec_long_va, BASIN_CODE, BASIN_NAME)
 
 lowAssessmentFlows <- left_join(lowAssessmentFlows, lowFlowSitesHUC, by = 'Gage ID') %>% 
   dplyr::select(Agency, `Gage ID`, `Station Name` = station_nm, `Site Type` = site_tp_cd,
                 Latitude = dec_lat_va, Longitude = dec_long_va, Date:Status, 
-                `Water Year` = WY, n7Q10, `7Q10 Flag`, VAHU5, VAHU6)
+                `Water Year` = WY, n7Q10, `7Q10 Flag`,BASIN_CODE, BASIN_NAME)
 
 
 ```
