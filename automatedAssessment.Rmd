@@ -1338,9 +1338,194 @@ conventionals <- conventionals %>%
 ```
 
 
-## Automated Assessment Steps
+## Automated Assessment Analysis
 
-Finally, we are ready to analyze some data! Go through conventionals one station at a time, join stationTable, analyze all available data by each parameter function (or nested functions), and report out results in the WQA CEDS bulk upload template format. 
+Finally, we are ready to analyze some data! Go through stationTable one station at a time, join conventionals, analyze all available data by each parameter function (or nested functions), and report out results in the WQA CEDS bulk upload template format. The next chunk is long. We start by setting up placeholder objects to store the data we want to save for later (`stationTableResults` and `ammoniaAnalysis`). The ammonia calculation takes a bit of time, so we save all the data, analysis, and results in `ammoniaAnalysis` so we can easily source this information for faster application rendering. 
+
+The loop runs through each station, correcting special standards information and running any thermocline analyses, as necessary. This `stationData` object is fed into all subsequent automated assessment functions that calculate results for individual parameters and output information into the appropriate output format. Certain parameter functions take longer to compute than others, or are sourced multiple times in this chunk, so they are run first, e.g. ammonia, Public Water Supply (PWS) criteria, nutrients, dissolved oxygen daily average criteria, etc. The `results` object is then constructed parameter by parameter into the Stations Table template format. This dataset is then appended to the overall output dataset, `stationTableResults`, before moving on to the next station. Should a station in the `stationTable` object not have any data in `conventionals`, the appropriate metadata in the Stations Table template format is still sent to the `stationTable` output object with any previous cycle comments, potentially indicating that the station doesn't have new data. 
+
+Please see the [Individual Parameter Analyses](#individual-parameter-analyses) section for detailed descriptions of what each individual parameter functions are doing during the below analysis.
+
+
+```{r automated assessment Automated Assessment, eval = F}
+# make placeholder objects to store data results
+stationTableResults <- stationsTemplate 
+# save ammonia results (based on default assessment information) for use in app to speed rendering
+ammoniaAnalysis <- tibble()
+
+
+# time the operation so we can know how long it takes:
+startTime <- Sys.time()
+
+# loop over all sites, not super efficient but get the job done in easy to follow format
+for(i in 1:nrow(stationTable)){
+
+  print(paste('Assessing station', i, 'of', nrow(stationTable), sep=' ')) # print progress information
+
+  # pull one station data
+  stationData <- filter(conventionals, FDT_STA_ID %in% stationTable$STATION_ID[i]) %>%
+    left_join(stationTable, by = c('FDT_STA_ID' = 'STATION_ID')) %>%
+    # Special Standards Correction step. This is done on the actual data bc some special standards have temporal components
+    pHSpecialStandardsCorrection() %>% # correct pH to special standards where necessary
+    temperatureSpecialStandardsCorrection() %>% # correct temperature special standards where necessary
+    # special lake steps
+    {if(stationTable$STATION_ID[i] %in% lakeStations$STATION_ID)
+      suppressWarnings(suppressMessages(
+        mutate(., lakeStation = TRUE) %>%
+        thermoclineDepth())) # adds thermocline information and SampleDate
+      else mutate(., lakeStation = FALSE) }
+
+  # --------------------------------------------------------------------------------------------------------------------------------------
+  # Add some extra columns that are helpful for assessors but don't fit the bulk upload template
+  
+  # Previous station table comments
+  comments <- stationTableComments(stationTable$STATION_ID[i], stationsTable2022, '2022', stationsTable2020, '2020')
+  
+  # Date last sampled
+  if(nrow(stationData) > 0){
+    dateLastSampled <- as.character(max(stationData$FDT_DATE_TIME)) } else {dateLastSampled <- 'No data in conventionals data pull'}
+  
+  # Low Flow Summary, only gives flag if station has FDT_TEMP_CELCIUS, DO_mg_L, FDT_FIELD_PH collected on day with gage in subbasin 
+  # below 7Q10
+  lowFlowSummary <- lowFlowFlagColumn(stationData)
+  
+  #---------------------------------------------------------------------------------------------------------------------------------------
+  
+  # Ammonia special section
+  ammoniaAnalysisStation <- freshwaterNH3limit(stationData, trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
+                                        mussels = TRUE, earlyLife = TRUE) 
+  # https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section155/ states the assumption is that
+  #  waters are to be assessed with the assumption that mussels and early life stages of fish should be present
+  # trout presence is determined by WQS class, this can be changed in the app but is forced to be what the station
+  # is attributed to in the automated assessment scripts
+  
+  # PWS Criteria
+  if(nrow(stationData) > 0){
+    if(is.na(unique(stationData$PWS))  ){
+      PWSconcat <- tibble(PWS= NA)
+   } else {
+     PWSconcat <- cbind(#tibble(STATION_ID = unique(stationData$FDT_STA_ID)),
+                         assessPWS(stationData, NITRATE_mg_L, LEVEL_NITRATE, 10, 'PWS_Nitrate'),
+                         assessPWS(stationData, CHLORIDE_mg_L, LEVEL_CHLORIDE, 250, 'PWS_Chloride'),
+                         assessPWS(stationData, SULFATE_TOTAL_mg_L, LEVEL_SULFATE_TOTAL, 250, 'PWS_Total_Sulfate')) %>%
+       dplyr::select(-ends_with('exceedanceRate')) }
+    
+  # chloride assessment if data exists
+    if(nrow(filter(stationData, !is.na(CHLORIDE_mg_L))) > 0){
+      chlorideFreshwater <- rollingWindowSummary(
+        annualRollingExceedanceSummary(
+          annualRollingExceedanceAnalysis(chlorideFreshwaterAnalysis(stationData), 3) ), "CHL")
+    } else {chlorideFreshwater <- tibble(CHL_EXC = NA, CHL_STAT= NA)}
+    
+  # Water toxics combination with PWS, Chloride Freshwater, and water column PCB data
+  if(nrow(bind_cols(PWSconcat,
+                    chlorideFreshwater,
+                    PCBmetalsDataExists(filter(markPCB, str_detect(SampleMedia, 'Water')) %>%
+                                        filter(StationID %in% stationData$FDT_STA_ID), 'WAT_TOX')) %>%
+          dplyr::select(contains(c('_EXC','_STAT'))) %>%
+          mutate(across( everything(),  as.character)) %>%
+          pivot_longer(cols = contains(c('_EXC','_STAT')), names_to = 'parameter', values_to = 'values', values_drop_na = TRUE) %>% 
+          filter(! str_detect(values, 'WQS info missing from analysis')) %>% 
+          filter(! values == "S")) > 1) {
+    WCtoxics <- tibble(WAT_TOX_EXC = NA, WAT_TOX_STAT = 'Review')
+    } else { WCtoxics <- tibble(WAT_TOX_EXC = NA, WAT_TOX_STAT = NA)} 
+  
+  } else {
+    WCtoxics <- tibble(WAT_TOX_EXC = NA, WAT_TOX_STAT = NA)
+  }
+   
+  # If data exists for station, run it, otherwise just output what last cycle said and comment
+  if(nrow(stationData) > 0){
+    # Nutrients based on station type
+    # Nutrient: TP (lakes have real standards; riverine no longer uses 0.2 mg/L as an observed effect for Aquatic life use)
+    if(unique(stationData$lakeStation) == TRUE){
+      TP <- TP_Assessment(stationData) 
+      } else {
+        TP <- countNutrients(stationData, PHOSPHORUS_mg_L, LEVEL_PHOSPHORUS, NA) %>% quickStats('NUT_TP') %>% 
+          mutate(NUT_TP_STAT = ifelse(NUT_TP_STAT != "S", "Review", NA)) } # flag OE but don't show a real assessment decision
+    
+      # Nutrients: Chl a (lakes)
+    if(unique(stationData$lakeStation) == TRUE){
+      chla <- chlA_Assessment(stationData)
+        #tibble(NUT_CHLA_EXC = NA, NUT_CHLA_SAMP = NA, NUT_CHLA_STAT = NA) # placeholder for now
+      } else {
+        chla <- countNutrients(stationData, CHLOROPHYLL_A_ug_L, LEVEL_CHLOROPHYLL_A, NA) %>% quickStats('NUT_CHLA') %>%
+          mutate(NUT_CHLA_STAT = NA) } # don't show a real assessment decision
+    
+    # Run DO Daily Avg for everyone!
+      DO_Daily_Avg_STAT <- paste0('DO_Daily_Avg_STAT: ', 
+                                       DO_Assessment_DailyAvg(stationData) %>% 
+                                         quickStats('DO_Daily_Avg') %>% 
+                                         dplyr::select(DO_Daily_Avg_STAT) %>% pull())#}
+    
+    results <- cbind(
+      StationTableStartingData(stationData),
+      tempExceedances(stationData) %>% quickStats('TEMP'),
+      DOExceedances_Min(stationData) %>% quickStats('DO'), 
+      # this will be removed for lake stations later since it does not apply
+      pHExceedances(stationData) %>% quickStats('PH'),
+      bacteriaAssessmentDecisionClass( # NEW for IR2024, bacteria only assessed in two most recent years of assessment period
+        filter(stationData, between(FDT_DATE_TIME, assessmentPeriod[1] + years(4), assessmentPeriod[2])),
+        uniqueStationName = unique(stationData$FDT_STA_ID)),
+ 
+      # Ammonia 
+      rollingWindowSummary(
+        annualRollingExceedanceSummary(
+          annualRollingExceedanceAnalysis(ammoniaAnalysisStation, yearsToRoll = 3)), parameterAbbreviation = "AMMONIA"),
+    
+      # Flag for whether or not metals data exists
+      metalsData(filter(WCmetals, Station_Id %in% stationData$FDT_STA_ID), 'WAT_MET'),
+   
+      # Mark's water column PCB results, flagged
+      WCtoxics, # from above, adds in PWS and water column PCB information
+    
+      # Roger's sediment metals analysis, transcribed
+      metalsData(filter(Smetals, Station_Id %in% stationData$FDT_STA_ID), 'SED_MET'),
+      
+      # Mark's sediment PCB results, flagged
+      PCBmetalsDataExists(filter(markPCB, str_detect(SampleMedia, 'Sediment')) %>%
+                      filter(StationID %in% stationData$FDT_STA_ID), 'SED_TOX'),
+      
+      # Gabe's fish metals results, flagged
+      PCBmetalsDataExists(filter(fishMetals, Station_ID %in% stationData$FDT_STA_ID), 'FISH_MET'),
+      
+      # Gabe's fish PCB results, flagged
+      PCBmetalsDataExists(filter(fishPCB, `DEQ rivermile` %in%  stationData$FDT_STA_ID), 'FISH_TOX'),
+    
+      # Benthics 
+      benthicAssessment(stationData, VSCIresults),
+      
+      # Nutrient Assessment done above by waterbody type
+      TP,
+      chla) %>%
+    
+      # COMMENTS
+      mutate(COMMENTS = paste0(DO_Daily_Avg_STAT) ) %>% 
+      left_join(comments, by = 'STATION_ID') %>%
+      left_join(lowFlowSummary, by = 'STATION_ID') %>%
+      dplyr::select(-ends_with(c('exceedanceRate', 'VERBOSE', 'Assessment Decision', 'StationID'))) %>%  # to match Bulk Upload template but helpful to keep visible til now for testing
+      mutate(`Date Last Sampled` = dateLastSampled)
+  } else {# pull what you can from last cycle and flag as carry over
+    results <- filter(stationTable, STATION_ID == stationTable$STATION_ID[i]) %>%
+      dplyr::select(STATION_ID:VAHU6, COMMENTS) %>%
+      mutate(COMMENTS = 'This station has no data in current window but was carried over due to IM in one of the 2020IR status fields or the 2020 stations table reports the station was carried over from a previous cycle.') %>%#,
+             #BACTERIA_COMMENTS = NA) %>%
+      left_join(comments, by = 'STATION_ID') %>% 
+      mutate(`Date Last Sampled` = dateLastSampled)
+  }
+  
+  stationTableResults <- bind_rows(stationTableResults,results)
+  ammoniaAnalysis <- bind_rows(ammoniaAnalysis, tibble(StationID = unique(stationData$FDT_STA_ID), AmmoniaAnalysis = list(ammoniaAnalysisStation)))
+    
+}
+
+
+stationTableResults <- bind_rows(stationsTemplate, stationTableResults) %>%
+  # for now bc bacteria needs help still
+  dplyr::select(STATION_ID:`7Q10 Flag`)
+
+timeDiff = Sys.time()- startTime
+```
 
 
 
