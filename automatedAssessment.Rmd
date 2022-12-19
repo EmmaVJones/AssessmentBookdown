@@ -15,22 +15,22 @@ board_register_rsconnect(key = conn$CONNECT_API_KEY,  #Sys.getenv("CONNECT_API_K
                          server = conn$CONNECT_SERVER)#Sys.getenv("CONNECT_SERVER"))
 ```
 
-This chapter details the specific steps required to transform the raw data outlined in the [Data Organization](#data-organization) chapter into preliminary assessment results. The general process the automated assessment specifies is to perform data manipulation and organization steps to prepare the data for analysis, apply specific assessment functions to the appropriate data that specify the assessment guidance and Water Quality Standards (WQS), and output a "stations table" that uses data from the assessment window to summarize each station for review and bulk upload into CEDS. See the [Automated Output](#automated-output) section to understand the information provided in the stations table output. 
+This chapter details the specific steps required to transform the raw data outlined in the [Data Organization](#data-organization) chapter into preliminary assessment results. The general process the automated assessment specifies begins with performing data manipulation and organization steps to prepare the data for analysis, then apply specific assessment functions to the appropriate data that specify the assessment guidance and Water Quality Standards (WQS), and finally, output a "stations table" that uses data from the assessment window to summarize each station for review and bulk upload into CEDS. See the [Automated Output](#automated-output) section to understand the information provided in the stations table output. 
 
 The automated assessment scripts are trained to systematically apply assessment guidance and WQS to all data for which the appropriate metadata is provided. This supervised system merely applies the rules that developers have programmed to mimic assessment protocols. These scripts do not provide assessment decisions. It is up to the human reviewer (regional assessor) to either accept the automated result or use best professional judgment to e.g. redact questionable data or interpret complex natural systems. 
 
 
 ## Metadata Attribution
 
-The automated assessment process hinges on each station having the appropriate metadata to analyze all raw data. The required metadata for each station include what Water Quality Standards apply to the station and which Assessment Unit(s) describe the station. One or more station can be included in an Assessment Units. It is ultimately the Assessment Units that are used to determine whether or not designated uses are met, which is where the automation stops and the human analysis component is required. 
+The automated assessment process hinges on each station having the appropriate metadata to analyze all raw data. The required metadata for each station include what Water Quality Standards apply to the station and which Assessment Unit(s) describe the station. One or more station can be included in an Assessment Unit. It is ultimately the Assessment Units that are used to determine whether or not designated uses are met, which is where the automation stops and the human analysis component is required. 
 
-In practice, metadata are spatially joined to stations by a rigorous data organization, spatial joining, and QA process that is detailed below. This automated process runs on the Assessment Data Analyst's computer and results are provided to regional assessment staff for individual review. This application is known as the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) and is hosted on the R server. It is up to each regional assessor to manually review each suggested metadata link prior to the assessment start date. After stations have completed the manual review process, they can be analyzed using the automated assessment scripts. Detailed intructions on how to use the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) is available in the [Regional Metadata Validation Tool How To](#regional-metadata-validation-tool-how-to) section.
+In practice, metadata are spatially joined to stations by a rigorous data organization, spatial joining, and QA process that is detailed below. This automated process runs on the Assessment Data Analyst's computer and results are provided to regional assessment staff for individual review through a shared shiny application. This application is known as the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) and is hosted on the R server. It is up to each regional assessor to manually review each suggested metadata link prior to the assessment start date. After stations have completed the manual review process, they can be analyzed using the automated assessment scripts. Detailed instructions on how to use the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/){target = "_blank"} is available in the [Regional Metadata Validation Tool How To](#regional-metadata-validation-tool-how-to) section.
 
 ### Distinct Sites
 
 Before station metadata can be linked to stations, a list of unique stations that were sampled in a given assessment window is required. Because multiple data sources are combined for an assessment, each unique station from each data source with data in the given IR window are included in this list. 
 
-For the purposes of the Automated Assessment User Guide, we will overview the process with a snippet of conventionals and citizen monitoring data types. Please see the [official script](https://github.com/EmmaVJones/IR2024/blob/main/1.preprocessData/HowToPreprocessData.Rmd) for more information.
+For the purposes of the Automated Assessment User Guide, we will overview the process with a snippet of conventionals and citizen monitoring data types. Please see the [official script](https://github.com/EmmaVJones/IR2024/blob/main/1.preprocessData/HowToPreprocessData.Rmd){target = "_blank"} for more information.
 
 ```{r automatedAssessment libraries, eval=FALSE}
 library(tidyverse)
@@ -46,7 +46,7 @@ board_register_rsconnect(key = conn$CONNECT_API_KEY,  #Sys.getenv("CONNECT_API_K
                          server = conn$CONNECT_SERVER)#Sys.getenv("CONNECT_SERVER"))
 ```
 
-Bring conventionals data into your environment.
+After setting up your local evironment with necessar packages and connecting to the R server, bring conventionals data into your environment.
 
 ```{r automatedAssessment conventionals}
 conventionals <- pin_get('ejones/conventionals2024draft', board = 'rsconnect') %>% 
@@ -57,7 +57,7 @@ conventionals[1:50,] %>% # preview first 50 rows
   DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
 ```
 
-Bring citizen data into your environment.
+Next, bring citizen data into your environment.
 
 ```{r automatedAssessment citmon}
 citmon <-  readRDS('exampleData/citmon.RDS') %>% 
@@ -637,9 +637,9 @@ library(dbplyr)
 ### connect to Production Environment
 pool <- dbPool(
   drv = odbc::odbc(),
-  Driver = "ODBC Driver 11 for SQL Server",
+  Driver = "ODBC Driver 11 for SQL Server",# or whatever ODBC driver version you have installed locally
   Server= "DEQ-SQLODS-PROD,50000",
-  dbname = "ODS",
+  databasename = "ODS",
   trusted_connection = "yes"
 )
 
@@ -732,7 +732,7 @@ WQSlookup_withStandards <- pin_get('ejones/WQSlookup-withStandards', board = 'rs
 
 ##### Adding new AU data to pinned datasets
 
-The new stations in an assessment cycle that were manually attributed to the AU layer from the previous cycle need this information added to the AUlookup table pin stored on the R server. After an assessor adds these stations into WQA CEDS with AU information, this table is no longer used to source AU information for a station, but it is required for the start of an assessment cycle for all stations that were not included in any previous assessments. 
+The new stations in an assessment cycle that were manually reviewed using the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) need this AU information added to the existing AUlookup table pin stored on the R server. After an assessor adds these stations into WQA CEDS with AU information, this table is no longer used to source AU information for a station, but it is required for the start of an assessment cycle for all stations that were not included in any previous assessments. 
 
 The server administrator must pull the AU attribution information contained in the Metadata App from the R server and append this information to the existing AUlookup table pin. The data may be retrieved by anyone using the following script. 
 
@@ -742,9 +742,9 @@ AUlookupArchive <- pin_get('ejones/AUlookup', board = 'rsconnect')
 
 #### Create a stationsTablebegin dataset
 
-The so called 'stationsTablebegin' dataset is the key input to the automated assessment scripts. This dataset tells the scripts all the stations it should look to assess. It is necessary to use this dataset as the list of stations to assess rather than any other individual dataset (e.g. conventionals, citmon/nonagency, PCB, etc.) because stations that need to be touched during a given assessment period might not have information in any of the individual datasets. This dataset also contains any stations from a previous cycle that must be carried over to the new cycle, carryover stations. These carryover stations may not have any data in the current window and thus would never appear in any individual dataset organized so far. The stationsTablebegin dataset contains not only all the stations that need to be addressed in an assessment cycle, but also at least one Assessment Unit per station for organizational purposes. 
+The so called 'stationsTablebegin' dataset is a key input to the automated assessment scripts. This dataset tells the scripts all the stations it should assess using the automated assessment functions. It is necessary to use this dataset as the list of stations to assess rather than any other individual dataset (e.g. conventionals, citmon/nonagency, PCB, etc.) because stations that need to be touched during a given assessment period might not have information in any of the individual datasets. This dataset also contains any stations from a previous cycle that must be carried over to the new cycle, i.e. carryover stations. These carryover stations may not have any data in the current window and thus would never appear in any individual dataset organized so far. The stationsTablebegin dataset contains not only all the stations that need to be addressed in an assessment cycle, but also at least one Assessment Unit per station for organizational purposes. 
 
-Because station WQS information are only used for comparing individual parameters to criteria, we do not actually store WQS metadata in the stationsTablebegin dataset. This information is only joined to the conventionals dataset at a later step in the automated assessment process to maintain a dataset most similar to the CEDS bulk upload template.
+Because station WQS information are only used for comparing individual parameters to criteria, we do not actually store WQS metadata in the stationsTablebegin dataset. This information is joined to the conventionals dataset at a later step in the automated assessment process to maintain a dataset most similar to the CEDS bulk upload template.
 
 Starting with the conventionals_distinct dataset (which includes citmon/non agency data at this point), we can begin to create our dataset of all the unique stations that we need to organize for the current cycle (stationsTablebegin).
 
@@ -768,7 +768,7 @@ conventionals_sf <- conventionals_distinct %>%
 
 We want the stationsTablebegin dataset to look like our CEDS Bulk Upload template to make future steps easier.
 
-The biggest changes from the older stations table format to this new bulk upload template is the addition of the 10 ID305B and station type columns as well as the lacustrine designation. 
+The biggest changes from the older stations table format to this new bulk upload template is the addition of the 10 ID305B and station type columns as well as the lacustrine designation. The lacustrine designation field identifies whether or no a lake station is considered to be within the "Lacustrine Zone" of the lake. This information is used to assess nutrients in Section 187 lakes. 
 
 ```{r automated assessment bulk upload template, eval = F}
 stationsTemplate <- read_excel('data/WQA_CEDS_templates/WQA_Bulk_Station_Upload_Final.xlsx',#'WQA_CEDS_templates/WQA_Bulk_Station_Upload (3).xlsx', 
@@ -789,9 +789,9 @@ library(dbplyr)
 ### Production Environment
 pool <- dbPool(
   drv = odbc::odbc(),
-  Driver = "ODBC Driver 11 for SQL Server", #"SQL Server Native Client 11.0", 
+  Driver = "ODBC Driver 11 for SQL Server", # or whatever ODBC driver version you have installed locally
   Server= "DEQ-SQLODS-PROD,50000",
-  dbname = "ODS",
+  databasename = "ODS",
   trusted_connection = "yes"
 )
 ```
@@ -1098,12 +1098,41 @@ The official assessment data pinned to the R server include:
 
 ## Automated Assessment
 
-Now that data are prepped for analysis, the last step is to bring all the data together, complete a few more manipulation steps, and feed the data through a process that assesses the data. To minimize the coding experience required to run the automated assessment process, the operation is written as a loop instead of as a function. Loops are inherently slow and sometimes confusing, but for this specific use case housing all operations inside a single loop increases the visibility of the order of operations and decreases the amount of coding experience users need to understand what is happening when. All individual parameter analyses are programmed as efficient functions and are detailed in the [Individual Parameter Analyses](#individual-parameter-analyses) section.
+Now that data are prepped for analysis, the last step is to bring all the data together, complete a few more manipulation steps, and feed the data through a process that assesses the data. To minimize the level of coding experience required to run the automated assessment process, the operation is written as a loop instead of as a function. Loops are inherently slow and sometimes confusing, but for this specific use case housing all operations inside a single loop increases the visibility of the order of operations and decreases the amount of coding experience users need to understand what is happening when. All individual parameter analyses are programmed as efficient functions and are detailed in the [Individual Parameter Analyses](#individual-parameter-analyses) section.
 
+As always, first set up your local environment with all the necessary packages you will use, source any necessary scripts, and connect to the R server to pull pinned data. 
 
+The custom assessment functions brought in below are stored in separate .R files and "sourced" into this script. This is a best practice to enable easier maintenance of the custom assessment functions as well as minimize the amount of code in this Rmarkdown document. When you source the scripts, you will see all the functions in your Environment pane. This is different than when we call in a package because one cannot see all the functions in a loaded package in their Environment pane. DEQ is working towards publishing an automated assessment package to neatly distribute all these custom functions. Until then, you can download these sourced scripts [here](https://github.com/EmmaVJones/IR2024/tree/main/3.automatedAssessment){target = "_blank"}. You can download the latest working copy of the automated assessment workflow in a single Rmarkdown document [here](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target = "_blank"}. 
 
-Bring in pinned data and local data. This part is still being actively written,  stay tuned.
+An important feature of this script is in the first line of code: `options(digits = 12)`. This set our local environment options and tells R to use 12 digits when storing numeric information. It is critical to store all potential digits of numeric data to not impose intermediate rounding steps and potentially skew results. Steps like these allow for statewide consistency. Spreadsheet and database software do not easily allow this level of calculation control. It is important to note that some tidyverse default printing behavior might make it appear that numerical data are rounded to only three digits. This is a feature for fast and clear data printing and does not reflect the true nature of the numeric data stored in your environment after establishing the `options(digits = 12)` environment option. You can always double check the numeric data by printing the full object (e.g. datasetIamWorkingWith$numericalColumnIwantToInvestigateFurther). 
 
+```{r automated assessment set up environment, eval = F}
+options(digits = 12) # critical to seeing all the data
+
+library(tidyverse)
+library(sf)
+library(readxl)
+library(pins)
+library(config)
+library(EnvStats)
+library(lubridate)
+library(round) # for correct round to even logic
+
+# Bring in custom assessment functions
+source('automatedAssessmentFunctions.R')
+source('updatedBacteriaCriteria.R')
+
+# get configuration settings
+conn <- config::get("connectionSettings")
+
+# use API key to register board
+board_register_rsconnect(key = conn$CONNECT_API_KEY,  
+                         server = conn$CONNECT_SERVER)
+```
+
+### Bring in required datasets
+
+Bring in pinned data and local data. **This section is still being actively written, stay tuned for an update with final IR2024 data.**
 
 ```{r automated assessment pull pins, eval = F}
 # official March Data releases for IR 2022
@@ -1119,16 +1148,42 @@ VCPMI63results <- pin_get("VCPMI63results", board = "rsconnect") %>%
   filter( between(`Collection Date`, assessmentPeriod[1], assessmentPeriod[2]) )
 VCPMI65results <- pin_get("VCPMI65results", board = "rsconnect") %>%
   filter( between(`Collection Date`, assessmentPeriod[1], assessmentPeriod[2]) ) 
+# placeholders from IR2022 until draft or final IR2024 data are available
 WCmetals <- pin_get("WCmetals-2022IRfinal",  board = "rsconnect")
 Smetals <- pin_get("Smetals-2022IRfinal",  board = "rsconnect")
-markPCB <- read_excel('data/2022 IR PCBDatapull_EVJ.xlsx', sheet = '2022IR Datapull EVJ')
-fishPCB <- read_excel('data/FishTissuePCBsMetals_EVJ.xlsx', sheet= 'PCBs')
-fishMetals <- read_excel('data/FishTissuePCBsMetals_EVJ.xlsx', sheet= 'Metals')
-
+markPCB <- read_excel('data/2022 IR PCBDatapull_EVJ.xlsx', sheet = '2022IR Datapull EVJ') # will be pinned data for IR2024
+fishPCB <- read_excel('data/FishTissuePCBsMetals_EVJ.xlsx', sheet= 'PCBs') # will be pinned data for IR2024
+fishMetals <- read_excel('data/FishTissuePCBsMetals_EVJ.xlsx', sheet= 'Metals') # will be pinned data for IR2024
 ```
 
 
-Bring in Station Table Bulk Upload Template
+Bring in the Station Table from the two most recent assessment cycles. The comment field from each of these datasets is joined to the Station Table output to assist regional assessment staff. 
+
+```{r automated assessment previous stations tables, eval = F}
+stationsTable2022 <- readRDS('../2.organizeMetadata/data/stationsTable2022.RDS')
+stationsTable2020 <- readRDS('../2.organizeMetadata/data/stationsTable2020.RDS')
+```
+
+
+Bring in lake nutrient standards. The lake-specific nutrient criteria are stored separate from WQS spatial data because these fields do not exist in the WQS spatial layers. Lake names in the WQS spatial layers are notoriously difficult to join against because of all the variation in names. As such, this dataset contains a special joining name field `Lake_Name` to clean up joining issues. 
+
+```{r lake nutrient standards, eval = T}
+lakeNutStandards <- read_csv('exampleData/9VAC25-260-187lakeNutrientStandards.csv')
+
+lakeNutStandards %>% # preview dataset
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+
+Bring in beginning station table data. This information communicates to the scripts which stations should be assessed and where they should be organized (AUs). It also has data from the last cycle to populate the historical station information table in the application.
+
+**To Note: The AU assignments in this table are valid as of the start of the assessment process. For any AU splits/reassignments, the assessors control that through local (.csv) copies of the output of this script that is uploaded to the relevant Assessment Application on the Connect Server (and subsequently uploaded to CEDS via the bulk data upload tool).**
+
+```{r automated assessment stationTable, eval = FALSE}
+stationTable <- pin_get('ejones/stationsTable2024begin', board = 'rsconnect')
+```
+
+Bring in Station Table Bulk Upload Template. This is the template format to match such that output from this script can be easily uploaded to CEDS via the Bulk Data Upload tool. Any deviations to this template in the output dataset were specifically requested by regional assessment staff to improve and expedite their review process. They are responsible for removing those added fields prior to bulk data upload.
 
 ```{r automated assessment bulk upload template 2, eval = F}
 stationsTemplate <- read_excel('WQA_CEDS_templates/WQA_Bulk_Station_Upload_Final.xlsx',#'WQA_CEDS_templates/WQA_Bulk_Station_Upload (3).xlsx', 
@@ -1143,36 +1198,150 @@ stationsTemplate <- read_excel('WQA_CEDS_templates/WQA_Bulk_Station_Upload_Final
 ```
 
 
+### Attach WQS information
 
-Bring in Station Table from two previous assessments 
+Pull pinned WQS info saved on server. Then perform a series of data manipulation steps that:
 
-```{r automated assessment stations table 2018, eval = F}
-historicalStationsTable2 <- read_excel('data/tbl_ir_mon_stations2018IRfinal.xlsx')
+1. Join WQS to station table by StationID
+2. Create a new variable that will correct for Class II pH differences for Tidal Waters
+3. Join actual WQS critera (object name WQSvalues) to each StationID
+4. Perform a little data cleanup to lose columns unnecessary for future steps
+5. Join station ecoregion information (for benthic analyses)
+6. Standardize lake names  (to match 187 lake names for future joining of criteria)
+    + Some problematic stations need manual steps to attach the correct lake name
+7. Join lake nutrient criteria to individual stations
+    + Lake Drummond requires some extra manual work per hh special standard https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section310/
+8. Rearrange data schema to more useful format after all previous joins
+9. Correct units for nutrient criteria to match conventionals data format (ug/L to mg/L)
+
+
+```{r automated assessment pull WQS info, eval = F}
+WQSlookup <- pin_get("WQSlookup-withStandards",  board = "rsconnect")
+citmonWQS <- readRDS('C:/HardDriveBackup/R/GitHub/IR2024/1.preprocessData/data/citmonStationsWithWQS.RDS') %>% 
+  dplyr::select(StationID = `Station Id`, `WQS Section`, `WQS Class`, `WQS Special Standard`)
+
+stationTable <- stationTable %>% # (1)
+  
+  # Special CitMon/Non Agency step until full WQS_ID inplementation in IR2028
+  left_join(citmonWQS, by = c('STATION_ID' = 'StationID')) %>% # (1)
+  
+  # Join to real WQS_ID's (do this second in case citmon station double listed, want proper WQS_ID if available) (1)
+  left_join(WQSlookup, by = c('STATION_ID' = 'StationID')) %>%
+  
+  # coalesce these similar fields together, taking WQS_ID info before citmon method
+  mutate(CLASS = coalesce(CLASS, `WQS Class`),
+         SEC = coalesce(SEC, `WQS Section`),
+         SPSTDS = coalesce(SPSTDS, `WQS Special Standard`)) %>% 
+  dplyr::select(-c(`WQS Section`, `WQS Class`, `WQS Special Standard`)) %>% 
+  
+  # Fix for Class II Tidal Waters in Chesapeake (bc complicated DO/temp/etc standard)
+  mutate(CLASS_BASIN = paste(CLASS,substr(BASIN, 1,1), sep="_")) %>% # (2)
+  mutate(CLASS_BASIN = ifelse(CLASS_BASIN == 'II_7', "II_7", as.character(CLASS))) %>% # (2)
+  # Join actual WQS criteria to each StationID
+  left_join(WQSvalues, by = 'CLASS_BASIN') %>% # (3)
+  # data cleanup
+  dplyr::select(-c(CLASS.y,CLASS_BASIN)) %>% # (4)
+  rename('CLASS' = 'CLASS.x') %>% # (4)
+  # Join station ecoregion information (for benthic analyses)
+  left_join(dplyr::select(WQMstationFull, WQM_STA_ID, EPA_ECO_US_L3CODE, EPA_ECO_US_L3NAME) %>% #(5)
+              distinct(WQM_STA_ID, .keep_all = TRUE), by = c('STATION_ID' = 'WQM_STA_ID')) %>%
+  # Standardize lake names (to match 187 lake names for future joining of criteria)
+  lakeNameStandardization() %>% # standardize lake names (6)
+  
+   
+  # extra special step (6)
+  mutate(Lake_Name = case_when(STATION_ID %in% c('2-TRH000.40') ~ 'Thrashers Creek Reservoir',
+                               STATION_ID %in% c('2-LSL000.16') ~ 'Lone Star Lake F (Crystal Lake)',
+                               STATION_ID %in% c('2-LSL000.04') ~ 'Lone Star Lake G (Crane Lake)',
+                               STATION_ID %in% c('2-LSL000.20') ~ 'Lone Star Lake I (Butler Lake)',
+                               STATION_ID %in% c('2-NWB002.93','2-NWB004.67',
+                                                 '2-NWB006.06') ~ 'Western Branch Reservoir',
+                               STATION_ID %in% c('2-LDJ000.60') ~ 'Lake Nottoway (Lee Lake)',
+                               TRUE ~ as.character(Lake_Name))) %>%
+
+
+  # Join lake nutrient criteria to individual stations
+  left_join(lakeNutStandards %>% 
+              mutate(Lakes_187B = 'y'),  # special step to make sure the WQS designation for 187 are correct even when not
+            by = c('Lake_Name')) %>% # (7)
+  # lake drummond special standards
+  mutate(Lakes_187B = ifelse(is.na(Lakes_187B.y ), Lakes_187B.x, Lakes_187B.y), 
+         # dd. For Lake Drummond, located within the boundaries of Chesapeake and Suffolk in the Great Dismal Swamp, chlorophyll a shall not exceed 35 µg/L and total phosphorus shall not exceed 40 µg/L at a depth of one meter or less. https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section310/
+         `Chlorophyll a (ug/L)` = case_when(Lake_Name %in% c('Lake Drummond') ~ 35,
+                                            TRUE ~ as.numeric(`Chlorophyll a (ug/L)`)),
+         `Total Phosphorus (ug/L)` = case_when(Lake_Name %in% c('Lake Drummond') ~ 40,
+                                               TRUE ~ as.numeric(`Total Phosphorus (ug/L)`))) %>% # (7)
+  dplyr::select(STATION_ID:StreamType, Lakes_187B, `Description Of Waters`:`Total Phosphorus (ug/L)`) %>% # (8)
+  # match lake limit to TP data unit
+  mutate(`Total Phosphorus (mg/L)` = `Total Phosphorus (ug/L)` / 1000) # (9)
+
+
+# Identify stations that are missing WQS
+missingWQS <- filter(stationTable, is.na(CLASS))
 ```
 
 
-Bring in lake nutrient standards
 
-```{r lake nutrient standards, eval = F}
-lakeNutStandards <- read_csv('data/9VAC25-260-187lakeNutrientStandards.csv')
+### Identify Station Type
+
+It is important to have a lookup table of all lake stations to efficiently run computationally-intense lake methods only on lake stations. This next step identifies all stations that have lake AU designations. We will use this information later to determine how to analyze certain parameters that have different methods based on waterbody type. 
+
+```{r automated assessment identify lake stations, eval = F}
+lakeStations <- filter_at(stationTable,
+                          .vars = vars(contains("ID305B")),
+                          .vars_predicate = any_vars(str_detect(., 'L_')))
 ```
 
 
+### Bring in Low Flow Information
 
-Workflow
+We also need to bring in the previously analyzed low flow periods for the assessment window. These USGS stream gages are analyzed using the 7Q10 methodology consistent with the DEQ Water Permitting Program with two assumption changes:
 
-The following steps complete the automated assessment.
+1. Provisional data are accepted (due to the expedited assessment timeline). QA/QC changes from Provision to Accepted data generally involve storm event corrections, so using Provisional data should not affect low flow analyses.
+2. Gages analyzed for low flow statistics require 10 or more valid water years for inclusion in analyses.
 
-Bring in user station table data
+This gage-specific information is spatially joined to major river subbasins to extrapolate low flow conditions to stations that fall into said watersheds. The temporal windows where low flow events were recorded in a watershed are joined to stations that fall into said watershed. Lake stations are removed from this flag. Parameters that should not be analyzed during low flow events are flagged during the automated assessment process and presented to the assessment staff in the assessment applications. A station-level flag is presented in the stationTable output of these scripts for users who prefer to only use the tabular output from the automated assessment tools.
 
-This information communicates to the scripts which stations should be assessed and where they should be organized (AUs). It also has data from the last cycle to populate the historical station information table in the application
 
-```{r stationTable, eval = FALSE}
-#stationTable <- read_csv('processedStationData/stationsTable2022begin_CitmonJames.csv')
+Spatially join when doing stuff now with draft data
 
-stationTable <- read_csv('processedStationData/stationsTable2022begin.csv')# %>% 
-  #filter(STATION_ID %in% kristie$StationID)
+```{r automated assessment low flow data, eval = F}
+# Simplify the data first by date and BASIN_CODE as to not duplicate data when joined to conventionals raw data
+assessmentWindowLowFlowsBasinLevelFlag <- dplyr::select(assessmentWindowLowFlows, Date, `Gage ID`, `7Q10 Flag`, BASIN_CODE) %>% 
+  group_by(Date, BASIN_CODE) %>% 
+  summarise(`7Q10 Flag Gage` = paste(unique(`Gage ID`),collapse = ", "),
+            `7Q10 Flag` = `7Q10 Flag`) %>% 
+  # still have duplicate rows with same info, so need to drop those or will duplicate conventionals data when joined in
+  mutate(n = 1:n()) %>% 
+  filter(n == 1) %>% 
+  dplyr::select(-n) # get rid of count bc no longer needed
+
+
+conventionals <- conventionals %>% 
+  left_join(dplyr::select(conventionals_distinct, FDT_STA_ID, BASIN_CODE) %>% st_drop_geometry(),
+            by = 'FDT_STA_ID') %>% 
+  mutate(SampleDate = as.Date(FDT_DATE_TIME)) %>% 
+  #left_join(dplyr::select(stationTable, STATION_ID, VAHU6), by = c('FDT_STA_ID' = 'STATION_ID')) %>% # join in VAHU6 information from Assessors
+  #left_join(dplyr::select(subbasinToVAHU6, VAHU6, BASIN_CODE, Basin_Code), by = 'VAHU6')  # join in basin information by VAHU6
+  left_join(assessmentWindowLowFlowsBasinLevelFlag,
+            by = c('SampleDate' = 'Date', 'BASIN_CODE' = 'BASIN_CODE')) %>% 
+  dplyr::select(-SampleDate) # rm unnecessary column
+
+
+
+# Special step to remove low flow information from lake stations
+conventionals <- conventionals %>% 
+  mutate(`7Q10 Flag` = case_when(FDT_STA_ID %in% lakeStations$STATION_ID ~ NA_character_,
+                                 TRUE ~ `7Q10 Flag`))
+
+#View(filter(conventionals, `7Q10 Flag` == "7Q10 Flag"))
 ```
+
+
+## Automated Assessment Steps
+
+Finally, we are ready to analyze some data! Go through conventionals one station at a time, join stationTable, analyze all available data by each parameter function (or nested functions), and report out results in the WQA CEDS bulk upload template format. 
+
 
 
 
