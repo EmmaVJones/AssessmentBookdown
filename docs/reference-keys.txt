@@ -1,6 +1,7 @@
 Introduction
 HowToUseDocument
 ProjectHistory
+wqa-technical-support-team
 Acknowledgements
 data-organization
 data-location
@@ -54,7 +55,14 @@ clean-up-pcb-dataset
 clean-up-fish-tissue-dataset
 pin-official-clean-ir-data-to-r-server
 automated-assessment
+bring-in-required-datasets
+attach-wqs-information
+identify-station-type
+bring-in-low-flow-information
+automated-assessment-analysis
 individual-parameter-analyses
+how-to-test-individual-parameter-functions
+why-would-you-want-to-test-individual-functions
 temperature
 dissolved-oxygen
 ph
@@ -65,6 +73,13 @@ pcb
 metals
 fish-tissue
 benthics
+additional-automated-functions
+assessmentperiod
+wqsvalues
+concatenateunique
+changedeqregionname
+lakenamestandardization
+quickstats
 automated-output
 regional-metadata-validation-tool-how-to
 application-orientation

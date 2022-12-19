@@ -1563,10 +1563,12 @@ New for the IR2024 cycle, all data, methods, and results are available for regio
 
 One of the goals of the WQA program is that anyone with access to the assessment data and analytical scripts can run the automated assessment processes and come to the same results. By consistently applying the same rules and logic to assessment data, we can ensure the assessment decisions are universally applied across the state. 
 
-Lastly, while we hope the next section of plain English, narrative descriptions of the automated assessment functions provide sufficient explanation as to what and why analytical steps were taken, should you run into a question, the chunk above and the functions below will allow any user to dig into any function to fully understand each process. We encourage you to investigate these functions in a stepwise manner. Should you run into problems with any function, please reach out to the [WQA Technical Support Team](#wqa-techical-support-team). 
+Lastly, while we hope the next section containing plain English, narrative descriptions of the automated assessment functions provide sufficient explanation as to what and why analytical steps were taken, should you run into a question, the chunk above and the functions below will allow any user to dig into any function to fully understand each process. We encourage you to investigate these functions in a stepwise manner. Should you run into problems, please reach out to the [WQA Technical Support Team](#wqa-techical-support-team). 
 
 
 ### Temperature
+
+
 ### Dissolved Oxygen
 ### pH
 ### Bacteria
@@ -1576,6 +1578,263 @@ Lastly, while we hope the next section of plain English, narrative descriptions 
 ### Metals
 ### Fish Tissue
 ### Benthics
+
+### Additional Automated Functions
+
+The functions below are helper functions but do not take a starring role in the automated assessment process; however, without these functions, one could not perform an automated assessment. Each function is detailed below.
+
+#### assessmentPeriod
+
+The `assessmentPeriod` and `assessmentCycle` objects are not functions but incredibly useful vectors. These objects hold assessment window and cycle name information that allow for significantly easier updates from cycle to cycle. By sourcing this information throughout multiple dependent arguments and functions, one can easily make cycle changes when a new cycle is ready for assessment. 
+
+```{r automated assessment cycle info, eval=FALSE}
+# Establish Assessment Period, update each cycle
+assessmentPeriod <- as.POSIXct(c("2017-01-01 00:00:00 UTC","2022-12-31 23:59:59 UTC"),tz='UTC')
+assessmentCycle <- '2024'
+```
+
+
+#### WQSvalues
+
+The `WQSvalues` object is a tibble that allows for easy WQS updates should these values change over time. This data is joined to individual station data by WQS Class information to easily link measured parameters to appropriate criteria. Follow up functions refine the criteria information should a station's WQS specify any special standards.
+
+```{r automated assessment WQS info, eval=FALSE}
+# WQS information for functions
+# From: 9VAC25-260-50. Numerical Criteria for Dissolved Oxygen, Ph, and Maximum Temperature
+# https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/
+WQSvalues <- tibble(CLASS_BASIN = c('I',"II","II_7","III","IV","V","VI","VII"),
+                    CLASS = c('I',"II","II","III","IV","V","VI","VII"),
+                    `Description Of Waters` = c('Open Ocean', 'Tidal Waters in the Chowan Basin and the Atlantic Ocean Basin',
+                                                'Tidal Waters in the Chesapeake Bay and its tidal tributaries',
+                                                'Nontidal Waters (Coastal and Piedmont Zone)','Mountainous Zone Waters',
+                                                'Stockable Trout Waters','Natural Trout Waters','Swamp Waters'),
+                    `Dissolved Oxygen Min (mg/L)` = c(5,4,NA,4,4,5,6,NA),
+                    `Dissolved Oxygen Daily Avg (mg/L)` = c(NA,5,NA,5,5,6,7,NA),
+                    `pH Min` = c(6,6,6.0,6.0,6.0,6.0,6.0,3.7),
+                    `pH Max` = c(9.0,9.0,9.0,9.0,9.0,9.0,9.0,8.0),
+                    `Max Temperature (C)` = c(NA, NA, NA, 32, 31, 21, 20, NA)) %>%
+  mutate(CLASS_DESCRIPTION = paste0(CLASS, " | ", `Description Of Waters`))
+
+```
+
+#### concatenateUnique
+
+This helper function returns a single concatenated vector with multiple entries separated by a comma.
+
+```{r automated assessment concatUnique, eval=FALSE}
+concatinateUnique <- function(stuff){
+  if(length(stuff)==1){
+    if(is.na(stuff)){return(NA)
+    }else{
+      return(paste(unique(stuff), collapse= ', ')) }
+  } 
+  if(length(stuff) > 1){return(paste(unique(stuff), collapse= ', '))}
+}
+
+```
+
+#### changeDEQRegionName
+
+This helper function helps clean up data entry issues when a verbose region name is provided instead of an acronym.
+
+```{r automated assessment changeDEQRegionName, eval=FALSE}
+changeDEQRegionName <- function(stuff){
+  # have to do this bc different places in conventionals report the assessment region over sample region
+  if(length(stuff) == 1){
+    if(is.na(stuff)){return("NA")}
+    if(stuff == "Valley"){return('VRO')}
+    if(stuff == "Northern"){return('NRO')}
+    if(stuff == "Piedmont"){return('PRO')}
+    if(stuff == "Blue Ridge"){return('BRRO')}
+    if(stuff == "Tidewater"){return('TRO')}
+    if(stuff == "Southwest" ){return('SWRO')}
+    if(stuff == 'NA'){return('NA')}
+  } else {return(concatinateUnique(stuff))}
+}
+
+```
+
+#### lakeNameStandardization
+
+This helper function allows for easier lake name cleanup to allow for joins on lake name fields between disparate data types. By storing this crosswalk information in a single function, it can be easily updated if lake names change and applied to multiple scripts easily.
+
+```{r automated assessment lakeNameStandardization, eval=FALSE}
+# Lake name standardization
+lakeNameStandardization <- function(x){
+  x %>% 
+    mutate(Lake_Name = case_when(WATER_NAME %in% c('Abel Lake Reservoir (Long Branch)') ~ 'Abel Lake',
+                                 WATER_NAME %in% c('Big Cherry Reservior') ~ 'Big Cherry Lake',
+                                 WATER_NAME %in% c('Dan River','Buffalo Creek','Bluestone Creek') ~ 'Kerr Reservoir',
+                                 WATER_NAME %in% c('Smith Lake (Aquia Reservoir)') ~ 'Aquia Reservoir (Smith Lake)',
+                                 WATER_NAME %in% c('Claytor Lake (New River)', 'Claytor Lake (Peak Creek)',
+                                                   'Claytor Lake Lower (New River)') ~ 'Claytor Lake',
+                                 WATER_NAME %in% c('Fairystone Lake (Goblin Town Creek)') ~ 'Fairystone Lake', 
+                                 WATER_NAME %in% c('Harwood Mill Reservoir (PWS)') ~ 'Harwood Mills Reservoir',
+                                 WATER_NAME %in% c('Goose Creek') ~ 'Goose Creek Reservoir',
+                                 WATER_NAME %in% c('Lake Anna', 'Lake Anna/Contrary Creek', 'Lake Anna/Freshwater Creek', 
+                                                   'Lake Anna/Gold Mine Creek', 'Lake Anna/Pamunkey Creek', 
+                                                   'Lake Anna/Plentiful Creek', 'Terrys Run/Lake Anna') ~ 'Lake Anna',
+                                 WATER_NAME %in% c('Lake Cohoon (PWS)') ~ 'Lake Cohoon',     
+                                 WATER_NAME %in% c('Conner Lake') ~ 'Lake Conner',
+                                 WATER_NAME %in% c('Lake Kilby (PWS)') ~ 'Lake Kilby',
+                                 WATER_NAME %in% c('Lake Meade (PWS)','Pitch Kettle Creek - Lake (PWS)') ~ 'Lake Meade',
+                                 WATER_NAME %in% c('Lake Moomaw (Jackson River)','Lake Moomaw Middle (Jackson River)') ~ 'Lake Moomaw',
+                                 WATER_NAME %in% c('Lake Prince - Reservoir (PWS)') ~ 'Lake Prince',
+                                 WATER_NAME %in% c('Lake Shenandoah') ~ 'Shenandoah Lake',
+                                 WATER_NAME %in% c('Lake Smith (PWS)') ~ 'Lake Smith',
+                                 WATER_NAME %in% c('Lake Whitehurst (PWS)') ~ 'Lake Whitehurst',
+                                 WATER_NAME %in% c('Leesville Lake', 'Leesville Lake (Pigg R.)', 
+                                                   'Leesville Lake Middle (Roanoke R.)') ~ 'Leesville Lake',
+                                 WATER_NAME %in% c('Lee Hall Reservoir- Upper, Middle','Lee Hall Reservoir-Lower') ~ 'Lee Hall Reservoir',
+                                 WATER_NAME %in% c('Little Creek Reservoir - (PWS)') ~ 'Little Creek Reservoir (VBC)',
+                                 WATER_NAME %in% c('Little Creek Reservoir (PWS)') ~ 'Little Creek Reservoir (JCC)',
+                                 WATER_NAME %in% c('Lonestar Lake F (PWS)') ~ 'Lone Star Lake F (Crystal Lake)', 
+                                 WATER_NAME %in% c('Lone Star Lake G (PWS)') ~ 'Lone Star Lake G (Crane Lake)', 
+                                 WATER_NAME %in% c('Lone Star Lake I (PWS)') ~ 'Lone Star Lake I (Butler Lake)', 
+                                 WATER_NAME %in% c('Martinsville (Beaver Creek) Reservoir',
+                                                   'Martinsville Reservoir') ~ 'Martinsville Reservoir (Beaver Creek Reservoir)',
+                                 WATER_NAME %in% c('Moormans River') ~ 'Sugar Hollow Reservoir',
+                                 WATER_NAME %in% c('North River') ~ 'Staunton Dam Lake',
+                                 WATER_NAME %in% c('Philpott Reservoir (Goblin Town Creek)', 'Philpott Reservoir Lower (Smith River)',
+                                                   'Philpott Reservoir (Smith River)') ~ "Philpott Reservoir",
+                                 WATER_NAME %in% c('Roanoke River','Lake Gaston') ~ 'Lake Gaston',     
+                                 WATER_NAME %in% c('Roaring Fork Reservoir') ~ 'Roaring Fork',
+                                 WATER_NAME %in% c('S F Rivanna River Reservoir') ~ 'Rivanna Reservoir (South Fork Rivanna Reservoir)',
+                                 str_detect(WATER_NAME, 'Smith Mtn. Lake') ~ 'Smith Mountain Lake', 
+                                 WATER_NAME %in% c('Speights Run - Lake (PWS)') ~ 'Speights Run Lake',
+                                 WATER_NAME %in% c('Troublesome Reservoir') ~ 'Troublesome Creek Reservoir',
+                                 WATER_NAME %in% c('Waller Mill Reservoir [PWS]') ~ 'Waller Mill Reservoir',
+                                 WATER_NAME %in% c('Unnamed pond near Tanyard Swamp') ~ 'Tanyard Swamp',
+                                 WATER_NAME %in% c('Unsegmented lakes in G03') ~ 'West Run',
+                                 TRUE ~ as.character(WATER_NAME))) 
+}
+```
+
+#### quickStats
+
+This helper function is essential to the automated assessment process. The function takes in parameter data with exceedances identified and sample counts and simplifies the data into a suggested assessment decision, where appropriate. The `parameter` argument allows users to pass through a character string they want to be included in the Stations Table field naming format. The `drop7Q10` argument is default set to false for automated assessment purposes, but the shiny applications use this feature to quickly rerun the exceedance math should a user decide that the 7Q10 flag should be used to remove data for a station and parameter combination.
+
+```{r automated assessment quickStats, eval=FALSE}
+quickStats <- function(parameterDataset, # dataset from one station that has been run through a parameter exceedance analysis function 
+                       #                  (e.g. tempExceedances(), DOExceedances_Min(), pHexceedances())
+                       parameter, # the name of the parameter as you want it to appear in final stations table output
+                       drop7Q10 = FALSE # drop any records from this analysis with a 7Q10 flag, default is false but can be overridden in apps
+                       ){
+  # Drop any 7Q10 flagged data from exceedance analyses for appropriate parameters
+  if(drop7Q10 == TRUE &
+     parameter %in% c("TEMP", "DO", "DO_Daily_Avg", "PH")){
+    parameterDataset <- dplyr::filter(parameterDataset, is.na(`7Q10 Flag`)) # only assess on assessable dataset
+  }
+  
+  if(nrow(parameterDataset) > 0 & any(!is.na(parameterDataset$limit))){
+    results <- data.frame(EXC = nrow(dplyr::filter(parameterDataset, exceeds == TRUE)),
+                          SAMP = nrow(parameterDataset)) %>%
+      # Implement Round to Even on Exceedance Frequency
+      dplyr::mutate(exceedanceRate = as.numeric(round::roundAll((EXC/SAMP)*100,digits=0, "r0.C"))) # round to nearest whole number per Memo to Standardize Rounding for Assessment Guidance
+    
+    if(results$EXC >= 1){outcome <- 'Review'} # for Mary
+    if(results$EXC >= 1 & results$exceedanceRate < 10.5){outcome <- 'Review'}
+    if(results$exceedanceRate > 10.5 & results$EXC >= 2 & results$SAMP > 10){outcome <- '10.5% Exceedance'}
+    if(results$EXC < 1 &results$exceedanceRate < 10.5 & results$SAMP > 10){outcome <- 'S'}
+    if(results$EXC >= 1 & results$SAMP <= 10){outcome <- 'Review'}
+    if(results$EXC < 1 & results$SAMP <= 10 & results$SAMP > 1){outcome <- 'S'} # & results$SAMP >1 new 12/21/2020 can't say supporting on 1 sample
+    if(results$EXC < 1 & results$SAMP <= 10 & results$SAMP == 1){outcome <- 'Review'} # & results$SAMP >1 new 12/21/2020 can't say supporting on 1 sample
+    
+    
+    results <- dplyr::mutate(results, STAT = outcome)
+    names(results) <- c(paste(parameter,names(results)[1], sep = '_'),
+                        paste(parameter,names(results)[2], sep = '_'),
+                        paste(parameter,names(results)[3], sep = '_'),
+                        paste(parameter,names(results)[4], sep = '_'))
+    #rename based on parameter entered
+    return(results)
+  } else {
+    if(nrow(parameterDataset) == 0){
+      z <- data.frame(EXC = NA, SAMP= nrow(parameterDataset), exceedanceRate= NA, STAT= NA)
+      names(z) <- paste(parameter,names(z), sep='_')
+      return(z)
+    } else {
+      z <- data.frame(EXC = NA, SAMP= nrow(parameterDataset), exceedanceRate= NA, STAT= paste(parameter, 'WQS info missing from analysis'))
+      names(z) <- paste(parameter,names(z), sep='_')
+      return(z)
+    }
+    
+  }
+}
+```
+
+
+#### StationTableStartingData
+
+```{r automated assessment StationTableStartingData, eval=FALSE}
+StationTableStartingData <- function(stationData){
+  stationData %>%
+    dplyr::select(FDT_STA_ID, ID305B_1:VAHU6) %>%
+    dplyr::rename('STATION_ID' = 'FDT_STA_ID') %>%
+    dplyr::distinct(STATION_ID, .keep_all = T)
+}
+
+# Example Usage:
+
+```
+
+
+#### stationTableComments
+
+```{r automated assessment stationTableComments, eval=FALSE}
+stationTableComments <- function(stations, 
+                                 previousStationTable, 
+                                 previousStationTableCycle,
+                                 previousStationTable2,
+                                 previousStationTable2Cycle){
+  lastComment <- filter(previousStationTable, `Station Id` %in% stations) %>%
+    dplyr::select(`Station Id`, Comments)
+  names(lastComment) <- c('STATION_ID', paste(previousStationTableCycle, 'IR COMMENTS'))
+  lastComment2 <- filter(previousStationTable2, `Station Id` %in% stations) %>%
+    dplyr::select(`Station Id`, Comments)
+  names(lastComment2) <- c('STATION_ID', paste(previousStationTable2Cycle, 'IR COMMENTS'))
+  return(left_join(lastComment, lastComment2, by= 'STATION_ID'))
+}
+
+# Example Usage:
+
+```
+
+
+#### thermoclineDepth
+
+```{r automated assessment thermoclineDepth, eval=FALSE}
+# Calculate daily thermocline depth and designate Epilimnion vs Hypolimnion
+thermoclineDepth <- function(stationData){
+  stationData <- stationData %>%
+    mutate(SampleDate = as.Date(FDT_DATE_TIME)) %>%
+    group_by(FDT_STA_ID, SampleDate) 
+  
+  dailyThermDepth <- dplyr::select(stationData, FDT_STA_ID, SampleDate, FDT_DEPTH, FDT_TEMP_CELCIUS) %>%
+    mutate(DepthDiff = c(NA, diff(FDT_DEPTH)),
+           TempDiff = c(NA, diff(FDT_TEMP_CELCIUS))) %>%
+    filter(DepthDiff == 1) # get rid of changes less than 1 meter depth
+  # Alt route in case shallow lake
+  if(nrow(dailyThermDepth) > 0){
+    dailyThermDepth <- filter(dailyThermDepth, TempDiff <= -1)
+    # one more catch if no thermocline established
+    if(nrow(dailyThermDepth) > 0){
+      dailyThermDepth <- summarise(dailyThermDepth, ThermoclineDepth = min(FDT_DEPTH) - 0.5) %>% ungroup() 
+    } else {
+      dailyThermDepth <- summarise(stationData, ThermoclineDepth = NA) %>% ungroup()  }
+  } else {
+    dailyThermDepth <- summarise(stationData, ThermoclineDepth = NA) %>% ungroup() }
+    
+  
+  full_join(stationData, dailyThermDepth, by = c('FDT_STA_ID', 'SampleDate')) %>%
+    mutate(LakeStratification= ifelse(FDT_DEPTH < ThermoclineDepth,"Epilimnion","Hypolimnion"))%>% ungroup() 
+}
+
+# Example usasge:
+# stationData %>% thermoclineDepth()
+```
+
+
 
 ## Automated Output
 
