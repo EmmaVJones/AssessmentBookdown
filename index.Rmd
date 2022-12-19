@@ -38,6 +38,13 @@ The 2024 IR further refines improvements to the riverine and lacustrine automate
 
 To date, no estuarine-specific assessment methods have been completed, but the WQA program is investigating utility and potential adoption among regions with estuarine waters.
 
+## WQA Technical Support Team
+
+Should you encounter any techical issues running the included scripts or have questions about the automated assessment methods described, please reach out to these technical staff for assistance: 
+
+* Emma Jones (emma.jones@deq.virginia.gov)
+* Joe Famularo (joseph.famularo@deq.virginia.gov)
+* Kristen Bretz (kristen.bretz@deq.virginia.gov)
 
 
 ## Acknowledgements {#Acknowledgements}
@@ -45,6 +52,8 @@ To date, no estuarine-specific assessment methods have been completed, but the W
 Many Water Quality Assessment (WQA) and Water Quality Standards (WQA) staff have contributed to this effort:
 
 * Emma Jones (emma.jones@deq.virginia.gov)
+* Joe Famularo (joseph.famularo@deq.virginia.gov)
+* Reid Downer (horace.downer@deq.virginia.gov)
 * Kristen Bretz (kristen.bretz@deq.virginia.gov)
 * Jason Hill (jason.hill@deq.virginia.gov)
 * Sandy Mueller (sandra.mueller@deq.virginia.gov)

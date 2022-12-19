@@ -1532,6 +1532,40 @@ timeDiff = Sys.time()- startTime
 
 ## Individual Parameter Analyses
 
+The functions detailed in this section are called in either the [automated assessment workflow report ](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target = "_blank"} or by waterbody-specific shiny applications that unpack the output of the [automated assessment workflow report ](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target = "_blank"}. All the automated assessment functions are stored in a single .R file that is shared amongst the shiny applications and Rmarkdown report to minimize labor involved in maintaining these critical functions. One day, these functions will be published as an R package, but until then, you can access the latest version of this script [here](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/automatedAssessmentFunctions.R){target = "_blank"}. 
+
+### How to Test Individual Parameter Functions
+
+The following code snippet will allow you to generate the appropriate `stationData` required for most function arguments. The below snippet will only run if you have run all the required data gathering and manipulation steps identified in the [Automated Assessment Analysis](#automated-assessment-analysis) section. The chunk below is set up such that you can easily change test stations by updating your `station` object. 
+
+```{r automated assessment set up test stationData, eval = F}
+# any station included in the stationTable object can be specified here, whether or not there is data for the station
+station <- '1AACO014.57' # other potential examples: '2-JKS023.61', '1ABAR037.84'
+
+# set up stationData object to run through individual parameter functions
+stationData <- filter(conventionals, FDT_STA_ID %in% station)%>%
+   left_join(stationTable, by = c('FDT_STA_ID' = 'STATION_ID')) %>%
+  # Special Standards Correction step. This is done on the actual data bc some special standards have temporal components
+  pHSpecialStandardsCorrection() %>% # correct pH to special standards where necessary
+  temperatureSpecialStandardsCorrection() %>% # correct temperature special standards where necessary
+  # special lake steps
+  {if(station %in% lakeStations$STATION_ID)
+      suppressWarnings(suppressMessages(
+        mutate(., lakeStation = TRUE) %>%
+          thermoclineDepth())) # adds thermocline information and SampleDate
+      else mutate(., lakeStation = FALSE) }
+
+```
+
+#### Why would you want to test individual functions? 
+
+New for the IR2024 cycle, all data, methods, and results are available for regional assessment staff (or any DEQ staff) to interrogate, for riverine and lacustrine waterbody types and some estuarine methods (stay tuned on improvements on this waterbody type). The agency has been working through technology hurdles to achieve full transparency for assessment processes for a number of years, and while we aren't fully there yet, we are getting closer. This bookdown is written as an accompanying handbook to all automated assessment processes to decipher the process for beginner R users. 
+
+One of the goals of the WQA program is that anyone with access to the assessment data and analytical scripts can run the automated assessment processes and come to the same results. By consistently applying the same rules and logic to assessment data, we can ensure the assessment decisions are universally applied across the state. 
+
+Lastly, while we hope the next section of plain English, narrative descriptions of the automated assessment functions provide sufficient explanation as to what and why analytical steps were taken, should you run into a question, the chunk above and the functions below will allow any user to dig into any function to fully understand each process. We encourage you to investigate these functions in a stepwise manner. Should you run into problems with any function, please reach out to the [WQA Technical Support Team](#wqa-techical-support-team). 
+
+
 ### Temperature
 ### Dissolved Oxygen
 ### pH
