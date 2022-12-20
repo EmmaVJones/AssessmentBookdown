@@ -24,13 +24,13 @@ The automated assessment scripts are trained to systematically apply assessment 
 
 The automated assessment process hinges on each station having the appropriate metadata to analyze all raw data. The required metadata for each station include what Water Quality Standards apply to the station and which Assessment Unit(s) describe the station. One or more station can be included in an Assessment Unit. It is ultimately the Assessment Units that are used to determine whether or not designated uses are met, which is where the automation stops and the human analysis component is required. 
 
-In practice, metadata are spatially joined to stations by a rigorous data organization, spatial joining, and QA process that is detailed below. This automated process runs on the Assessment Data Analyst's computer and results are provided to regional assessment staff for individual review through a shared shiny application. This application is known as the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) and is hosted on the R server. It is up to each regional assessor to manually review each suggested metadata link prior to the assessment start date. After stations have completed the manual review process, they can be analyzed using the automated assessment scripts. Detailed instructions on how to use the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/){target = "_blank"} is available in the [Regional Metadata Validation Tool How To](#regional-metadata-validation-tool-how-to) section.
+In practice, metadata are spatially joined to stations by a rigorous data organization, spatial joining, and QA process that is detailed below. This automated process runs on the Assessment Data Analyst's computer and results are provided to regional assessment staff for individual review through a shared shiny application. This application is known as the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) and is hosted on the R server. It is up to each regional assessor to manually review each suggested metadata link prior to the assessment start date. After stations have completed the manual review process, they can be analyzed using the automated assessment scripts. Detailed instructions on how to use the [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/){target="_blank"} is available in the [Regional Metadata Validation Tool How To](#regional-metadata-validation-tool-how-to) section.
 
 ### Distinct Sites
 
 Before station metadata can be linked to stations, a list of unique stations that were sampled in a given assessment window is required. Because multiple data sources are combined for an assessment, each unique station from each data source with data in the given IR window are included in this list. 
 
-For the purposes of the Automated Assessment User Guide, we will overview the process with a snippet of conventionals and citizen monitoring data types. Please see the [official script](https://github.com/EmmaVJones/IR2024/blob/main/1.preprocessData/HowToPreprocessData.Rmd){target = "_blank"} for more information.
+For the purposes of the Automated Assessment User Guide, we will overview the process with a snippet of conventionals and citizen monitoring data types. Please see the [official script](https://github.com/EmmaVJones/IR2024/blob/main/1.preprocessData/HowToPreprocessData.Rmd){target="_blank"} for more information.
 
 ```{r automatedAssessment libraries, eval=FALSE}
 library(tidyverse)
@@ -1102,7 +1102,7 @@ Now that data are prepped for analysis, the last step is to bring all the data t
 
 As always, first set up your local environment with all the necessary packages you will use, source any necessary scripts, and connect to the R server to pull pinned data. 
 
-The custom assessment functions brought in below are stored in separate .R files and "sourced" into this script. This is a best practice to enable easier maintenance of the custom assessment functions as well as minimize the amount of code in this Rmarkdown document. When you source the scripts, you will see all the functions in your Environment pane. This is different than when we call in a package because one cannot see all the functions in a loaded package in their Environment pane. DEQ is working towards publishing an automated assessment package to neatly distribute all these custom functions. Until then, you can download these sourced scripts [here](https://github.com/EmmaVJones/IR2024/tree/main/3.automatedAssessment){target = "_blank"}. You can download the latest working copy of the automated assessment workflow in a single Rmarkdown document [here](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target = "_blank"}. 
+The custom assessment functions brought in below are stored in separate .R files and "sourced" into this script. This is a best practice to enable easier maintenance of the custom assessment functions as well as minimize the amount of code in this Rmarkdown document. When you source the scripts, you will see all the functions in your Environment pane. This is different than when we call in a package because one cannot see all the functions in a loaded package in their Environment pane. DEQ is working towards publishing an automated assessment package to neatly distribute all these custom functions. Until then, you can download these sourced scripts [here](https://github.com/EmmaVJones/IR2024/tree/main/3.automatedAssessment){target="_blank"}. You can download the latest working copy of the automated assessment workflow in a single Rmarkdown document [here](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target="_blank"}. 
 
 An important feature of this script is in the first line of code: `options(digits = 12)`. This set our local environment options and tells R to use 12 digits when storing numeric information. It is critical to store all potential digits of numeric data to not impose intermediate rounding steps and potentially skew results. Steps like these allow for statewide consistency. Spreadsheet and database software do not easily allow this level of calculation control. It is important to note that some tidyverse default printing behavior might make it appear that numerical data are rounded to only three digits. This is a feature for fast and clear data printing and does not reflect the true nature of the numeric data stored in your environment after establishing the `options(digits = 12)` environment option. You can always double check the numeric data by printing the full object (e.g. datasetIamWorkingWith$numericalColumnIwantToInvestigateFurther). 
 
@@ -1532,7 +1532,7 @@ timeDiff = Sys.time()- startTime
 
 ## Individual Parameter Analyses
 
-The functions detailed in this section are called in either the [automated assessment workflow report ](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target = "_blank"} or by waterbody-specific shiny applications that unpack the output of the [automated assessment workflow report ](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target = "_blank"}. All the automated assessment functions are stored in a single .R file that is shared amongst the shiny applications and Rmarkdown report to minimize labor involved in maintaining these critical functions. One day, these functions will be published as an R package, but until then, you can access the latest version of this script [here](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/automatedAssessmentFunctions.R){target = "_blank"}. 
+The functions detailed in this section are called in either the [automated assessment workflow report ](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target="_blank"} or by waterbody-specific shiny applications that unpack the output of the [automated assessment workflow report ](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target="_blank"}. All the automated assessment functions are stored in a single .R file that is shared amongst the shiny applications and Rmarkdown report to minimize labor involved in maintaining these critical functions. One day, these functions will be published as an R package, but until then, you can access the latest version of this script [here](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/automatedAssessmentFunctions.R){target="_blank"}. 
 
 ### How to Test Individual Parameter Functions
 
@@ -1568,7 +1568,7 @@ Lastly, while we hope the next section containing plain English, narrative descr
 
 ### Temperature
 
-A maximum temperature criteria applies to stations depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target = '_blank'}. The `tempExceedances()` function identifies any temperature exceedances of the `Max Temperature (C)` field for each sample provided. The function removes all Level I and Level II data and missing data before rounding measure to even and comparing against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+A maximum temperature criteria applies to stations depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target='_blank'}. The `tempExceedances()` function identifies any temperature exceedances of the `Max Temperature (C)` field for each sample provided. The function removes all Level I and Level II data and missing data before rounding measure to even and comparing against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
 
 ```{r automated assessment temperature, eval=FALSE}
 #Max Temperature Exceedance Function
@@ -1597,9 +1597,9 @@ tempExceedances <- function(stationData){
 
 ### Dissolved Oxygen
 
-There are two general dissolved oxygen (DO) criteria that may apply to stations, depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target = '_blank'}. The minimum DO criteria are evaluated against the provided `Dissolved Oxygen Min (mg/L)` using the `DOExceedances_Min()` function. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target = '_blank'}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+There are two general dissolved oxygen (DO) criteria that may apply to stations, depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target="_blank"}. The minimum DO criteria are evaluated against the provided `Dissolved Oxygen Min (mg/L)` using the `DOExceedances_Min()` function. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
 
-```{r automated assessment cycle info, eval=FALSE}
+```{r automated assessment DOExceedances_Min, eval=FALSE}
 # Minimum DO Exceedance function
 DOExceedances_Min <- function(stationData){
   # special step for lake stations, remove samples based on lake assessment guidance 
@@ -1635,7 +1635,7 @@ DOExceedances_Min <- function(stationData){
 ```
 
 
-A separate function called `DO_Assessment_DailyAvg()` evaluates whether or not a station exceeds the DO daily average criteria, provided in the `Dissolved Oxygen Daily Avg (mg/L)` field. This analysis is only run if the number of samples for a station in a given date are greater than one. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target = '_blank'}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+A separate function called `DO_Assessment_DailyAvg()` evaluates whether or not a station exceeds the DO daily average criteria, provided in the `Dissolved Oxygen Daily Avg (mg/L)` field. This analysis is only run if the number of samples for a station in a given date are greater than one. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
 
 ```{r automated assessment DO_Assessment_DailyAvg, eval=FALSE}
 # Daily Average exceedance function
@@ -1686,7 +1686,7 @@ DO_Assessment_DailyAvg <- function(stationData){
 
 ### pH
 
-A pH range criteria applies to stations depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target = '_blank'}. The `pHExceedances()` function identifies any pH values outside of the range specified in the associated `pH Min` and `pH Max` fields. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target = '_blank'}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, the function removes all Level I and Level II data and missing data before rounding measures to even and comparing against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+A pH range criteria applies to stations depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target="_blank"}. The `pHExceedances()` function identifies any pH values outside of the range specified in the associated `pH Min` and `pH Max` fields. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, the function removes all Level I and Level II data and missing data before rounding measures to even and comparing against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
 
 
 ```{r automated assessment pHExceedances, eval=FALSE}
@@ -1736,7 +1736,7 @@ pHExceedances <- function(stationData){
 
 ### Bacteria
 
-[Recreational bacteria](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section170/){target = '_blank'} is a more complicated standard to apply to monitoring data due to the unique rolling windows. To standardize the logic across *E.coli* and enterococci data, the nested function architecture that evaluates the bacteria data is programmed to handle either *E.coli* or enterococci data. The four functions required to calculate the bacteria criteria are detailed below.
+[Recreational bacteria](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section170/){target="_blank"} is a more complicated standard to apply to monitoring data due to the unique rolling windows. To standardize the logic across *E.coli* and enterococci data, the nested function architecture that evaluates the bacteria data is programmed to handle either *E.coli* or enterococci data. The four functions required to calculate the bacteria criteria are detailed below.
 
 
 #### bacteriaExceedances_NEW
@@ -2172,12 +2172,12 @@ bacteriaAssessmentDecisionClass <- function(stationData, # input dataframe with 
 
 ### Nutrients
 
-```{r automated assessment cycle info, eval=FALSE}
+```{r automated assessment nutrients, eval=FALSE}
 ```
 
 ### Ammonia
 
-```{r automated assessment cycle info, eval=FALSE}
+```{r automated assessment ammonia, eval=FALSE}
 ```
 
 ### PCB
@@ -2227,7 +2227,7 @@ For a general flag provided to the Station Table to determine whether fish tissu
 
 The `benthicAssessment()` function is used primarily for flagging whether or benthic data exist when building the Station Table. Most stations evaluated during an assessment period do not have benthic macroinvertebrate data, so it is important to flag when data require review. 
 
-Benthic assessments are completed by regional biologists to ensure the appropriate SCI and professional judgment are used for assessments. The biological staff review all samples within a given assessment period using the [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2022BioassessmentDashboard/){target = '_blank'} and complete a bioassessment for submission via the [Bioassessment Fact Sheet Generator](https://rconnect.deq.virginia.gov/BenthicAssessmentFactSheet/){target = '_blank'}. This information is archived for future biological, assessment, and TMDL staff as well as provided seamlessly within the [Riverine Assessment Application](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/){target = '_blank'}. 
+Benthic assessments are completed by regional biologists to ensure the appropriate SCI and professional judgment are used for assessments. The biological staff review all samples within a given assessment period using the [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2022BioassessmentDashboard/){target="_blank"} and complete a bioassessment for submission via the [Bioassessment Fact Sheet Generator](https://rconnect.deq.virginia.gov/BenthicAssessmentFactSheet/){target="_blank"}. This information is archived for future biological, assessment, and TMDL staff as well as provided seamlessly within the [Riverine Assessment Application](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/){target="_blank"}. 
 
 The regional assessment staff know to look for bioassessment information based on the 'Review' flag that the `benthicAssessment()` function provides to the Station Table output. 
 
