@@ -1568,16 +1568,686 @@ Lastly, while we hope the next section containing plain English, narrative descr
 
 ### Temperature
 
+A maximum temperature criteria applies to stations depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target = '_blank'}. The `tempExceedances()` function identifies any temperature exceedances of the `Max Temperature (C)` field for each sample provided. The function removes all Level I and Level II data and missing data before rounding measure to even and comparing against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+
+```{r automated assessment temperature, eval=FALSE}
+#Max Temperature Exceedance Function
+tempExceedances <- function(stationData){
+  dplyr::select(stationData, FDT_DATE_TIME, FDT_DEPTH, tidyselect::contains('TEMP_CELCIUS'), `Max Temperature (C)`, `7Q10 Flag`) %>% # Just get relevant columns 
+    dplyr::filter(! (LEVEL_FDT_TEMP_CELCIUS %in% c('Level II', 'Level I'))) %>% # get lower levels out
+    dplyr::filter(! is.na(FDT_TEMP_CELCIUS)) %>% # get rid of NA's
+    # rename columns to make exceedance analyses easier to apply
+    dplyr::rename(parameter = !! names(.[3]),
+           limit = !! names(.[6])) %>% 
+    # Apply Round to Even Rule before testing for exceedances
+    dplyr::mutate(parameterRound = signif(parameter, digits = 2), # two significant figures based on WQS https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/
+                  exceeds = case_when(parameterRound > limit ~ TRUE, # Identify where above max Temperature, 
+                                      parameterRound <= limit ~ FALSE, # no exceedance
+                                      TRUE ~ NA))
+}
+
+# Example Usage:
+# where stationData is already in your environment, see Automated Assessment for environment set up help
+# tempExceedances(stationData) 
+# tempExceedances(stationData) %>%
+#  quickStats('TEMP') # pass results to quickStats() to consolidate results
+```
+
+
 
 ### Dissolved Oxygen
+
+There are two general dissolved oxygen (DO) criteria that may apply to stations, depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target = '_blank'}. The minimum DO criteria are evaluated against the provided `Dissolved Oxygen Min (mg/L)` using the `DOExceedances_Min()` function. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target = '_blank'}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+
+```{r automated assessment cycle info, eval=FALSE}
+# Minimum DO Exceedance function
+DOExceedances_Min <- function(stationData){
+  # special step for lake stations, remove samples based on lake assessment guidance 
+  if(unique(stationData$lakeStation) == TRUE){
+    if(!is.na(unique(stationData$Lakes_187B)) & unique(stationData$Lakes_187B) == 'y'){
+      DOdata <- dplyr::filter(stationData, LakeStratification %in% c("Epilimnion", NA)) %>% # only use epilimnion or unstratified samples for analysis
+        dplyr::select(FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, DO_mg_L, RMK_DO, LEVEL_DO, 
+                      `Dissolved Oxygen Min (mg/L)`, LakeStratification, `7Q10 Flag`) # Just get relevant columns,
+    } else {
+      DOdata <- dplyr::select(stationData, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, DO_mg_L, RMK_DO, LEVEL_DO,
+                              `Dissolved Oxygen Min (mg/L)`, LakeStratification, `7Q10 Flag`) }# Just get relevant columns,
+  } else {
+    DOdata <- dplyr::select(stationData, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, DO_mg_L, RMK_DO, LEVEL_DO, 
+                            `Dissolved Oxygen Min (mg/L)`, `7Q10 Flag`) # Just get relevant columns, 
+  }
+  
+  DOdata %>%
+    dplyr::filter(!(LEVEL_DO %in% c('Level II', 'Level I'))) %>% # get lower levels out
+    dplyr::filter(!is.na(DO_mg_L)) %>% 
+    dplyr::rename(parameter = !!names(.[4]), limit = !!names(.[7])) %>% # rename columns to make functions easier to apply
+    # Round to Even Rule
+    dplyr::mutate(parameterRound = signif(parameter, digits = 2), # two significant figures based on  https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/
+                  exceeds = case_when(parameterRound < limit ~ TRUE, # Identify where below min DO 
+                                      parameterRound >= limit ~ FALSE, # no exceedance
+                                      TRUE ~ NA))
+}
+
+# Example Usage:
+# where stationData is already in your environment, see Automated Assessment for environment set up help
+# DOExceedances_Min(stationData) 
+# DOExceedances_Min(stationData) %>% 
+#   quickStats('DO') # pass results to quickStats() to consolidate results
+```
+
+
+A separate function called `DO_Assessment_DailyAvg()` evaluates whether or not a station exceeds the DO daily average criteria, provided in the `Dissolved Oxygen Daily Avg (mg/L)` field. This analysis is only run if the number of samples for a station in a given date are greater than one. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target = '_blank'}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+
+```{r automated assessment DO_Assessment_DailyAvg, eval=FALSE}
+# Daily Average exceedance function
+DO_Assessment_DailyAvg <- function(stationData){ 
+  # special step for lake stations, remove samples based on lake assessment guidance 
+  if(unique(stationData$lakeStation) == TRUE){
+    if(!is.na(unique(stationData$Lakes_187B)) & unique(stationData$Lakes_187B) == 'y'){
+      DOdata <- dplyr::filter(stationData, LakeStratification %in% c("Epilimnion", NA)) %>% # only use epilimnion or unstratified samples for analysis
+        dplyr::select(FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, DO_mg_L, RMK_DO, LEVEL_DO, 
+                      `Dissolved Oxygen Daily Avg (mg/L)`, LakeStratification, `7Q10 Flag`) # Just get relevant columns,
+    } else {
+      DOdata <- dplyr::select(stationData, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, DO_mg_L, RMK_DO, LEVEL_DO,
+                              `Dissolved Oxygen Daily Avg (mg/L)`, LakeStratification, `7Q10 Flag`) }# Just get relevant columns,
+  } else {
+    DOdata <- dplyr::select(stationData, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, DO_mg_L, RMK_DO, LEVEL_DO, 
+                            `Dissolved Oxygen Daily Avg (mg/L)`, `7Q10 Flag`) # Just get relevant columns, 
+  }
+  
+  
+  DOdata %>% 
+    dplyr::filter(!(LEVEL_DO %in% c('Level II', 'Level I'))) %>% # get lower levels out
+    dplyr::filter(!is.na(DO_mg_L)) %>% #get rid of NA's
+    dplyr::mutate(date = as.Date(FDT_DATE_TIME, format="%m/%d/%Y"), 
+                  limit = `Dissolved Oxygen Daily Avg (mg/L)`) %>% 
+    dplyr::group_by(date) %>%
+    dplyr::mutate(n_Samples_Daily = n()) %>% # how many samples per day?
+    dplyr::filter(n_Samples_Daily > 1) %>%
+      # Daily average with average rounded to even
+    dplyr::mutate(DO_DailyAverage = signif(mean(DO_mg_L), digits = 2),  # two significant figures based on  https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/
+                  exceeds =  case_when(DO_DailyAverage < limit & is.na(`7Q10 Flag`) ~ TRUE, # exceedance if above limit and no 7Q10 Flag
+                                       DO_DailyAverage < limit & `7Q10 Flag` == "7Q10 Flag" ~ FALSE,  # exceedance if above limit and 7Q10 Flag
+                                       DO_DailyAverage >= limit ~ FALSE, # no exceedance
+                                       TRUE ~ NA)) %>% 
+                    #ifelse(DO_DailyAverage < `Dissolved Oxygen Daily Avg (mg/L)`,T,F)) %>% 
+    dplyr::ungroup() %>%
+    distinct(date, .keep_all = T) %>% 
+    dplyr::select(-c(FDT_DATE_TIME)) 
+}
+
+# Example Usage:
+# where stationData is already in your environment, see Automated Assessment for environment set up help
+# DO_Assessment_DailyAvg(stationData)
+# DO_Assessment_DailyAvg(stationData) %>% 
+#   quickStats('DO_Daily_Avg')  # pass results to quickStats() to consolidate results
+```
+
+
+
 ### pH
+
+A pH range criteria applies to stations depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target = '_blank'}. The `pHExceedances()` function identifies any pH values outside of the range specified in the associated `pH Min` and `pH Max` fields. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target = '_blank'}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, the function removes all Level I and Level II data and missing data before rounding measures to even and comparing against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+
+
+```{r automated assessment pHExceedances, eval=FALSE}
+# pH range Exceedance Function
+pHExceedances <- function(stationData){
+  # special step for lake stations, remove samples based on lake assessment guidance 
+  if(unique(stationData$lakeStation) == TRUE){
+    if(!is.na(unique(stationData$Lakes_187B)) & unique(stationData$Lakes_187B) == 'y'){
+      pHdata <- filter(stationData, LakeStratification %in% c("Epilimnion", NA)) %>% # only use epilimnion or unstratified samples for analysis
+        dplyr::select(FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, FDT_FIELD_PH, RMK_FDT_FIELD_PH, LEVEL_FDT_FIELD_PH, 
+                      `pH Min`, `pH Max`, LakeStratification, `7Q10 Flag`) # Just get relevant columns,
+    } else {
+      pHdata <- dplyr::select(stationData, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, FDT_FIELD_PH, RMK_FDT_FIELD_PH, LEVEL_FDT_FIELD_PH,
+                              `pH Min`, `pH Max`, LakeStratification, `7Q10 Flag`) }# Just get relevant columns,
+  } else {
+    pHdata <- dplyr::select(stationData, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, FDT_FIELD_PH, RMK_FDT_FIELD_PH, LEVEL_FDT_FIELD_PH, 
+                            `pH Min`, `pH Max`, `7Q10 Flag`) }# Just get relevant columns, 
+  
+  pHdata <- filter(pHdata, !(LEVEL_FDT_FIELD_PH %in% c('Level II', 'Level I'))) %>% # get lower levels out
+    filter(!is.na(FDT_FIELD_PH)) #get rid of NA's
+    
+  # only run analysis if WQS exist for station
+    if(any(is.na(pHdata$`pH Min`)) | any(is.na(pHdata$`pH Max`))){
+      pH <- mutate(pHdata, interval = 1, exceeds = FALSE, limit = `pH Min`) # placeholder to run quickStats() without any WQS
+    } else {
+        pH <- pHdata %>%
+        rowwise() %>% 
+        # Round to Even Rule
+        mutate(parameterRound = signif(FDT_FIELD_PH, digits = 2)) %>% # two significant figures based on WQS https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/
+        mutate(interval=findInterval(parameterRound,c(`pH Min`,`pH Max`), left.open=TRUE, rightmost.closed = TRUE)) %>% # Identify where pH outside of assessment range with round to even
+        ungroup()%>%
+        mutate(exceeds = case_when(interval != 1 ~ TRUE, #  Highlight where pH doesn't fall into criteria range
+                                   interval == 1 ~ FALSE,  # no exceedance if inside limit
+                                   TRUE ~ NA),
+               limit = `pH Min`)
+        }
+  return(pH)
+}
+
+# Example Usage:
+# where stationData is already in your environment, see Automated Assessment for environment set up help
+# pHExceedances(stationData) 
+# pHExceedances(stationData) %>% 
+#   quickStats('PH')  # pass results to quickStats() to consolidate results
+```
+
+
 ### Bacteria
+
+[Recreational bacteria](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section170/){target = '_blank'} is a more complicated standard to apply to monitoring data due to the unique rolling windows. To standardize the logic across *E.coli* and enterococci data, the nested function architecture that evaluates the bacteria data is programmed to handle either *E.coli* or enterococci data. The four functions required to calculate the bacteria criteria are detailed below.
+
+
+#### bacteriaExceedances_NEW
+
+The `bacteriaExceedances_NEW()` function is the innermost function in the nested bacteria function logic. This is the analytical function that applies the bacteria criteria logic. This function takes in all station data, the designated `bacteriaField` and `bacteriaRemark` field arguments to tell the function which type of bacteria to assess (*E.coli* or enterococci), a `sampleRequirement` argument (minimum n samples in 90 day window needed to apply geomean), a `STV` argument (threshold for *E.coli* or enterococci), and a `geomeanCriteria` argument (threshold for *E.coli* or enterococci). The function is applied inside the `bacteriaAssessmentDecision()` function to calculate unique 90 day data windows, apply STV and geomean criteria where appropriate, and report out the results of this analysis for summarization and language standardization by `bacteriaAssessmentDecision()`. To ease later data visualization steps, a listcolumn named `associatedData` is included in the function output that contains the raw data that falls within each 90 day window the user can unpack to see all data associated with each 90 day window. 
+
+```{r automated assessment bacteriaExceedances_NEW, eval=FALSE}
+# Function to assess on 90 day windows across input dataset
+# really just a building block, one probably wouldn't run this function independently
+bacteriaExceedances_NEW <- function(stationData, # input dataframe with bacteria data
+                                    bacteriaField, # name of bacteria field data
+                                    bacteriaRemark, # name of bacteria comment field
+                                    sampleRequirement, # minimum n samples in 90 day window needed to apply geomean
+                                    STV, # unique for ecoli/enter
+                                    geomeanCriteria # unique for ecoli/enter
+                                    ){
+  # Output tibble to organize results, need list object to save associate data
+  out <- tibble(`StationID` = as.character(NA),
+                `Date Window Starts` = as.Date(NA), 
+                `Date Window Ends` = as.Date(NA), 
+                `Last Sample Date in Window` = as.Date(NA), 
+                `Samples in 90 Day Window` = as.numeric(NA), 
+                `STV Exceedances In Window` = as.numeric(NA), 
+                `STV Exceedance Rate` = as.numeric(NA), 
+                `STV Assessment` = as.character(NA),
+                `Geomean In Window` = as.numeric(NA),
+                `Geomean Assessment` = as.character(NA),
+                associatedData = list())
+  
+  # Data reorg to enable both types of bacteria assessment from a single function
+  stationData2 <- dplyr::select(stationData, FDT_STA_ID, FDT_DATE_TIME, !! bacteriaField, !! bacteriaRemark) %>%
+    rename(Value = bacteriaField, LEVEL_Value = bacteriaRemark) %>%
+    filter(! LEVEL_Value %in% c('Level II', 'Level I')) %>% # get lower levels out
+    filter(!is.na(Value))
+  
+  if(nrow(stationData2) > 0){
+    # Loop through each row of input df to test 90 day windows against assessment criteria
+    for( i in 1 : nrow(stationData2)){
+      time1 <- as.Date(stationData2$FDT_DATE_TIME[i])
+      timePlus89 <- time1 + days(89) 
+      
+      # Organize prerequisites to decision process
+      windowData <- filter(stationData2, as.Date(FDT_DATE_TIME) >= time1 & as.Date(FDT_DATE_TIME) <= timePlus89) %>% 
+        mutate(nSamples = n(), # count number of samples in 90 day window
+               STVhit = ifelse(Value > STV, TRUE, FALSE), # test values in window against STV
+               geomean = ifelse(nSamples > 1, # calculate geomean of samples if nSamples>1
+                                as.numeric(round::roundAll(EnvStats::geoMean(Value, na.rm = TRUE), digits=0, "r0.C")), # round to nearest whole number per Memo to Standardize Rounding for Assessment Guidance
+                                NA), 
+               geomeanCriteriaHit = ifelse(geomean > geomeanCriteria, TRUE, FALSE)) # test round to even geomean against geomean Criteria
+      
+      # First level of testing: any STV hits in dataset? Want this information for all scenarios
+      nSTVhitsInWindow <- nrow(filter(windowData, STVhit == TRUE))
+      # STV exceedance rate calculation with round to even math
+      STVexceedanceRate <- ifelse(unique(windowData$nSamples) >= 10, 
+                                  as.numeric(round::roundAll((nSTVhitsInWindow / unique(windowData$nSamples)) * 100,digits=0, "r0.C")), # round to nearest whole number per Memo to Standardize Rounding for Assessment Guidance
+                                  NA) # no STV exceedance rate if < 10 samples
+      if(nSTVhitsInWindow == 0){
+        `STV Assessment` <- 'No STV violations within 90 day window' } 
+      if(nSTVhitsInWindow == 1){
+        `STV Assessment` <- paste(nSTVhitsInWindow, ' STV violation(s) with ', format(STVexceedanceRate, digits = 3), 
+                                  '% exceedance rate in 90 day window | Insufficient Information (Prioritize for follow up monitoring)',sep='')}
+      if(nSTVhitsInWindow >= 2){
+        `STV Assessment` <- paste(nSTVhitsInWindow, ' STV violation(s) with ', format(STVexceedanceRate, digits = 3), 
+                                  '% exceedance rate in 90 day window | Impaired: ', nSTVhitsInWindow,' hits in the same 90-day period',sep='') }
+      
+      
+      # Second level of testing: only if minimum geomean sampling requirements met in 90 day period
+      if(unique(windowData$nSamples) >= sampleRequirement){
+        # Geomean Hit
+        if(unique(windowData$geomeanCriteriaHit) == TRUE){
+          `Geomean Assessment` <- paste('Geomean: ', format(unique(windowData$geomean), digits = 3), 
+                                        ' | Impaired: geomean exceeds criteria in the 90-day period', sep='')  
+        } else{
+          `Geomean Assessment` <-  paste('Geomean: ', format(unique(windowData$geomean), digits = 3), 
+                                         ' | Geomean criteria met, hold assessment decision for further testing', sep= '')} 
+      } else { # minimum geomean sampling requirements NOT met in 90 day period
+        `Geomean Assessment` <- 'Insufficient Information: geomean sampling criteria not met'  }
+      
+      out[i,] <-  tibble(`StationID` = unique(stationData2$FDT_STA_ID),
+                         `Date Window Starts` = time1, 
+                         `Date Window Ends` = timePlus89, 
+                         `Last Sample Date in Window` = max(windowData$FDT_DATE_TIME),
+                         `Samples in 90 Day Window` = unique(windowData$nSamples), 
+                         `STV Exceedances In Window` = nSTVhitsInWindow, 
+                         `STV Exceedance Rate` = STVexceedanceRate,
+                         `STV Assessment` = `STV Assessment`,
+                         `Geomean In Window` = ifelse(unique(windowData$nSamples) >= sampleRequirement, unique(windowData$geomean), NA), # avoid excitement, only give geomean result if 10+ samples
+                         `Geomean Assessment` = `Geomean Assessment`,
+                         associatedData = list(windowData)) 
+    } #end for loop
+  } else {
+    out <- tibble(`StationID` = unique(stationData$FDT_STA_ID),
+                  `Date Window Starts` = as.Date(NA), 
+                  `Date Window Ends` = as.Date(NA), 
+                  `Last Sample Date in Window` = as.Date(NA), 
+                  `Samples in 90 Day Window` = as.numeric(NA), 
+                  `STV Exceedances In Window` = as.numeric(NA), 
+                  `STV Exceedance Rate` = as.numeric(NA), 
+                  `STV Assessment` = as.character(NA),
+                  `Geomean In Window` = as.numeric(NA),
+                  `Geomean Assessment` = as.character(NA),
+                  associatedData = list(NA))
+  }
+  
+  # For IR2024, we only want to make assessment decisions on data windows with unique datasets. Running distinct() on `Last Sample Date in Window`
+  # will keep only the rows with the first occurrence of any given sample date, allowing us to remove rolled windows that contain duplicated 
+  # datasets. Joining this result back to the out dataset allows us to flag `Valid Assessment Window` appropriately. Since this function
+  # feeds the app, we want to keep all records and only at later functions that make assessment decisions do we want to filter out 
+  # non-unique windows.
+  distinctWindows <- distinct(out, `Last Sample Date in Window`, .keep_all = T) %>% 
+    mutate(`Valid Assessment Window` = TRUE)
+  
+  out <- left_join(out, distinctWindows,
+                    by = c("StationID", "Date Window Starts", "Date Window Ends", "Last Sample Date in Window", 
+                           "Samples in 90 Day Window", "STV Exceedances In Window", "STV Exceedance Rate", 
+                           "STV Assessment", "Geomean In Window", "Geomean Assessment", "associatedData")) %>% # join by everything to be safe
+    dplyr::select(StationID:`Last Sample Date in Window`, `Valid Assessment Window`, everything())
+  
+  return(out) 
+}
+
+# Example Usage:
+# where stationData is already in your environment, see Automated Assessment for environment set up help
+#bacteriaExceedances_NEW(stationData, 'ECOLI', 'LEVEL_ECOLI', 10, 410, 126)
+#bacteriaExceedances_NEW(stationData, 'ENTEROCOCCI', 'LEVEL_ENTEROCOCCI', 10, 130, 35) 
+# How to unpack raw data from inside each unqiue 90 day window
+# y <- bacteriaExceedances_NEW(stationData, 'ECOLI', 'LEVEL_ECOLI', 10, 410, 126)
+# View(y) # look at this data structure
+# y$associatedData[1] # look at first 90 day window associated data
+```
+
+
+
+#### bacteriaAssessmentDecision
+
+The `bacteriaAssessmentDecision()` function is the workhorse of the bacteria assessment logic, summarizing bacteria assessment results into decisions. This function passes through the provided arguments to the `bacteriaExceedances_NEW()` function to perform the bacteria criteria analysis. The function is applied inside the `bacteriaAssessmentDecisionClass()` function to summarize and report out the results of the `bacteriaExceedances_NEW()` analysis. To ease later data visualization steps, a listcolumn named `associatedDecisionData` is included in the function output that the user can unpack to see all data associated with each 90 day window. 
+
+```{r automated assessment bacteriaAssessmentDecision, eval=FALSE}
+# Function to summarize bacteria assessment results into decisions
+# This function returns all potential issues with priory on geomean results IF there
+# are enough samples to run geomean
+# Round to even rules are applied
+bacteriaAssessmentDecision <- function(stationData, # input dataframe with bacteria data
+                                       bacteriaField, # name of bacteria field data
+                                       bacteriaRemark, # name of bacteria comment field
+                                       sampleRequirement, # minimum n samples in 90 day window needed to apply geomean
+                                       STV, # unique for ecoli/enter
+                                       geomeanCriteria # unique for ecoli/enter
+){
+    # Rename output columns based on station table template
+    stationTableName <- ifelse(bacteriaField == 'ECOLI', "ECOLI", "ENTER")
+    
+    nSamples <- select(stationData,  Value = {{ bacteriaField }} ) %>% 
+      filter(!is.na(Value)) # total n samples taken in assessment window
+    
+    
+    if(nrow(nSamples) > 0){ # only proceed through decisions if there is data to be analyzed
+
+    # Run assessment function
+    # make two objects here because we want to base all decisions only on valid data, but we also want to output all associated data from 
+      # this function, so we create a rawAnalysisForOutput to be saved in a list column for unpacking later
+    rawAnalysisForOutput <- suppressWarnings(bacteriaExceedances_NEW(stationData, bacteriaField, bacteriaRemark, sampleRequirement, STV, geomeanCriteria)   )
+    validForAssessment <- rawAnalysisForOutput %>% 
+      filter(`Valid Assessment Window` == TRUE)
+    
+    # bail out if no data to analyze bc all Level II or Level I, OR (new for IR2024) no valid windows for assessment
+    if(nrow(filter(validForAssessment, !is.na(`Date Window Starts`))) == 0 ){
+      return(tibble(StationID = unique(stationData$FDT_STA_ID),
+                    `_EXC` = NA, # right now this is set to # total STV exceedances, not the # STV exceedances in a 90-day period with 10+ samples
+                    #`_IMPAIREDWINDOWS` = NA,
+                    `_SAMP` = NA, 
+                    `_GM.EXC` = NA,
+                    `_GM.SAMP` = NA,
+                    `_STAT` = NA, # is this the right code???
+                    `_STAT_VERBOSE` = NA, 
+                    `BACTERIADECISION` = NA,
+                    `BACTERIASTATS` = NA,
+                    associatedDecisionData = list(NA)) %>%
+               rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE)) %>%  # fix names to match station table format
+               rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+    }
+    
+    # number of STV exceedances, reported in bacteria_EXC field in stations table and useful for logic testing
+    # don't want to do this analysis on validForAssessment bc sum(validForAssessment$`STV Exceedances In Window`) will overshoot real n
+    exceedSTVn <- select(stationData,  Value = {{ bacteriaField }} ) %>%
+      filter(Value > STV) # total STV exceedances in dataset
+    # Windows with > 10% STV rate, these can only be calculated on windows with 10 or more samples
+    exceedSTVrate <- filter(validForAssessment, `STV Exceedance Rate` > 10)
+    # windows with geomean exceedances, these can only be calculated on windows with 10 or more samples
+    exceedGeomean <- filter(validForAssessment, `Geomean In Window` > geomeanCriteria)
+    
+    # Decision logic time, work through geomean first and if there is no appropriate geomean data (no windows with 10+ samples)
+    #   then go to STV assessment
+    
+    # Were at least 10 samples taken within any 90-day period of the assessment window?
+    if( any(!is.na(validForAssessment$`Geomean In Window`)) ){ # Were at least 10 samples taken within any 90-day period of the assessment window? - Yes
+      # Do the geometric means calculated for the 90-day periods represented by 10+ samples meet the GM criterion?
+      if( nrow(exceedGeomean) == 0){ # Do the geometric means calculated for the 90-day periods represented by 10+ samples meet the GM criterion? - Yes
+        # Do any of the 90-day periods of the assessment window represented in the dataset exceed the 10% STV Exceedance Rate?
+        if( nrow(exceedSTVn) > 0){ # Do any of the 90-day periods of the assessment window represented in the dataset exceed the 10% STV Exceedance Rate? - Yes
+          
+          # Yes, in a 90-day period represented by 10+ samples
+          if(nrow(filter(exceedSTVrate, `Samples in 90 Day Window` >= 10 & `STV Exceedance Rate` > 10)) > 0){ # STV exceedances in a 90-day period represented by >= 10 samples
+            return(tibble(StationID = unique(validForAssessment$StationID),
+                          `_EXC` = nrow(exceedSTVn), # right now this is set to # total STV exceedances, not the # STV exceedances in a 90-day period with 10+ samples
+                          `_SAMP` = nrow(nSamples), 
+                          `_GM.EXC` = nrow(exceedGeomean),
+                          `_GM.SAMP` = nrow(filter(validForAssessment, !is.na(`Geomean In Window`))),
+                          `_STAT` = "IM",
+                          `_STAT_VERBOSE` = "Impaired - 2 or more STV exceedances in the same 90-day period represented by 10+ samples, no geomean exceedances.",#STV exceedances in a 90-day period represented by >= 10 samples after verifying geomean passes where applicable.",
+                          `BACTERIADECISION` = paste0(stationTableName, ": ",`_STAT_VERBOSE`),
+                          `BACTERIASTATS` = paste0(stationTableName, ": Number of 90 day windows with > 10% STV exceedance rate: ", nrow(exceedSTVrate)),
+                          associatedDecisionData = list(rawAnalysisForOutput) ) %>%
+                     rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE)) %>%  # fix names to match station table format
+                     rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+            
+          } else {  # STV exceedances in a 90-day period represented by < 10 samples
+            
+            # 2 or more hits in the same 90-day period?
+            if(any(validForAssessment$`STV Exceedances In Window` >= 2) ){
+              return(tibble(StationID = unique(validForAssessment$StationID),
+                            `_EXC` = nrow(exceedSTVn), # right now this is set to # total STV exceedances, not the # STV exceedances in a 90-day period with 10+ samples
+                            `_SAMP` = nrow(nSamples), 
+                            `_GM.EXC` = nrow(exceedGeomean),
+                            `_GM.SAMP` = nrow(filter(validForAssessment, !is.na(`Geomean In Window`))),
+                            `_STAT` = "IM",
+                            `_STAT_VERBOSE` = "Impaired- 2 or more STV exceedances in the same 90-day period with < 10 samples, no geomean exceedances.", #2 or more STV hits in the same 90-day period with < 10 samples after verifying geomean passes where applicable.",
+                            `BACTERIADECISION` = paste0(stationTableName, ": ",`_STAT_VERBOSE`),
+                            `BACTERIASTATS` = paste0(stationTableName, ": Number of 90 day windows with > 10% STV exceedance rate: ", nrow(exceedSTVrate)),
+                            associatedDecisionData = list(rawAnalysisForOutput) ) %>%
+                       rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE)) %>%  # fix names to match station table format
+                       rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+              } else { 
+                
+                # did the STV exceedance(s) occur in windows with 10+ samples?
+                if(all(filter(validForAssessment, `STV Exceedances In Window` > 0)$`Samples in 90 Day Window` >= 10)){
+                  return(tibble(StationID = unique(validForAssessment$StationID),
+                                `_EXC` = nrow(exceedSTVn), # right now this is set to # total STV exceedances, not the # STV exceedances in a 90-day period with 10+ samples
+                                `_SAMP` = nrow(nSamples), 
+                                `_GM.EXC` = nrow(exceedGeomean),
+                                `_GM.SAMP` = nrow(filter(validForAssessment, !is.na(`Geomean In Window`))),
+                                `_STAT` = "S",
+                                `_STAT_VERBOSE` = "Fully Supporting - No STV exceedance rates >10% or geomean exceedances in any 90-day period represented by 10+ samples.",# No geomean exceedances and STV exceedance(s) in one or multiple 90-day periods represented by 10+ samples.", # previous language: 1 STV hit in one or multiple 90-day periods with < 10 samples after verifying geomean passes where applicable.",
+                                `BACTERIADECISION` = paste0(stationTableName, ": ",`_STAT_VERBOSE`),
+                                `BACTERIASTATS` = paste0(stationTableName, ": Number of 90 day windows with > 10% STV exceedance rate: ", nrow(exceedSTVrate)),
+                                associatedDecisionData = list(rawAnalysisForOutput) ) %>%
+                           rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE)) %>%  # fix names to match station table format
+                           rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+                  
+                } else {# STV exceedance(s) occured in windows with < 10 samples
+                
+                # 1 hit in one or multiple 90-day periods after verifying geomean passes where applicable
+                return(tibble(StationID = unique(validForAssessment$StationID),
+                              `_EXC` = nrow(exceedSTVn), # right now this is set to # total STV exceedances, not the # STV exceedances in a 90-day period with 10+ samples
+                              `_SAMP` = nrow(nSamples), 
+                              `_GM.EXC` = nrow(exceedGeomean),
+                              `_GM.SAMP` = nrow(filter(validForAssessment, !is.na(`Geomean In Window`))),
+                              `_STAT` = "O",
+                              `_STAT_VERBOSE` = "Fully Supporting - No geomean exceedances and only 1 STV exceedance in one or multiple 90-day periods represented by < 10 samples.", # previous language: 1 STV hit in one or multiple 90-day periods with < 10 samples after verifying geomean passes where applicable.",
+                              `BACTERIADECISION` = paste0(stationTableName, ": ",`_STAT_VERBOSE`),
+                              `BACTERIASTATS` = paste0(stationTableName, ": Number of 90 day windows with > 10% STV exceedance rate: ", nrow(exceedSTVrate)),
+                              associatedDecisionData = list(rawAnalysisForOutput) ) %>%
+                         rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE)) %>%  # fix names to match station table format
+                         rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+                } 
+                }
+          }
+          
+        } else {  # Do any of the 90-day periods of the assessment window represented in the dataset exceed the 10% STV Exceedance Rate? - No
+          return(tibble(StationID = unique(validForAssessment$StationID),
+                        `_EXC` = nrow(exceedSTVn), # right now this is set to # total STV exceedances, not the # STV exceedances in a 90-day period with 10+ samples
+                        `_SAMP` = nrow(nSamples), 
+                        `_GM.EXC` = nrow(exceedGeomean),
+                        `_GM.SAMP` = nrow(filter(validForAssessment, !is.na(`Geomean In Window`))),
+                        `_STAT` = "S",
+                        `_STAT_VERBOSE` = "Fully Supporting - No STV exceedance rates >10% or geomean exceedances in any 90-day period represented by 10+ samples.", #No STV exceedances or geomean exceedances in any 90-day period.",
+                        `BACTERIADECISION` = paste0(stationTableName, ": ",`_STAT_VERBOSE`),
+                        `BACTERIASTATS` = paste0(stationTableName, ": Number of 90 day windows with > 10% STV exceedance rate: ", nrow(exceedSTVrate)),
+                        associatedDecisionData = list(rawAnalysisForOutput) ) %>%
+                   rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE)) %>%  # fix names to match station table format
+                   rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+          }
+        
+      } else { # Do the geometric means calculated for the 90-day periods represented by 10+ samples meet the GM criterion? - No
+        return(tibble(StationID = unique(validForAssessment$StationID),
+                      `_EXC` = nrow(exceedSTVn), # right now this is set to # total STV exceedances, not the # STV exceedances in a 90-day period with 10+ samples
+                      `_SAMP` = nrow(nSamples), 
+                      `_GM.EXC` = nrow(exceedGeomean),
+                      `_GM.SAMP` = nrow(filter(validForAssessment, !is.na(`Geomean In Window`))),
+                      `_STAT` = "IM",
+                      `_STAT_VERBOSE` = "Impaired- geomean exceedance in any 90-day period.", #geomean exceedance(s) in any 90-day period with >= 10 samples.",
+                      `BACTERIADECISION` = paste0(stationTableName, ": ",`_STAT_VERBOSE`),
+                      `BACTERIASTATS` = paste0(stationTableName, ": Number of 90 day windows with > 10% STV exceedance rate: ", nrow(exceedSTVrate)),
+                      associatedDecisionData = list(rawAnalysisForOutput) ) %>%
+                 rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE)) %>%  # fix names to match station table format
+                 rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+        }
+      
+    } else { # Were at least 10 samples taken within any 90-day period of the assessment window? - No
+      # Were there any hits of the STV during the dataset?
+      if( nrow(exceedSTVn) == 0){ # Were there any hits of the STV during the dataset? - No
+        return(tibble(StationID = unique(validForAssessment$StationID),
+                      `_EXC` = nrow(exceedSTVn), # right now this is set to # total STV exceedances, not the # STV exceedances in a 90-day period with 10+ samples
+                      `_SAMP` = nrow(nSamples), 
+                      `_GM.EXC` = as.numeric(NA), #nrow(exceedGeomean), # Data Entry manual updated to require NA instead of 0 if < 10 samples per 90 day window
+                      `_GM.SAMP` = as.numeric(NA), #nrow(filter(validForAssessment, !is.na(`Geomean In Window`))), # Data Entry manual updated to require NA instead of 0 if < 10 samples per 90 day window
+                      `_STAT` = "IN", 
+                      `_STAT_VERBOSE` = "Insufficient Information (Prioritize for follow up monitoring)- No STV exceedances but insufficient data to analyze geomean.", #0 STV hits but insufficient data to analyze geomean.",
+                      `BACTERIADECISION` = paste0(stationTableName, ": ",`_STAT_VERBOSE`),
+                      `BACTERIASTATS` = paste0(stationTableName, ": Number of 90 day windows with > 10% STV exceedance rate: ", nrow(exceedSTVrate)),
+                      associatedDecisionData = list(rawAnalysisForOutput) ) %>%
+                 rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE))%>%  # fix names to match station table format
+                 rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+        } else { # Were there any hits of the STV during the dataset? - Yes
+          # 2 or more hits in the same 90-day period
+          if(any(validForAssessment$`STV Exceedances In Window` >= 2) ){
+            return(tibble(StationID = unique(validForAssessment$StationID),
+                          # not quite right yet
+                          `_EXC` = nrow(exceedSTVn), # right now this is set to # total STV exceedances, not the number of STV exceedances in a 90-day period with 10+ samples
+                          `_SAMP` = nrow(nSamples), 
+                          `_GM.EXC` = as.numeric(NA), #nrow(exceedGeomean), # Data Entry manual updated to require NA instead of 0 if < 10 samples per 90 day window
+                          `_GM.SAMP` = as.numeric(NA), #nrow(filter(validForAssessment, !is.na(`Geomean In Window`))), # Data Entry manual updated to require NA instead of 0 if < 10 samples per 90 day window
+                          `_STAT` = "IM", 
+                          `_STAT_VERBOSE` = "Impaired - 2 or more STV hits in the same 90-day period with < 10 samples.",
+                          `BACTERIADECISION` = paste0(stationTableName, ": ",`_STAT_VERBOSE`),
+                          `BACTERIASTATS` = paste0(stationTableName, ": Number of 90 day windows with > 10% STV exceedance rate: ", nrow(exceedSTVrate)),
+                          associatedDecisionData = list(rawAnalysisForOutput) ) %>%
+                     rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE))%>%  # fix names to match station table format
+                     rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+          } else { 
+            # 1 hit in one or multiple 90-day periods
+            return(tibble(StationID = unique(validForAssessment$StationID),
+                          `_EXC` = nrow(exceedSTVn), # right now this is set to # total STV exceedances, not the # STV exceedances in a 90-day period with 10+ samples
+                          `_SAMP` = nrow(nSamples), 
+                          `_GM.EXC` = as.numeric(NA), #nrow(exceedGeomean), # Data Entry manual updated to require NA instead of 0 if < 10 samples per 90 day window
+                          `_GM.SAMP` = as.numeric(NA), #nrow(filter(validForAssessment, !is.na(`Geomean In Window`))), # Data Entry manual updated to require NA instead of 0 if < 10 samples per 90 day window
+                          `_STAT` = "IN",
+                          `_STAT_VERBOSE` = "Insufficient Information (Prioritize for follow up monitoring)- One STV exceedance in one or multiple 90-day periods but insufficient data to analyze geomean.",#1 STV hit in one or multiple 90-day periods but insufficient data to analyze geomean.",
+                          `BACTERIADECISION` = paste0(stationTableName, ": ",`_STAT_VERBOSE`),
+                          `BACTERIASTATS` = paste0(stationTableName, ": Number of 90 day windows with > 10% STV exceedance rate: ", nrow(exceedSTVrate)),
+                          associatedDecisionData = list(rawAnalysisForOutput) ) %>%
+                     rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE)) %>%  # fix names to match station table format
+                     rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+            }
+        }
+      }
+    # No bacteria data to analyze
+    } else {
+      return(tibble(StationID = unique(stationData$FDT_STA_ID),
+                    `_EXC` = NA, # right now this is set to # total STV exceedances, not the # STV exceedances in a 90-day period with 10+ samples
+                    `_SAMP` = NA, 
+                    `_GM.EXC` = NA,
+                    `_GM.SAMP` = NA,
+                    `_STAT` = NA, # is this the right code???
+                    `_STAT_VERBOSE` = NA, 
+                    `BACTERIADECISION` = NA,
+                    `BACTERIASTATS` = NA,
+                    associatedDecisionData = list(NA)) %>%
+               rename_with( ~ gsub("_", paste0(stationTableName,"_"), .x, fixed = TRUE)) %>%  # fix names to match station table format
+               rename_with( ~ gsub(".", "_", .x, fixed = TRUE)) ) # special step to get around accidentally replacing _GM with station table name
+    }
+  }
+
+# Example Usage:
+# where stationData object is already in your environment, see Automated Assessment for environment set up help
+# bacteriaAssessmentDecision(stationData, 'ECOLI', 'LEVEL_ECOLI', 10, 410, 126)
+# bacteriaAssessmentDecision(stationData, 'ENTEROCOCCI', 'LEVEL_ENTEROCOCCI', 10, 130, 35)
+# To get just info for station table  
+#bacteriaAssessmentDecision(stationData, 'ECOLI', 'LEVEL_ECOLI', 10, 410, 126) %>%
+#  dplyr::select(StationID:ECOLI_STAT)
+#bacteriaAssessmentDecision(stationData, 'ENTEROCOCCI', 'LEVEL_ENTEROCOCCI', 10, 130, 35) %>%
+#  dplyr::select(StationID:ENTER_STAT)
+
+# How to unpack analyzed data from a single site
+# x <- bacteriaAssessmentDecision(stationData, 'ENTEROCOCCI', 'LEVEL_ENTEROCOCCI', 10, 130, 35)
+# View(x) # look at this data structure
+# x$associatedDecisionData[1] # look at each 90 day window used to make the assessment decision
+```
+
+
+#### bacteriaAssessmentDecisionClass
+
+The `bacteriaAssessmentDecisionClass()` is the outermost function to assess bacteria data. The function takes in all data for a single station as well as a StationID (to provide adequate output information in case no bacteria data exist for said station). Based on the WQS class, *E.coli* is analyzed if the site is freshwater or *E.coli* and Enterococci are analyzed if the site is saltwater or transitional. It is up to the regional assessor to determine which bacteria analysis best represents these transitional sites. Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. The output of this function includes all the bacteria columns required in the Station Table for CEDS bulk data upload as well as a verbose comment that is provided to the assessor for standardized inclusion in CEDS WQA.
+
+```{r automated assessment bacteriaAssessmentDecisionClass, eval=FALSE}
+## outermost function to decide which bacteria should be assessed based on WQS Class
+bacteriaAssessmentDecisionClass <- function(stationData, # input dataframe with bacteria data
+                                            uniqueStationName # stationID for output in case no data come into function
+                                            ){
+
+  
+  # stop everything if no data to analyze in stationData
+  if(nrow(stationData) == 0){
+    return(
+      tibble(StationID = uniqueStationName, ECOLI_EXC = as.numeric(NA), ECOLI_SAMP = as.numeric(NA), ECOLI_GM_EXC = as.numeric(NA), ECOLI_GM_SAMP = as.numeric(NA),
+             ECOLI_STAT = as.character(NA), ECOLI_STATECOLI_VERBOSE = as.character(NA),
+             ENTER_EXC = as.numeric(NA), ENTER_SAMP = as.numeric(NA), ENTER_GM_EXC = as.numeric(NA), ENTER_GM_SAMP = as.numeric(NA),
+             ENTER_STAT = as.character(NA), ENTER_STATENTER_VERBOSE = as.character(NA)) )}
+  
+  # lake stations should only be surface sample
+  if(unique(stationData$lakeStation) == TRUE){
+    stationData <- filter(stationData, FDT_DEPTH <= 0.3) }
+  
+  if(nrow(stationData) > 0){
+    if(unique(stationData$CLASS) %in% c('I', 'II')){
+            # previously this was programmed to only output enterococci results for these classes, but assessors requested both outputs to be conservative
+      return(
+        left_join(bacteriaAssessmentDecision(stationData, 'ECOLI', 'LEVEL_ECOLI', 10, 410, 126),
+                  bacteriaAssessmentDecision(stationData, 'ENTEROCOCCI', 'LEVEL_ENTEROCOCCI', 10, 130, 35),
+                  by = 'StationID') %>% 
+          mutate(BACTERIADECISION = paste0(BACTERIADECISION.x, ' | ', BACTERIADECISION.y),
+                 BACTERIASTATS = paste0(BACTERIASTATS.x, ' | ', BACTERIASTATS.y)) %>% 
+          dplyr::select(-c(BACTERIADECISION.x, BACTERIADECISION.y, BACTERIASTATS.x, BACTERIASTATS.y,
+                           associatedDecisionData.x, associatedDecisionData.y)) )
+      } else {
+      return(
+        bacteriaAssessmentDecision(stationData, 'ECOLI', 'LEVEL_ECOLI', 10, 410, 126) %>%
+          dplyr::select(StationID:BACTERIASTATS) %>% #ECOLI_STATECOLI_VERBOSE) %>%
+          mutate(ENTER_EXC = as.numeric(NA), ENTER_SAMP = as.numeric(NA), ENTER_GM_EXC = as.numeric(NA), ENTER_GM_SAMP = as.numeric(NA),
+                 ENTER_STAT = as.character(NA), ENTER_STATENTER_VERBOSE = as.character(NA)) ) }
+  } else {
+    return(
+      tibble(StationID = uniqueStationName, ECOLI_EXC = as.numeric(NA), ECOLI_SAMP = as.numeric(NA), ECOLI_GM_EXC = as.numeric(NA), ECOLI_GM_SAMP = as.numeric(NA),
+             ECOLI_STAT = as.character(NA), ECOLI_STATECOLI_VERBOSE = as.character(NA),
+             ENTER_EXC = as.numeric(NA), ENTER_SAMP = as.numeric(NA), ENTER_GM_EXC = as.numeric(NA), ENTER_GM_SAMP = as.numeric(NA),
+             ENTER_STAT = as.character(NA), ENTER_STATENTER_VERBOSE = as.character(NA)) )}
+}
+
+# Example Usage:
+# where stationData object is already in your environment, see Automated Assessment for environment set up help
+# bacteriaAssessmentDecisionClass(stationData)
+```
+
 ### Nutrients
+
+```{r automated assessment cycle info, eval=FALSE}
+```
+
 ### Ammonia
+
+```{r automated assessment cycle info, eval=FALSE}
+```
+
 ### PCB
+
+The `PCBmetalsDataExists()` function is used primarily for flagging whether or not certain data exist when building the Station Table. Most stations evaluated during an assessment period do not have metals or toxics data, so it is important to flag when data require review. This particular function can be used to flag when data exist across water column PCB, sediment PCB, fish tissue metals, and fish tissue PCB data. When data exists for these toxics parameters, regional assessment staff may investigate them against applicable thresholds inside the waterbody-specific shiny assessment application. 
+
+```{r automated assessment PCBmetalsDataExists, eval=FALSE}
+## Identify if further review needs to happen for PCB or metals data 
+PCBmetalsDataExists <- function(datasetType, # any of the preorganized PCB or fish tissue datasets
+                                parameterType # field name to pass through to Station Table output
+                                ){
+  # if any data given to function
+  if(nrow(datasetType) > 0){ 
+    x <- data.frame(EXC = NA, STAT = 'Review')
+  }else {
+    x <- data.frame(EXC = NA, STAT = NA) }
+  
+  names(x) <- paste(parameterType, names(x), sep='_')
+  return(x)
+}
+
+# Example Usage:
+# where markPCB, fishMetals, fishPCB objects are already in your environment, see Automated Assessment for environment set up help
+# PCBmetalsDataExists(filter(markPCB, str_detect(SampleMedia, 'Water')) %>%
+#                       filter(StationID %in% '2-JKS023.61'), 'WAT_TOX')
+# PCBmetalsDataExists(filter(markPCB, str_detect(SampleMedia, 'Sediment')) %>%
+#                       filter(StationID %in% '2-JKS023.61'), 'SED_TOX')
+# PCBmetalsDataExists(filter(fishMetals, Station_ID %in% '2-JKS023.61'), 'FISH_MET')
+# PCBmetalsDataExists(filter(fishPCB, `DEQ rivermile` %in%  '2-JKS023.61'), 'FISH_TOX')
+```
+
+
 ### Metals
+
+For a general flag provided to the Station Table to determine whether metals data do/do not exist, please see [PCB](#pcb) above. When data exists for these sediment or water column metals parameters, regional assessment staff may investigate them against applicable thresholds inside the waterbody-specific shiny assessment application. 
+
+
+
+**Hang tight til Joe's update**
+
 ### Fish Tissue
+
+For a general flag provided to the Station Table to determine whether fish tissue data do/do not exist, please see [PCB](#pcb) above. When data exists for these fish tissue metals or PCB data, regional assessment staff may investigate them against applicable thresholds inside the waterbody-specific shiny assessment application. 
+
+
 ### Benthics
+
+The `benthicAssessment()` function is used primarily for flagging whether or benthic data exist when building the Station Table. Most stations evaluated during an assessment period do not have benthic macroinvertebrate data, so it is important to flag when data require review. 
+
+Benthic assessments are completed by regional biologists to ensure the appropriate SCI and professional judgment are used for assessments. The biological staff review all samples within a given assessment period using the [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2022BioassessmentDashboard/){target = '_blank'} and complete a bioassessment for submission via the [Bioassessment Fact Sheet Generator](https://rconnect.deq.virginia.gov/BenthicAssessmentFactSheet/){target = '_blank'}. This information is archived for future biological, assessment, and TMDL staff as well as provided seamlessly within the [Riverine Assessment Application](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/){target = '_blank'}. 
+
+The regional assessment staff know to look for bioassessment information based on the 'Review' flag that the `benthicAssessment()` function provides to the Station Table output. 
+
+```{r automated assessment benthicAssessment, eval=FALSE}
+# Benthic Data flag
+benthicAssessment <- function(stationData,
+                              VSCIresults # pinned dataset with all BenSamps run against just VSCI
+                              ){
+  # this works because the all SCI options are run on all data, so if there is a VSCI result 
+  # (even if in real life that is not the correct SCI to use), then benthic data exists for
+  # a given station
+  benthicDataExist <- filter(VSCIresults, StationID %in% unique(stationData$FDT_STA_ID))
+  if(nrow(benthicDataExist) > 0){tibble(BENTHIC_STAT = 'Review')
+  } else { tibble(BENTHIC_STAT = NA)}
+}
+
+# Example Usage:
+# where stationData and VSCIresults objects are already in your environment, see Automated Assessment for environment set up help
+# benthicAssessment(stationData, VSCIresults)
+```
 
 ### Additional Automated Functions
 
@@ -1589,8 +2259,12 @@ The `assessmentPeriod` and `assessmentCycle` objects are not functions but incre
 
 ```{r automated assessment cycle info, eval=FALSE}
 # Establish Assessment Period, update each cycle
-assessmentPeriod <- as.POSIXct(c("2017-01-01 00:00:00 UTC","2022-12-31 23:59:59 UTC"),tz='UTC')
+assessmentPeriod <- as.POSIXct( c("2017-01-01 00:00:00 UTC", "2022-12-31 23:59:59 UTC"), tz='UTC')
 assessmentCycle <- '2024'
+
+# Example Usage:
+# pin_get("ejones/VSCIresults", board = "rsconnect") %>%
+#   filter( between(`Collection Date`, assessmentPeriod[1], assessmentPeriod[2]) )
 ```
 
 
@@ -1615,44 +2289,16 @@ WQSvalues <- tibble(CLASS_BASIN = c('I',"II","II_7","III","IV","V","VI","VII"),
                     `Max Temperature (C)` = c(NA, NA, NA, 32, 31, 21, 20, NA)) %>%
   mutate(CLASS_DESCRIPTION = paste0(CLASS, " | ", `Description Of Waters`))
 
+# Example Usage:
+# where stationTable is already joined to citmonWQS and WQSlookup, see Automated Assessment for environment set up help
+# stationTable %>%
+#   # Fix for Class II Tidal Waters in Chesapeake (bc complicated DO/temp/etc standard)
+#   mutate(CLASS_BASIN = paste(CLASS,substr(BASIN, 1,1), sep="_")) %>% # (2)
+#   mutate(CLASS_BASIN = ifelse(CLASS_BASIN == 'II_7', "II_7", as.character(CLASS))) %>% # (2)
+#   # Join actual WQS criteria to each StationID
+#   left_join(WQSvalues, by = 'CLASS_BASIN')
 ```
 
-#### concatenateUnique
-
-This helper function returns a single concatenated vector with multiple entries separated by a comma.
-
-```{r automated assessment concatUnique, eval=FALSE}
-concatinateUnique <- function(stuff){
-  if(length(stuff)==1){
-    if(is.na(stuff)){return(NA)
-    }else{
-      return(paste(unique(stuff), collapse= ', ')) }
-  } 
-  if(length(stuff) > 1){return(paste(unique(stuff), collapse= ', '))}
-}
-
-```
-
-#### changeDEQRegionName
-
-This helper function helps clean up data entry issues when a verbose region name is provided instead of an acronym.
-
-```{r automated assessment changeDEQRegionName, eval=FALSE}
-changeDEQRegionName <- function(stuff){
-  # have to do this bc different places in conventionals report the assessment region over sample region
-  if(length(stuff) == 1){
-    if(is.na(stuff)){return("NA")}
-    if(stuff == "Valley"){return('VRO')}
-    if(stuff == "Northern"){return('NRO')}
-    if(stuff == "Piedmont"){return('PRO')}
-    if(stuff == "Blue Ridge"){return('BRRO')}
-    if(stuff == "Tidewater"){return('TRO')}
-    if(stuff == "Southwest" ){return('SWRO')}
-    if(stuff == 'NA'){return('NA')}
-  } else {return(concatinateUnique(stuff))}
-}
-
-```
 
 #### lakeNameStandardization
 
@@ -1708,6 +2354,11 @@ lakeNameStandardization <- function(x){
                                  WATER_NAME %in% c('Unsegmented lakes in G03') ~ 'West Run',
                                  TRUE ~ as.character(WATER_NAME))) 
 }
+
+# Example Usage:
+# where stationTable is already joined to citmonWQS, WQSlookup, WQSvalues, and WQMstationFull, see Automated Assessment for environment set up help
+# stationTable %>% 
+#   lakeNameStandardization()  
 ```
 
 #### quickStats
@@ -1761,10 +2412,17 @@ quickStats <- function(parameterDataset, # dataset from one station that has bee
     
   }
 }
+
+# Example Usage:
+# where stationData is already in your environment, see Automated Assessment for environment set up help
+# tempExceedances(stationData) %>% 
+#   quickStats('TEMP')
 ```
 
 
 #### StationTableStartingData
+
+This helper function organizes existing site metadata into a format that matches the desired Station Table output format.
 
 ```{r automated assessment StationTableStartingData, eval=FALSE}
 StationTableStartingData <- function(stationData){
@@ -1775,11 +2433,55 @@ StationTableStartingData <- function(stationData){
 }
 
 # Example Usage:
+# where stationData is already in your environment, see Automated Assessment for environment set up help
+# StationTableStartingData(stationData)
 
+```
+
+#### temperatureSpecialStandardsCorrection
+
+This helper function is applied after `WQSvalues()` is run on a tibble of station data. The function corrects the coarser WQS value joined by Class by identifying if any temperature special standards are attributed to a station. If so, the function then adjusts each `Max Temperature (C)` record based on temporal criteria accordingly.
+
+```{r automated assessment temperatureSpecialStandardsCorrection, eval=FALSE}
+# temperature special standards adjustment function
+# this is applied to the actual monitoring data because there is a temporal component to these criteria
+temperatureSpecialStandardsCorrection <- function(x){
+  # ee. Maximum temperature for these seasonally stockable trout waters is 26°C and applies May 1 through October 31. https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section310/
+  # ff. Maximum temperature for these seasonally stockable trout waters is 28°C and applies May 1 through October 31. https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section310/
+  # hh. Maximum temperature for these seasonally stockable trout waters is 31°C and applies May 1 through October 31. https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section310/
+  mutate(x, `Max Temperature (C)` = case_when(str_detect(as.character(SPSTDS), 'ee') & month(FDT_DATE_TIME) %in% 5:10 ~ 26,
+                                              str_detect(as.character(SPSTDS), 'ff') & month(FDT_DATE_TIME) %in% 5:10 ~ 28,
+                                              str_detect(as.character(SPSTDS), 'hh') & month(FDT_DATE_TIME) %in% 5:10 ~ 31,
+                                              TRUE ~ `Max Temperature (C)`)) 
+}
+
+# Example Usage:
+# where conventionals and stationTable objects are already in your environment, see Automated Assessment for environment set up help
+# stationData <- filter(conventionals, FDT_STA_ID %in% '2-JKS023.61') %>%
+#     left_join(stationTable, by = c('FDT_STA_ID' = 'STATION_ID')) %>%
+#     temperatureSpecialStandardsCorrection()
+```
+
+#### pHSpecialStandardsCorrection
+
+This helper function is applied after `WQSvalues()` is run on a tibble of station data. The function corrects the coarser WQS value joined by Class by identifying if any pH special standards are attributed to a station. If so, the function then adjusts each `pH Min` and `pH Max` record based on applicable criteria accordingly.
+
+```{r automated assessment pHSpecialStandardsCorrection, eval=FALSE}
+pHSpecialStandardsCorrection <- function(stationData){
+  mutate(stationData, `pH Min` = case_when(str_detect(as.character(SPSTDS), '6.5-9.5') ~ 6.5, TRUE ~ `pH Min`),
+         `pH Max` = case_when(str_detect(as.character(SPSTDS), '6.5-9.5') ~ 9.5, TRUE ~ `pH Max`))
+}
+# Example Usage:
+# where conventionals and stationTable objects are already in your environment, see Automated Assessment for environment set up help
+# stationData <- filter(conventionals, FDT_STA_ID %in% '2-JKS023.61') %>%
+#     left_join(stationTable, by = c('FDT_STA_ID' = 'STATION_ID')) %>%
+#     pHSpecialStandardsCorrection()
 ```
 
 
 #### stationTableComments
+
+This helper function parses station level comments from the two most recent IR Station Table outputs. This information is joined into the current IR Station Table, despite not fitting with the CEDS Bulk Data Upload template, in order to provide regional assessment staff with historical station information adjacent to current station information.
 
 ```{r automated assessment stationTableComments, eval=FALSE}
 stationTableComments <- function(stations, 
@@ -1797,11 +2499,14 @@ stationTableComments <- function(stations,
 }
 
 # Example Usage:
-
+# where stationsTable2022 and stationTable2020 are objects containing previous stations table spreadsheets read into your R environment, see Automated Assessment for environment set up help
+# stationTableComments('2-JKS023.61', stationsTable2022, '2022', stationsTable2020, '2020')
 ```
 
 
 #### thermoclineDepth
+
+This helper function is essential for any lake station. The function takes in all conventionals data for a particular station and calculates a thermocline depth for each sample date. This depth is then used to attribute every sample as either "Epilimnion", "Hypolimnion", or unstratified (NA).
 
 ```{r automated assessment thermoclineDepth, eval=FALSE}
 # Calculate daily thermocline depth and designate Epilimnion vs Hypolimnion
@@ -1830,10 +2535,44 @@ thermoclineDepth <- function(stationData){
     mutate(LakeStratification= ifelse(FDT_DEPTH < ThermoclineDepth,"Epilimnion","Hypolimnion"))%>% ungroup() 
 }
 
-# Example usasge:
+# Example usage:
+# where stationData is already in your environment, see Automated Assessment for environment set up help
 # stationData %>% thermoclineDepth()
 ```
 
+#### lowFlowFlagColumn
+
+This helper function is new for IR2024. The function provides a flag field to the Station Table output only if a station has temperature, DO, or pH data collected on day with gage in subbasin is below 7Q10.
+
+```{r automated assessment lowFlowFlagColumn, eval=FALSE}
+# Function to add a column to stations table output that summarizes 7Q10 information for relevant parameters
+lowFlowFlagColumn <- function(stationData){
+  lowFlowFlag <- filter(stationData, !is.na(`7Q10 Flag`))
+  if(nrow(lowFlowFlag) > 0){
+    withParameterData <- dplyr::select(lowFlowFlag, FDT_STA_ID, FDT_DATE_TIME, 
+                                       FDT_TEMP_CELCIUS, DO_mg_L, FDT_FIELD_PH, `7Q10 Flag Gage`) %>% 
+      pivot_longer(-c(FDT_STA_ID, FDT_DATE_TIME, `7Q10 Flag Gage`), names_to = 'parameter', values_to = 'value') %>% 
+      filter(!is.na(value)) # drop rows with no data for specific parameters
+    if(nrow(withParameterData) > 0){
+      gageFlags <- dplyr::select(withParameterData, FDT_STA_ID, FDT_DATE_TIME,  `7Q10 Flag Gage`) %>% 
+        distinct(FDT_DATE_TIME, .keep_all = T) %>% 
+        summarise(STATION_ID = FDT_STA_ID, 
+                  `7Q10 Flag` = paste(as.Date(FDT_DATE_TIME),  `7Q10 Flag Gage`, collapse = '; ')) %>% 
+        mutate(`7Q10 Flag` = paste('USGS Gages in subbasin below 7Q10: ', `7Q10 Flag`)) 
+    } else {
+      gageFlags <- tibble(STATION_ID = unique(lowFlowFlag$FDT_STA_ID),
+                          `7Q10 Flag` = NA_character_)   }
+  } else {
+    gageFlags <- tibble(STATION_ID = unique(lowFlowFlag$FDT_STA_ID),
+                        `7Q10 Flag` = NA_character_)
+    }
+  return(gageFlags)
+}
+
+# Example usage:
+# where stationData is already in your environment, see Automated Assessment for environment set up help
+#lowFlowFlagColumn(stationData)
+```
 
 
 ## Automated Output

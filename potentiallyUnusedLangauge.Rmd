@@ -1,0 +1,210 @@
+---
+title: "potentially unused language"
+author: "Emma Jones"
+date: "12/20/2022"
+output: html_document
+---
+#### concatenateUnique
+
+This helper function returns a single concatenated vector with multiple entries separated by a comma.
+
+```{r automated assessment concatUnique, eval=FALSE}
+concatinateUnique <- function(stuff){
+  if(length(stuff)==1){
+    if(is.na(stuff)){return(NA)
+    }else{
+      return(paste(unique(stuff), collapse= ', ')) }
+  } 
+  if(length(stuff) > 1){return(paste(unique(stuff), collapse= ', '))}
+}
+
+```
+
+#### changeDEQRegionName
+
+This helper function helps clean up data entry issues when a verbose region name is provided instead of an acronym.
+
+```{r automated assessment changeDEQRegionName, eval=FALSE}
+changeDEQRegionName <- function(stuff){
+  # have to do this bc different places in conventionals report the assessment region over sample region
+  if(length(stuff) == 1){
+    if(is.na(stuff)){return("NA")}
+    if(stuff == "Valley"){return('VRO')}
+    if(stuff == "Northern"){return('NRO')}
+    if(stuff == "Piedmont"){return('PRO')}
+    if(stuff == "Blue Ridge"){return('BRRO')}
+    if(stuff == "Tidewater"){return('TRO')}
+    if(stuff == "Southwest" ){return('SWRO')}
+    if(stuff == 'NA'){return('NA')}
+  } else {return(concatinateUnique(stuff))}
+}
+
+# Example Usage:
+# where stationData is already in your environment, see Automated Assessment for environment set up help
+
+```
+
+
+#### STVexceedance
+
+The `STVexceedance()` bacteria helper function is used inside the `bacteriaAssessmentDecision()` to easily identify 90 day windows have 2+ STV exceedances.
+
+```{r automated assessment STVexceedance, eval=FALSE}
+#Function to see if any 90 day windows have 2+ STV exceedances
+STVexceedance <- function(df, STV){
+  morethan1STVexceedanceInAnyWindow <- filter(df, `STV Exceedances In Window` >= 2)
+  if(nrow(morethan1STVexceedanceInAnyWindow) > 0){
+    return('| 2 or more STV exceedances in a 90 day window |')
+  }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+These need to be written up:
+
+```{r}
+
+# Consolidate water column metals assessment decisions calculated by Roger Stewart
+# Fuction exactly the same as 2020 cycle and may need updates if dataset changes
+metalsExceedances <- function(x, metalType){
+  # if any data given to function
+  if(nrow(x) > 0){ VIO <- length(which(x == 'NSP')) 
+  }else {
+    VIO <- NA  }
+  
+  x <- data.frame(VIO = VIO, STAT = ifelse(VIO > 0, 'Review', 'S'))
+  names(x) <- paste(metalType,names(x), sep='_')
+  return(x)
+}
+
+```
+
+```{r}
+#### PWS Assessment Functions ---------------------------------------------------------------------------------------------------
+# The app doesn't use this function for modules because you need to be able to toggle assessment on/off with WQS adjustment on the
+# fly, but the automated functions need PWS filter programmed in to ease automating over thousands of sites
+
+assessPWS <- function(stationData, fieldName, commentName, PWSlimit, outputName){
+  if(unique(stationData$PWS) %in% c("Yes")){
+    fieldName_ <- enquo(fieldName)
+    commentName_ <- enquo(commentName)
+    parameterData <- dplyr::select(stationData, FDT_DATE_TIME, !! fieldName_, !! commentName_) %>%
+      filter(!( !! commentName_ %in% c('Level II', 'Level I'))) %>% # get lower levels out
+      filter(!is.na(!!fieldName_ )) %>% #get rid of NA's
+      mutate(`Parameter Rounded to WQS Format` = signif(!! fieldName_, digits = 2),  # two significant figures based on WQS https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/
+             limit =  PWSlimit) %>%
+      rename(parameter = !!names(.[4])) %>% # rename columns to make functions easier to apply
+      mutate(exceeds = ifelse(parameter > limit, T, F)) # Identify where above WQS limit
+    return(quickStats(parameterData, outputName)) #%>% dplyr::select(-ends_with('STAT')))    
+  }
+  return(quickStats(tibble(limit = NA), outputName))
+  }
+
+#assessPWS(stationData, NITRATE_mg_L, LEVEL_NITRATE, 10, 'PWS_Nitrate')
+#assessPWS(stationData, CHLORIDE_mg_L, LEVEL_CHLORIDE, 250, 'PWS_Chloride')
+#assessPWS(stationData, SULFATE_TOTAL_mg_L, LEVEL_SULFATE_TOTAL, 250, 'PWS_Total_Sulfate')
+
+
+```
+
+
+```{r}
+
+
+
+# Single station chloride assessment
+
+chlorideFreshwaterAnalysis <- function(stationData){
+  # doesn't apply in class II transition zone
+  stationDataCHL <- filter(stationData, CLASS %in% c('III', "IV","V","VI","VII") |
+                             CLASS ==  "II" & ZONE == 'Tidal Fresh') %>% 
+    filter(!(LEVEL_CHLORIDE %in% c('Level II', 'Level I'))) %>% # get lower levels out
+    filter(!is.na(CHLORIDE_mg_L)) #get rid of NA's
+  
+  if(nrow(stationDataCHL) > 0){
+    
+    
+    # make a place to store analysis results
+    acuteCriteriaResults <- tibble(FDT_STA_ID = as.character(NA), WindowDateTimeStart = as.POSIXct(NA), FDT_DEPTH = as.numeric(NA),
+                                   Value = as.numeric(NA), ValueType = as.character(NA), 
+                                   `Criteria Type` = as.character(NA), CriteriaValue = as.numeric(NA), 
+                                   `Sample Count` = as.numeric(NA), 
+                                   parameterRound = as.numeric(NA), Exceedance = as.numeric(NA))
+    chronicCriteriaResults <- acuteCriteriaResults
+    
+    # loop through each row of data to correctly calculate criteria and find any chronic scenarios
+    for(k in stationDataCHL$FDT_DATE_TIME){  #k = stationDataCHL$FDT_DATE_TIME[1]
+      acuteDataWindow <- filter(stationDataCHL,  between(FDT_DATE_TIME, k, k + hours(1)))
+      chronicDataWindow <- filter(stationDataCHL,  between(FDT_DATE_TIME, k, k + days(4)))
+      
+      # Run acute analysis if data exists
+      if(nrow(acuteDataWindow) > 0){
+        acuteDataCriteriaAnalysis <- suppressMessages( 
+          dplyr::select(acuteDataWindow, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, CHLORIDE_mg_L) %>% 
+          group_by(FDT_STA_ID, FDT_DEPTH) %>% # can't group by datetime or summary can't happen
+          summarise(Value = mean(CHLORIDE_mg_L, na.rm=T),  # get hourly average
+                    `Sample Count` = length(CHLORIDE_mg_L)) %>%  #count sample that made up average
+          mutate(ValueType = 'Hourly Average',
+                 ID = paste( FDT_STA_ID, FDT_DEPTH, sep = '_'), # make a uniqueID in case >1 sample for given datetime
+                 `Criteria Type` = 'Acute', 
+                 CriteriaValue = 860) %>%  # 860,000ug/L criteria to mg/L
+          mutate(parameterRound = signif(Value, digits = 2), # two significant figures based on WQS https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/
+                 Exceedance = ifelse(parameterRound > CriteriaValue, 1, 0 ), # use 1/0 to easily summarize multiple results later
+                 WindowDateTimeStart = min(acuteDataWindow$FDT_DATE_TIME)) %>% 
+          dplyr::select(FDT_STA_ID, WindowDateTimeStart, everything(), -ID) )
+        # Save the results for viewing later
+        acuteCriteriaResults <- bind_rows(acuteCriteriaResults, acuteDataCriteriaAnalysis) 
+      } else {acuteCriteriaResults <- acuteCriteriaResults }
+      
+      # Run chronic analysis if data exists
+      if(nrow(chronicDataWindow) > 0){
+        chronicDataCriteriaAnalysis <- suppressMessages( 
+          dplyr::select(chronicDataWindow, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, CHLORIDE_mg_L) %>% 
+          group_by(FDT_STA_ID, FDT_DEPTH) %>% # can't group by datetime or summary can't happen
+          summarise(Value = mean(CHLORIDE_mg_L, na.rm=T),  # get hourly average
+                    `Sample Count` = length(CHLORIDE_mg_L)) %>%  #count sample that made up average
+          mutate(ValueType = 'Four Day Average',
+                 ID = paste( FDT_STA_ID, FDT_DEPTH, sep = '_'), # make a uniqueID in case >1 sample for given datetime
+                 `Criteria Type` = 'Chronic', 
+                 CriteriaValue = 230) %>%  # 230,000ug/L criteria to mg/L
+          mutate(parameterRound = signif(Value, digits = 2), # two significant figures based on WQS https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/
+                 Exceedance = ifelse(parameterRound > CriteriaValue, 1, 0 ), # use 1/0 to easily summarize multiple results later
+                 WindowDateTimeStart = min(chronicDataWindow$FDT_DATE_TIME)) %>% 
+          dplyr::select(FDT_STA_ID, WindowDateTimeStart, everything(), -ID) )
+        # Save the results for viewing later
+        chronicCriteriaResults <- bind_rows(chronicCriteriaResults, chronicDataCriteriaAnalysis) 
+      } else {chronicCriteriaResults <- chronicCriteriaResults }
+    }
+    # summarize results
+    stationCriteriaResults <- bind_rows( acuteCriteriaResults, chronicCriteriaResults) %>% 
+      filter(!is.na(FDT_STA_ID)) %>% # drop placeholder rows
+      distinct(FDT_STA_ID, WindowDateTimeStart, FDT_DEPTH, `Criteria Type`, .keep_all = T) %>% # remove duplicates in case > 1 depth per datetime
+      arrange(FDT_STA_ID, WindowDateTimeStart, FDT_DEPTH, `Criteria Type`)
+    return(stationCriteriaResults)
+  } else { return(NULL)}
+  # } else {return(tibble(FDT_STA_ID = as.character(NA), WindowDateTimeStart = as.POSIXct(NA), FDT_DEPTH = as.numeric(NA),
+  #                       Value = as.numeric(NA), ValueType = as.character(NA), 
+  #                       `Criteria Type` = as.character(NA), CriteriaValue = as.numeric(NA), 
+  #                       `Sample Count` = as.numeric(NA), 
+  #                       parameterRound = as.numeric(NA), Exceedance = as.numeric(NA)) ) }
+}
+# dataToAnalyze <- chlorideFreshwaterAnalysis(stationData) 
+
+# fake data for testing
+#dataToAnalyze$`Sample Count`[1:77] <- rep(3, 77)
+# dataToAnalyze <- zz
+
+```
+
