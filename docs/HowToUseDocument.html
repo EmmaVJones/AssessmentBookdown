@@ -153,7 +153,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="divider"></li>
 <li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
 <ul>
-<li class="chapter" data-level="1.1" data-path="HowToUseDocument.html"><a href="HowToUseDocument.html"><i class="fa fa-check"></i><b>1.1</b> How to Use Document</a></li>
+<li class="chapter" data-level="1.1" data-path="HowToUseDocument.html"><a href="HowToUseDocument.html"><i class="fa fa-check"></i><b>1.1</b> How to Use Document</a>
+<ul>
+<li class="chapter" data-level="1.1.1" data-path="HowToUseDocument.html"><a href="HowToUseDocument.html#ProgrammingExpectations"><i class="fa fa-check"></i><b>1.1.1</b> Programming Expectations</a></li>
+</ul></li>
 <li class="chapter" data-level="1.2" data-path="ProjectHistory.html"><a href="ProjectHistory.html"><i class="fa fa-check"></i><b>1.2</b> Project History</a></li>
 <li class="chapter" data-level="1.3" data-path="wqa-technical-support-team.html"><a href="wqa-technical-support-team.html"><i class="fa fa-check"></i><b>1.3</b> WQA Technical Support Team</a></li>
 <li class="chapter" data-level="1.4" data-path="Acknowledgements.html"><a href="Acknowledgements.html"><i class="fa fa-check"></i><b>1.4</b> Acknowledgements</a></li>
@@ -216,7 +219,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="3.5.9" data-path="individual-parameter-analyses.html"><a href="individual-parameter-analyses.html#metals"><i class="fa fa-check"></i><b>3.5.9</b> Metals</a></li>
 <li class="chapter" data-level="3.5.10" data-path="individual-parameter-analyses.html"><a href="individual-parameter-analyses.html#fish-tissue"><i class="fa fa-check"></i><b>3.5.10</b> Fish Tissue</a></li>
 <li class="chapter" data-level="3.5.11" data-path="individual-parameter-analyses.html"><a href="individual-parameter-analyses.html#benthics"><i class="fa fa-check"></i><b>3.5.11</b> Benthics</a></li>
-<li class="chapter" data-level="3.5.12" data-path="individual-parameter-analyses.html"><a href="individual-parameter-analyses.html#additional-automated-functions"><i class="fa fa-check"></i><b>3.5.12</b> Additional Automated Functions</a></li>
+<li class="chapter" data-level="3.5.12" data-path="individual-parameter-analyses.html"><a href="individual-parameter-analyses.html#additional-functions"><i class="fa fa-check"></i><b>3.5.12</b> Additional Functions</a></li>
 </ul></li>
 <li class="chapter" data-level="3.6" data-path="automated-output.html"><a href="automated-output.html"><i class="fa fa-check"></i><b>3.6</b> Automated Output</a></li>
 </ul></li>
@@ -260,7 +263,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="HowToUseDocument" class="section level2" number="1.1">
 <h2><span class="header-section-number">1.1</span> How to Use Document</h2>
-<p>The following report is an agency effort to facilitate the further adoption of automated assessment methods statewide. The intention of this project is to provide a non-programmer audience with accessible and understandable narratives describing the automated water quality assessment process. This document is not a comprehensive <a href="https://www.deq.virginia.gov/water/water-quality/assessments/wqa-guidance-manual">WQA Guidance Manual</a>, nor is it an introduction to using the R programming language. Here, we document the overall automated assessment process, explaining reasons certain decisions were made, and how to unpack analyses.</p>
+<p>The following report is an agency effort to facilitate the further adoption of automated assessment methods statewide. The intention of this project is to provide a non-programmer audience with accessible and understandable narratives describing the automated water quality assessment process. This document is not a comprehensive <a href="https://www.deq.virginia.gov/water/water-quality/assessments/wqa-guidance-manual" target="_blank">WQA Guidance Manual</a>, nor is it an introduction to using the R programming language. Here, we document the overall automated assessment process, explaining reasons certain decisions were made, how to unpack analyses, and where to seek further assistance through additional resources or interactive data exploration through web-based application interfaces.</p>
+<div id="ProgrammingExpectations" class="section level3" number="1.1.1">
+<h3><span class="header-section-number">1.1.1</span> Programming Expectations</h3>
+<p>The Water Quality Assessment process is complicated. Learning a programming language is complicated. Combine these topics, the subject of this book, and we arrive at complicated<sup>2</sup>.</p>
+<p>The narrative script descriptions are written for understanding at an elementary programming level; however, the individual scripts utilize advanced programming techniques for parsimony, efficiency, and ease of long term maintenance. While it is not necessary to understand every element of code provided to run the automated assessment methods, certain programming themes listed below can be helpful:</p>
+<ul>
+<li><a href="https://www.tidyverse.org/" target="_blank">Tidyverse</a></li>
+<li><a href="https://rmarkdown.rstudio.com/" target="_blank">Rmarkdown</a></li>
+<li><a href="https://datacarpentry.org/semester-biology/lessons/R-functions/" target="_blank">Custom functions</a></li>
+<li><a href="https://jennybc.github.io/purrr-tutorial/" target="_blank">Optimizing list objects with purrr</a></li>
+<li><a href="https://cran.r-project.org/web/packages/pins/vignettes/pins.html" target="_blank">Pinned data</a></li>
+</ul>
+<p>The internally-published <a href="https://rconnect.deq.virginia.gov/MethodsEncyclopedia/" target="_blank">DEQ R Methods Encyclopedia</a> is a good resource when getting started with R. These articles are useful to familiarize yourself:</p>
+<ul>
+<li><a href="https://rconnect.deq.virginia.gov/MethodsEncyclopedia/gettingStartedWithR.html#gettingStartedWithR" target="_blank">Getting Started With R</a></li>
+<li><a href="https://rconnect.deq.virginia.gov/MethodsEncyclopedia/gettingStartedWithR.html#how-to-learn-or-continue-learning-r" target="_blank">How to Learn (or Continue Learning) R?</a></li>
+<li><a href="https://rconnect.deq.virginia.gov/MethodsEncyclopedia/connectToConnectPins.html#connectToConnectPins" target="_blank">Connecting to R Connect (for Pinned Data)</a></li>
+</ul>
+<p>The <a href="wqa-technical-support-team.html#wqa-technical-support-team">WQA Technical Support Team</a> is available for assistance should you encounter any questions.</p>
+</div>
 </div>
             </section>
 

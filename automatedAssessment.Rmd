@@ -1568,7 +1568,7 @@ Lastly, while we hope the next section containing plain English, narrative descr
 
 ### Temperature
 
-A maximum temperature criteria applies to stations depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target='_blank'}. The `tempExceedances()` function identifies any temperature exceedances of the `Max Temperature (C)` field for each sample provided. The function removes all Level I and Level II data and missing data before rounding measure to even and comparing against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+A maximum temperature criteria applies to stations depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target='_blank'}. The `tempExceedances()` function identifies any temperature exceedances of the `Max Temperature (C)` field for each sample provided. The function removes all Level I and Level II data and missing data before rounding measure to even and comparing against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument. Read more about the `quickStats()` helper function in the [Additional Functions section.](#quickstats){target='_blank'}
 
 ```{r automated assessment temperature, eval=FALSE}
 #Max Temperature Exceedance Function
@@ -1597,7 +1597,9 @@ tempExceedances <- function(stationData){
 
 ### Dissolved Oxygen
 
-There are two general dissolved oxygen (DO) criteria that may apply to stations, depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target="_blank"}. The minimum DO criteria are evaluated against the provided `Dissolved Oxygen Min (mg/L)` using the `DOExceedances_Min()` function. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+There are two general dissolved oxygen (DO) criteria that may apply to stations, depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target="_blank"}. The minimum DO criteria are evaluated against the provided `Dissolved Oxygen Min (mg/L)` using the `DOExceedances_Min()` function. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"}, then only the epilimnion and unstratified samples are evaluated. Thermocline information is evaluated using the [`thermoclineDepth()` function](#thermoclinedepth){target='_blank'} in a previous step. 
+
+Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument. Read more about the `quickStats()` helper function in the [Additional Functions section.](#quickstats){target='_blank'}
 
 ```{r automated assessment DOExceedances_Min, eval=FALSE}
 # Minimum DO Exceedance function
@@ -1635,7 +1637,9 @@ DOExceedances_Min <- function(stationData){
 ```
 
 
-A separate function called `DO_Assessment_DailyAvg()` evaluates whether or not a station exceeds the DO daily average criteria, provided in the `Dissolved Oxygen Daily Avg (mg/L)` field. This analysis is only run if the number of samples for a station in a given date are greater than one. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+A separate function called `DO_Assessment_DailyAvg()` evaluates whether or not a station exceeds the DO daily average criteria, provided in the `Dissolved Oxygen Daily Avg (mg/L)` field. This analysis is only run if the number of samples for a station in a given date are greater than one. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"}, then only the epilimnion and unstratified samples are evaluated. Thermocline information is evaluated using the [`thermoclineDepth()` function](#thermoclinedepth){target='_blank'} in a previous step. 
+
+Regardless of the waterbody type, all Level I and Level II data and missing data are removed before measures are rounded to even and compared against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument. Read more about the `quickStats()` helper function in the [Additional Functions section.](#quickstats){target='_blank'}
 
 ```{r automated assessment DO_Assessment_DailyAvg, eval=FALSE}
 # Daily Average exceedance function
@@ -1686,7 +1690,7 @@ DO_Assessment_DailyAvg <- function(stationData){
 
 ### pH
 
-A pH range criteria applies to stations depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target="_blank"}. The `pHExceedances()` function identifies any pH values outside of the range specified in the associated `pH Min` and `pH Max` fields. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, the function removes all Level I and Level II data and missing data before rounding measures to even and comparing against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument.
+A pH range criteria applies to stations depending on their [associated WQS](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section50/){target="_blank"}. The `pHExceedances()` function identifies any pH values outside of the range specified in the associated `pH Min` and `pH Max` fields. This function handles lake stations differently than other waterbody types. If a station is in a [Section 187 lake](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"}, then only the epilimnion and unstratified samples are evaluated. Regardless of the waterbody type, the function removes all Level I and Level II data and missing data before rounding measures to even and comparing against the provided criteria. An internal `7Q10 Flag` is passed through this function for use in the `quickStats()` function should a user adjust the default `drop7Q10` argument. Read more about the `quickStats()` helper function in the [Additional Functions section.](#quickstats){target='_blank'}
 
 
 ```{r automated assessment pHExceedances, eval=FALSE}
@@ -2177,7 +2181,397 @@ bacteriaAssessmentDecisionClass <- function(stationData, # input dataframe with 
 
 ### Ammonia
 
+[Ammonia](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section155/){target="_blank"} is evaluated using acute, chronic, and four-day criteria across rolling three year windows that may not exceed more than once every three years on the average in free flowing streams. The presence or absence of trout, freshwater mussel species, and early life stages of fish during most times of the year each affect the calculation of ammonia criteria for a given waterbody. The WQS state that ["the Department of Environmental Quality, after consultation with the Virginia Department of Wildlife Resources and the U.S. Fish and Wildlife Service, has determined that the majority of Virginia freshwaters are likely to contain, or have contained in the past, freshwater mussel species in the family Unionidae and contain early life stages of fish during most times of the year. Therefore, the ammonia criteria presented in subsections B and C of this section are designed to provide protection to these species and life stages."](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section155/){target="_blank} In practice, this means, unless demonstrated otherwise, mussels and fish early life stages are assumed present for criteria method calculations. Once the method for criteria calculation has been established for a waterbody, individual temperature and pH measurements are required to calculate individual criteria, and averages of these parameters are required when more than one measure is present within a given criteria window (for chronic, 30 day, and four day criteria). 
+
+Ammonia is a complicated criteria to program and understand. The automated assessment scripts have organized ammonia criteria calculation into nested functions such that individual components of the analysis can be extracted when needed (e.g. during interactive application data visualization). To expedite application rendering time, calculated ammonia results are stored in a R dataset (.RDS) and provided to the application instead of recalculating the criteria on the fly in the application. As such, the WQS (including trout present/absent) attributed to a station in the metadata attribution process as well as mussels and early life fish stages present values are the default values when exploring ammonia criteria analyses in the interactive assessment applications. Should sufficient justification exist to depart from these default values for individual stations, please contact the [WQA Technical Support Team](#wqa-technical-support-team). 
+
+#### freshwaterNH3limit
+
+The calculation and application of ammonia criteria is performed by the `freshwaterNH3limit()` function. This function takes in data from one station (`stationData` argument) as well as three additional boolean (TRUE/FALSE) arguments: `trout` (trout present/absent), `mussels` (mussels present/absent), and `earlyLife` (early life stages of fish present/absent). The `trout` argument determined by the associated WQS Class where Class V and VI waters indicate trout are present and any other class indicates trout are absent. As stated above, the `mussels` and `earlyLife` arguments are default set to TRUE to be most protective, but should justification exist, these options may be toggled to FALSE and result in different criteria methods applied to the data.
+
+This function is complicated and will be explained using the order of operations presented internally. Running through each scenario individually could assist understanding of the logic. First, since this is a computationally-intensive function, if no data are available to be analyzed, the function returns NULL. If data are present, the function removes all Level I and Level II data, missing data, and data greater than 1 meter depth before rechecking whether data are there for analysis and returning NULL if not. 
+
+The function then creates storage objects for acute, chronic, and four day average results and loops through each row of data to correctly calculate acute criteria and find any chronic scenarios (and then run a 4 day analysis if data exist). Each new sample event prompts the creation of acute, chronic, and four day data windows. If sufficient data exist in any of these windows, the window temperature and pH averages are used to calculate ammonia criteria based on the scenario arguments established above for comparison to the window ammonia average, rounded to even. Chronic and four day windows are only calculated if more than one result exists in those data windows. The data analyzed within each window is saved as a listcolumn called `associatedData` that may be extracted for investigation later. The output of the function is a long dataset where each unique sample event could have a row summarizing the acute, chronic, and four day calculated criteria, sample count in the given window, exceedance result, and associated data (`associatedData` listcolumn).
+
 ```{r automated assessment ammonia, eval=FALSE}
+# Calculate limits and return dataframe with original data and limits 9VAC25-260-155 https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section155/
+freshwaterNH3limit <- function(stationData, # dataframe with station data
+                               trout, # T/F condition
+                               mussels,# T/F condition
+                               earlyLife# T/F condition
+){
+  # If no data, return nothing
+  if(nrow(stationData)==0){return(NULL)}
+  
+  # remove any data that shouldn't be considered
+  stationDataAmmonia <- filter(stationData, !(LEVEL_FDT_TEMP_CELCIUS %in% c('Level II', 'Level I')) |
+                                 !(LEVEL_FDT_FIELD_PH %in% c('Level II', 'Level I'))) %>% # get lower levels out
+    # # lake stations should only be surface sample
+    # {if(unique(stationData$lakeStation) == TRUE)
+      filter(., FDT_DEPTH <= 1) %>%  # all samples should be < 1m (this allows for 0.3m surface samples and 0m integrated samples)
+      # else . } %>%
+    filter(!is.na(AMMONIA_mg_L)) %>% #get rid of NA's
+    dplyr::select(FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, FDT_TEMP_CELCIUS, FDT_FIELD_PH, AMMONIA_mg_L) %>% 
+    # can only run analysis if all above variable are populated for a given date/time
+    filter(!is.na(FDT_TEMP_CELCIUS) & !is.na(FDT_FIELD_PH))
+  # If no data, return nothing
+  if(nrow(stationDataAmmonia)==0){return(NULL)}
+  
+  
+  # make a place to store analysis results
+  acuteCriteriaResults <- tibble(FDT_STA_ID = as.character(NA), WindowDateTimeStart = as.POSIXct(NA), 
+                                 FDT_DEPTH = as.character(NA),# character so we can concatenate multiple depth values if needed
+                                 Value = as.numeric(NA), ValueType = as.character(NA), 
+                                 `Criteria Type` = as.character(NA), CriteriaValue = as.numeric(NA), 
+                                 `Sample Count` = as.numeric(NA), 
+                                 parameterRound = as.numeric(NA), Exceedance = as.numeric(NA),
+                                 associatedData = list())
+  chronicCriteriaResults <- acuteCriteriaResults
+  fourDayCriteriaResults <- acuteCriteriaResults
+  
+  # loop through each row of data to correctly calculate acute criteria and find any chronic scenarios (and then 
+  #   run a 4 day analysis if data exist)
+  for(k in stationDataAmmonia$FDT_DATE_TIME){  #k = stationDataAmmonia$FDT_DATE_TIME[2]
+    acuteDataWindow <- filter(stationDataAmmonia,  between(FDT_DATE_TIME, k, k + hours(1)))
+    chronicDataWindow <- filter(stationDataAmmonia,  between(FDT_DATE_TIME, k, k + days(30)))
+    fourDayDataWindow <- filter(stationDataAmmonia,  between(FDT_DATE_TIME, k, k + days(4)))
+    
+    
+    # Run acute analysis if data exists
+    # Acute is calculated on 1 hour windows, so we need to average temperature and pH within each 1 hour window before we can calculate an
+    #  acute criteria. There are no rules on how many samples need to occur in a 1 hour window for the window to be valid, but chronic and
+    #  4 day criteria require > 1 sample to be analyzed.
+    
+    # Acute criteria can combine multiple depths in calculation of criteria, <1m difference (which is taken care of above)
+    
+    if(nrow(acuteDataWindow) > 0){
+      acuteDataCriteriaAnalysis <- suppressMessages( 
+        acuteDataWindow %>% 
+          #  group_by(FDT_STA_ID) %>% # for some reason if multiple depths but 1 stationID get 2 rows when group_by(FDT_STA_ID)
+          summarise(FDT_STA_ID = paste0(unique(FDT_STA_ID), collapse = ' '), ### this is the ugly fix to problem identified above
+                    FDT_DEPTH = paste0(sort(unique(FDT_DEPTH)), collapse = ' | '),
+                    TempValue = mean(FDT_TEMP_CELCIUS, na.rm=T),  # get hourly average; don't round to even bc more calculations to follow with data
+                    pHValue = mean(FDT_FIELD_PH, na.rm=T),  # get hourly average; don't round to even bc more calculations to follow with data
+                    Value = mean(AMMONIA_mg_L, na.rm=T),  # get hourly average; don't round to even bc more calculations to follow with data
+                    `Sample Count` = length(AMMONIA_mg_L)) %>%  #count sample that made up average
+          mutate(ValueType = 'Hourly Average',
+                 ID = paste( FDT_STA_ID, FDT_DEPTH, sep = '_'), # make a uniqueID in case >1 sample for given datetime
+                 `Criteria Type` = 'Acute') %>% 
+          {if(trout == TRUE & mussels == TRUE)  # Trout & mussels present scenario
+            mutate(., CriteriaValue = as.numeric(signif(
+              min(((0.275 / (1 + 10^(7.204 - pHValue))) + (39.0 / (1 + 10^(pHValue - 7.204)))),
+                  (0.7249 * ( (0.0114 / (1 + 10^(7.204 - pHValue))) + (1.6181 / (1 + 10^(pHValue - 7.204)))) * (23.12 * 10^(0.036 * (20 - TempValue))) )), digits = 2)))
+            else . } %>%
+          {if(trout == TRUE & mussels == FALSE) # Trout present & mussels absent scenario
+            mutate(., CriteriaValue = as.numeric(signif(
+              min(((0.275 / (1 + 10^(7.204 - pHValue))) + (39.0 / (1 + 10^(pHValue - 7.204)))),
+                  (0.7249 * ( (0.0114 / (1 + 10^(7.204 - pHValue))) + (1.6181 / (1 + 10^(pHValue - 7.204)))) * (62.15 * 10^(0.036 * (20 - TempValue))) )), digits = 2)))
+            else . } %>%
+          {if(trout == FALSE & mussels == TRUE) # Trout absent & mussels present scenario
+            mutate(., CriteriaValue = as.numeric(signif(
+              0.7249 * ((0.0114 / (1 + 10^(7.204 - pHValue))) + (1.6181 / (1 + 10^(pHValue - 7.204)))) * min(51.93, (23.12 * 10^(0.036 * (20 - TempValue)))), digits = 2)))
+            else .} %>% 
+          {if(trout == FALSE & mussels == FALSE) # Trout & mussels absent scenario
+            mutate(., CriteriaValue = as.numeric(signif(
+              0.7249 * ((0.0114 / (1 + 10^(7.204 - pHValue))) + (1.6181 / (1 + 10^(pHValue - 7.204)))) * min(51.93, (62.15 * 10^(0.036 * (20 - TempValue)))), digits = 2)))
+            else .} %>% 
+          mutate(parameterRound = signif(Value, digits = 2), # two significant figures based on 9VAC25-260-155 https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section155/
+                 Exceedance = ifelse(parameterRound > CriteriaValue, 1, 0 ), # use 1/0 to easily summarize multiple results later
+                 WindowDateTimeStart = min(acuteDataWindow$FDT_DATE_TIME)) %>% 
+          dplyr::select(FDT_STA_ID, WindowDateTimeStart, everything(), -ID) ) 
+      # now save data for later, in a format that matches with desired output
+      acuteDataCriteriaAnalysis <- acuteDataCriteriaAnalysis %>% 
+        dplyr::select(-c(TempValue, pHValue)) %>% 
+        bind_cols(tibble(associatedData = list(left_join(acuteDataWindow,
+                                                         dplyr::select(acuteDataCriteriaAnalysis, FDT_STA_ID,  WindowDateTimeStart, TempValue, pHValue, Value),
+                                                         by = c('FDT_STA_ID', 'FDT_DATE_TIME' = 'WindowDateTimeStart')))) )
+      
+      # Save the results for viewing later
+      acuteCriteriaResults <- bind_rows(acuteCriteriaResults, acuteDataCriteriaAnalysis) 
+      
+    } else {acuteCriteriaResults <- acuteCriteriaResults }
+    
+
+    # Run chronic analysis if enough data exists, must have > 1 sample in chronic window to run analysis
+    # Chronic is calculated on 30 day windows, so we need to average temperature and pH within each 30 day window before we can calculate a
+    #  chronic criteria. The chronic criteria will be associated with each sample date that starts a 30 day period, but it applies to all
+    #  samples within the 30 day window. All raw data associated with each window is saved as a listcolumn for later review.
+    
+    # Chronic criteria can combine multiple depths in calculation of criteria, <1m difference (which is taken care of above)
+    
+    if(nrow(chronicDataWindow) > 1){ # need 2 or more data points to run a chronic
+      chronicDataCriteriaAnalysis <- suppressMessages(
+        chronicDataWindow %>% 
+        #  group_by(FDT_STA_ID) %>% # for some reason if multiple depths but 1 stationID get 2 rows when group_by(FDT_STA_ID)
+          summarise(FDT_STA_ID = paste0(unique(FDT_STA_ID), collapse = ' '), ### this is the ugly fix to problem identified above
+                    FDT_DEPTH = paste0(sort(unique(FDT_DEPTH)), collapse = ' | '),
+                    TempValue = mean(FDT_TEMP_CELCIUS, na.rm = T), # get 30 day average; don't round to even bc more calculations to follow with data
+                    pHValue = mean(FDT_FIELD_PH, na.rm = T), # get 30 day average; don't round to even bc more calculations to follow with data
+                    Value = mean(AMMONIA_mg_L, na.rm = T), # get 30 day average; don't round to even bc more calculations to follow with data
+                    `Sample Count` = length(AMMONIA_mg_L)) %>%  #count sample that made up average
+          mutate(ValueType = '30 Day Average',
+                 ID = paste( FDT_STA_ID, FDT_DEPTH, sep = '_'), # make a uniqueID in case >1 sample for given datetime
+                 `Criteria Type` = 'Chronic') %>%
+        # Trout & mussels present scenario
+        {if(trout == TRUE & mussels == TRUE & earlyLife == TRUE)  # Trout & mussels present scenario & earlyLife == TRUE
+          mutate(., CriteriaValue = as.numeric(signif(
+            0.8876 * ((0.0278 / (1 + 10^(7.688 - pHValue))) + (1.1994 / (1 + 10^(pHValue - 7.688)))) * (2.126 * 10^(0.028 * (20 - max(7, TempValue)))), digits = 2)))
+          else .} %>%
+        {if(trout == TRUE & mussels == TRUE & earlyLife == FALSE)  # Trout & mussels present scenario & earlyLife == FALSE
+          mutate(., CriteriaValue = as.numeric(NA))
+          else .} %>%
+
+        # Trout present & mussels absent scenario
+        {if(trout == TRUE & mussels == FALSE & earlyLife == TRUE)  # Trout present & mussels absent scenario & earlyLife == TRUE
+          mutate(., CriteriaValue = as.numeric(signif(
+            0.9405 * ((0.0278 / (1 + 10^(7.688 - pHValue))) + (1.1994 / (1 + 10^(pHValue - 7.688)))) * min(6.92, (7.547 * 10^(0.028 * (20 - TempValue)))), digits = 2)))
+          else .} %>%
+        {if(trout == TRUE & mussels == FALSE & earlyLife == FALSE)  # Trout present & mussels absent scenario & earlyLife == FALSE
+          mutate(., CriteriaValue = as.numeric(signif(
+            0.9405 * ((0.0278 / (1 + 10^(7.688 - pHValue))) + (1.1994 / (1 + 10^(pHValue - 7.688)))) * (7.547 * 10^(0.028 * (20 - max(TempValue, 7)))), digits = 2)))
+          else .} %>%
+
+        # Trout absent & mussels present scenario
+        {if(trout == FALSE & mussels == TRUE & earlyLife == TRUE)  # Trout absent & mussels present scenario & earlyLife == TRUE
+          mutate(., CriteriaValue = as.numeric(signif(
+            0.8876 * ((0.0278 / (1 + 10^(7.688 - pHValue))) + (1.1994 / (1 + 10^(pHValue - 7.688)))) * (2.126 * 10^(0.028 * (20 - max(7, TempValue)))), digits = 2)))
+          else .} %>%
+        {if(trout == FALSE & mussels == TRUE & earlyLife == FALSE)  # Trout absent & mussels present scenario & earlyLife == FALSE
+          mutate(., CriteriaValue = as.numeric(NA))
+          else .} %>%
+
+         # Trout & mussels absent scenario
+        {if(trout == FALSE & mussels == FALSE & earlyLife == TRUE)  # Trout & mussels absent scenario & earlyLife == TRUE
+          mutate(., CriteriaValue = as.numeric(signif(
+            0.9405 * ((0.0278 / (1 + 10^(7.688 - pHValue))) + (1.1994 / (1 + 10^(pHValue - 7.688)))) * min(6.92, (7.547 * 10^(0.028 * (20 - TempValue)))), digits = 2)))
+          else .} %>%
+        {if(trout == FALSE & mussels == FALSE & earlyLife == FALSE)  # Trout & mussels absent scenario & earlyLife == FALSE
+          mutate(., CriteriaValue = as.numeric(signif(
+            0.9405 * ((0.0278 / (1 + 10^(7.688 - pHValue))) + (1.1994 / (1 + 10^(pHValue - 7.688)))) * (7.547 * 10^(0.028 * (20 - max(TempValue, 7)))), digits = 2)))
+          else .} %>%
+
+        mutate(parameterRound = signif(Value, digits = 2), # two significant figures based on 9VAC25-260-155 https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section155/
+               Exceedance = ifelse(parameterRound > CriteriaValue, 1, 0 ), # use 1/0 to easily summarize multiple results later
+               WindowDateTimeStart = min(acuteDataWindow$FDT_DATE_TIME)) %>%
+        dplyr::select(FDT_STA_ID, WindowDateTimeStart, everything(), -ID) ) 
+      # now save data for later, in a format that matches with desired output
+      chronicDataCriteriaAnalysis <- chronicDataCriteriaAnalysis %>% 
+        dplyr::select(-c(TempValue, pHValue)) %>% 
+        bind_cols(tibble(associatedData = list(left_join(chronicDataWindow,
+                                                         dplyr::select(chronicDataCriteriaAnalysis, FDT_STA_ID,  WindowDateTimeStart, TempValue, pHValue, Value),
+                                                         by = c('FDT_STA_ID', 'FDT_DATE_TIME' = 'WindowDateTimeStart')))) )
+
+      # Save the results for viewing later
+      chronicCriteriaResults <- bind_rows(chronicCriteriaResults, chronicDataCriteriaAnalysis)
+    } else {chronicCriteriaResults <- chronicCriteriaResults }
+    
+    
+    # Run 4 day analysis if data exists
+    # 4 day analysis is run on 4 day windows, so we need to average temperature and pH within each 4 day window before we can compare to a 2.5x 
+    #  chronic criteria. The chronic criteria associated with each sample date that starts a 4 day period is used for the 4 day analysis. 
+    #  All raw data associated with each window is saved as a listcolumn for later review.
+    
+    # 4day criteria can combine multiple depths in calculation of criteria, <1m difference (which is taken care of above)
+    
+    if(nrow(fourDayDataWindow) > 1){
+      fourDayDataCriteriaAnalysis <- suppressMessages( 
+        fourDayDataWindow %>% 
+          #  group_by(FDT_STA_ID) %>% # for some reason if multiple depths but 1 stationID get 2 rows when group_by(FDT_STA_ID)
+          summarise(FDT_STA_ID = paste0(unique(FDT_STA_ID), collapse = ' '), ### this is the ugly fix to problem identified above
+                    FDT_DEPTH = paste0(sort(unique(FDT_DEPTH)), collapse = ' | '),
+                    TempValue = mean(FDT_TEMP_CELCIUS, na.rm=T),  # get 4day average; doesn't do anything bc this doesn't go into criteria calculation but needed to match other data format
+                    pHValue = mean(FDT_FIELD_PH, na.rm=T),  # get 4day average; doesn't do anything bc this doesn't go into criteria calculation but needed to match other data format
+                    Value = mean(AMMONIA_mg_L, na.rm=T),  # get 4day average; don't round to even bc want to see raw and parameterRound columns in output
+                    `Sample Count` = length(AMMONIA_mg_L)) %>%  #count sample that made up average
+          mutate(ValueType = 'Four Day Average',
+                 ID = paste( FDT_STA_ID, FDT_DEPTH, sep = '_'), # make a uniqueID in case >1 sample for given datetime
+                 `Criteria Type` = 'Four Day') %>% 
+          left_join(dplyr::select(chronicDataCriteriaAnalysis, FDT_STA_ID, `Chronic CriteriaValue` = CriteriaValue),
+                    by = c('FDT_STA_ID')) %>% 
+          mutate(CriteriaValue = as.numeric(signif(`Chronic CriteriaValue` * 2.5, digits = 2)), # 4 day criteria = 2.5x chronic criteria
+                 parameterRound = signif(Value, digits = 2), # two significant figures based on 9VAC25-260-155 https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section155/
+                 Exceedance = ifelse(parameterRound > CriteriaValue, 1, 0 ), # use 1/0 to easily summarize multiple results later
+                 WindowDateTimeStart = min(fourDayDataWindow$FDT_DATE_TIME)) %>% 
+          dplyr::select(FDT_STA_ID, WindowDateTimeStart, everything(), -c(ID, `Chronic CriteriaValue` ) ) )
+      # now save data for later, in a format that matches with desired output
+      fourDayDataCriteriaAnalysis <- fourDayDataCriteriaAnalysis %>% 
+        dplyr::select(-c(TempValue, pHValue)) %>% 
+        bind_cols(tibble(associatedData = list(left_join(fourDayDataWindow,
+                                                         dplyr::select(fourDayDataCriteriaAnalysis, FDT_STA_ID,  WindowDateTimeStart, TempValue, pHValue, Value),
+                                                         by = c('FDT_STA_ID', 'FDT_DATE_TIME' = 'WindowDateTimeStart')))) )
+      
+      # Save the results for viewing later
+      fourDayCriteriaResults <- bind_rows(fourDayCriteriaResults, fourDayDataCriteriaAnalysis) 
+      
+    } else {fourDayCriteriaResults <- fourDayCriteriaResults }
+    
+          
+
+    combinedResults <- bind_rows(acuteCriteriaResults, chronicCriteriaResults) %>%
+      {if(nrow(fourDayCriteriaResults) > 0)
+        bind_rows(., fourDayCriteriaResults)
+        else .} %>% 
+      arrange(WindowDateTimeStart, `Criteria Type`)
+        
+    }
+  
+      
+      return( combinedResults)#bind_rows(acuteDataCriteriaAnalysis, chronicDataCriteriaAnalysis))
+}
+
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+# ammoniaAnalysisStation <- freshwaterNH3limit(stationData, 
+#                                              trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
+#                                              mussels = TRUE, 
+#                                              earlyLife = TRUE) 
+# https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section155/ states the assumption is that
+# waters are to be assessed with the assumption that mussels and early life stages of fish should be present
+# trout presence is determined by WQS class, this can be changed in the app but is forced to be what the station
+# is attributed to in the automated assessment scripts
+```
+
+#### annualRollingExceedanceAnalysis
+
+Calculating the appropriate ammonia criteria is just the first part of assessing ammonia. To assess ammonia in free-flowing and tidal waters for Wildlife and Aquatic Life Uses, acute, chronic and four day criteria must not exceed respective criteria more than once every three years on the average. Helper functions have been established to assist with the automation of these decisions. The `annualRollingExceedanceAnalysis()` helper function takes in the output of the `freshwaterNH3limit()` function and an additional argument (`yearsToRoll`) that established the number of years to roll analyses over, for our use case we will use three years. 
+
+The function extracts the year from each data window analyzed and drops any criteria that do not meet sample count rules (e.g. chronic or four day window results that were calculated on 1 or fewer samples). Based on the unique years of the input data windows and the `yearsToRoll` argument (3 in our case), the function loops over data within each `yearsToRoll` window range to calculate the number of exceedances in the rolled window (and whether or not the window is valid) by criteria type (e.g. acute, chronic, or four day) and appends all data used for the summary in a listcolumn called `associatedData` to simplify data review. Unique window ranges are not repeated thanks to the logic outlined in the `windowRange` range established for the for loop.
+
+```{r automated assessment ammonia annualRollingExceedanceAnalysis, eval=FALSE}
+# New rolling window analysis function. This calculates the number of exceedances in a X year window (not repeating windows)
+#  and determines if the number of windows exceeding criteria are greater than the number of windows not exceeding criteria
+#  using subsequent annualRollingExceedanceSummary()
+# analyze results by 3 year windows, not a strict rolling window, roll by year
+annualRollingExceedanceAnalysis <- function(dataToAnalyze,
+                                            yearsToRoll){
+  
+  if(is.null(dataToAnalyze)){return(NULL)}
+  
+  # place to store results
+  dataWindowResults <- tibble(FDT_STA_ID = as.character(NA), `Window Begin` = as.numeric(NA),
+                              FDT_DEPTH = as.character(NA),# character so we can concatenate multiple depth values if needed
+                              `Criteria Type` = as.character(NA),
+                              `Years Analysis Rolled Over`= as.numeric(NA), 
+                              `Exceedances in Rolled Window` = as.numeric(NA), 
+                              associatedData = list())
+  dataToAnalyze <- dataToAnalyze %>% 
+    mutate(Year = year(WindowDateTimeStart),
+           `Valid Window` = case_when(`Criteria Type` %in% c("Chronic", "Four Day")  & `Sample Count` > 1 ~ TRUE,
+                                      TRUE ~ NA))
+  
+   # First, identify all window start options
+  windowOptions <- unique(year(dataToAnalyze$WindowDateTimeStart))
+  # Now, stop loop from repeating windows by capping the top end by yearsToRoll-1 (so don't have 3 yr windows exceeding 
+  #  assessment period), then remove any windowRange options that don't actually have data in those years
+  windowRange <- (min(windowOptions):(max(windowOptions)- (yearsToRoll- 1)))[(min(windowOptions):(max(windowOptions)- (yearsToRoll- 1))) %in% windowOptions]
+
+
+  for(i in min(windowRange):(max(windowRange)- (yearsToRoll- 1))){ #i = min(min(windowRange):(max(windowRange)- (yearsToRoll- 1))[1])
+    # print(i)}
+    dataWindow <- filter(dataToAnalyze, Year %in% i:(i + yearsToRoll- 1) ) # minus 1 year for math to work
+    dataWindowAnalysis <- suppressMessages( dataWindow %>% 
+                                              group_by(FDT_STA_ID, #FDT_DEPTH, 
+                                                       `Criteria Type`) %>%
+                                              summarise(`Criteria Type` = unique(`Criteria Type`),
+                                                        `Window Begin` = year(min(WindowDateTimeStart)),
+                                                        `Years Analysis Rolled Over` = yearsToRoll, 
+                                                        `Exceedances in Rolled Window` = sum(Exceedance),
+                                                        `Valid Window` = all(`Valid Window` == T)) %>% 
+                                              bind_cols(tibble(associatedData = list(dataWindow))) ) 
+    dataWindowResults <- bind_rows(dataWindowResults, dataWindowAnalysis) 
+  }
+  return(dataWindowResults)
+}
+
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+# annualRollingExceedanceAnalysis(
+#   freshwaterNH3limit(stationData,
+#                    trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
+#                    mussels = TRUE,
+#                    earlyLife = TRUE),
+#   yearsToRoll = 3)
+```
+
+#### annualRollingExceedanceSummary
+
+The `annualRollingExceedanceSummary()` helper function summarizes the output of the `annualRollingExceedanceAnalysis()` function to suggest an ammonia result for Wildlife and Aquatic Life Designated uses. This function determines whether the number of exceeding windows are greater than the number of windows without exceedances and suggests a result based on that analysis. Before suggesting any results, the function ensures all data windows are valid (based upon flags chronic and four day sampling criteria analyzed in previous functions). After summarizing the window results by criteria type, the function suggests a result to the user where a "Supporting" output is provided only if the number of windows without exceedances are greater than the number of windows with exceedances. All other summaries result in a "Review" flag.
+
+```{r automated assessment ammonia annualRollingExceedanceSummary, eval=FALSE}
+# Flag if more windows exceeding than not
+annualRollingExceedanceSummary <- function(rolledAnalysis){
+  
+  if(is.null(rolledAnalysis)){return(NULL)}
+  
+  # make a valid dataset for this analysis
+  validDataForExceedanceSummary <- bind_rows(
+    rolledAnalysis %>% 
+      filter(`Criteria Type` == 'Chronic' & `Valid Window` == TRUE),
+    rolledAnalysis %>% 
+      filter(`Criteria Type` == 'Acute')  ) %>% 
+    {if("Four Day" %in% unique(rolledAnalysis$`Criteria Type`))
+      bind_rows(.,
+                filter(rolledAnalysis, `Criteria Type` == "Four Day"& `Valid Window` == TRUE) )
+      else . }
+
+  
+  suppressMessages(
+    validDataForExceedanceSummary %>% 
+    group_by(FDT_STA_ID, FDT_DEPTH, `Criteria Type`) %>% 
+    summarise(`n Windows Fine` = sum(`Exceedances in Rolled Window` < 2),
+              `n Windows Exceeding` = sum(`Exceedances in Rolled Window` >= 2)) %>% 
+    mutate(`Suggested Result` = case_when(`n Windows Fine` > `n Windows Exceeding` ~ "Supporting",
+                                          `n Windows Fine` < `n Windows Exceeding` ~ "Review",
+                                          `n Windows Fine` == `n Windows Exceeding` ~ "Review",
+                                          TRUE ~ as.character(NA))))
+    
+}
+
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+# annualRollingExceedanceSummary(
+#   annualRollingExceedanceAnalysis(
+#   freshwaterNH3limit(stationData,
+#                    trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
+#                    mussels = TRUE,
+#                    earlyLife = TRUE),
+#   yearsToRoll = 3)
+# )
+```
+
+
+#### rollingWindowSummary
+
+The `rollingWindowSummary()` helper function summarizes the output of the `annualRollingExceedanceSummary()` function for a simplified output for the Station Table. The nested series of functions that analyzed the ammonia data are summarized in an output of two columns, detailing the number of exceedances and the suggested parameter status. As of the writing of this document, the value desired in the number of exceedances column has not been determined (potentially the number of windows with exceedances or the number of exceedances across all windows), so to be conservative, this is left as NA right now and requires input by assessment staff before upload into CEDS. However, the parameter status is summarized as such. Should a "Review" result be contained in any of the acute, chronic, or four day results, then the parameter status will be set to "Review" to signify to the assessor that further review is needed for the decision. If all criteria assessed contain "Supporting" results, then the parameter status will suggest the parameter status is supporting ("S"). The `parameterAbbreviation` argument passes a character string of the chosen parameter name to the Station Table output column headers. 
+
+```{r automated assessment ammonia rollingWindowSummary, eval=FALSE}
+# Rolling summary for stations table
+rollingWindowSummary <- function(annualRollingExceedanceSummaryOutput, parameterAbbreviation){
+  
+  if("Review" %in% unique(annualRollingExceedanceSummaryOutput$`Suggested Result`)){
+    z <- tibble(`_EXC` = as.numeric(NA), `_STAT` = 'Review')
+  } else {
+    # first kick out NULL entries (no data to analyze)
+    if(is.null(annualRollingExceedanceSummaryOutput)){
+      z <- tibble(`_EXC` = as.numeric(NA), `_STAT` = as.character(NA))
+      } else {  z <- tibble(`_EXC` = as.numeric(NA), `_STAT` = "S")} }
+  names(z) <- paste0(parameterAbbreviation, names(z))
+  return(z)
+}
+
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+# rollingWindowSummary(
+#   annualRollingExceedanceSummary(
+#     annualRollingExceedanceAnalysis(
+#       freshwaterNH3limit(stationData,
+#                          trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
+#                          mussels = TRUE,
+#                          earlyLife = TRUE),
+#       yearsToRoll = 3)
+#     ),
+#   "AMMONIA"
+# )
 ```
 
 ### PCB
@@ -2249,7 +2643,7 @@ benthicAssessment <- function(stationData,
 # benthicAssessment(stationData, VSCIresults)
 ```
 
-### Additional Automated Functions
+### Additional Functions
 
 The functions below are helper functions but do not take a starring role in the automated assessment process; however, without these functions, one could not perform an automated assessment. Each function is detailed below.
 
