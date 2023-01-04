@@ -1740,8 +1740,9 @@ pHExceedances <- function(stationData){
 
 ### Bacteria
 
-[Recreational bacteria](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section170/){target="_blank"} is a more complicated standard to apply to monitoring data due to the unique rolling windows. To standardize the logic across *E.coli* and enterococci data, the nested function architecture that evaluates the bacteria data is programmed to handle either *E.coli* or enterococci data. The four functions required to calculate the bacteria criteria are detailed below.
+[Recreational bacteria](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section170/){target="_blank"} is a more complicated standard to apply to monitoring data due to the unique rolling windows. To standardize the logic across *E.coli* and enterococci data, the nested function architecture that evaluates the bacteria data is programmed to handle either *E.coli* or enterococci data. The three functions required to calculate the bacteria criteria are detailed below.
 
+![bacteriaLogic](images/Bacteria_Fig.png)
 
 #### bacteriaExceedances_NEW
 
@@ -2574,6 +2575,106 @@ rollingWindowSummary <- function(annualRollingExceedanceSummaryOutput, parameter
 # )
 ```
 
+
+### Water Column Toxics
+
+Since there is no place in the Station Table for individual Public Water Supply, freshwater chloride, or water column PCB criteria results, the WAT_TOX fields summarize exceedances for PWS criteria, freshwater chloride aquatic life use, and water column PCB status. The code snippet below (see [Automated Assessment Analysis](#automated-assessment-analysis)) outlines how these criteria results are combined into a single field in the Station Table. It is highly advised that assessment staff use this field as a flag when reviewing a station summary from the Station Table using the appropriate waterbody application to fully understand which criteria may be providing the WAT_TOX flag.
+
+See the [Public Water Supply Criteria](#public-water-supply-criteria), [Freshwater Chloride](#freshwater-chloride), and [PCB](#pcb) sections below for details on individual parameter functions demonstrated in the below chunk.
+
+```{r  automated assessment PWS snippet, eval=FALSE}
+# code snippet from Automated Assessment Analysis
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+
+ # PWS Human Health Criteria
+  if(nrow(stationData) > 0){
+    if(is.na(unique(stationData$PWS))  ){
+      PWSconcat <- tibble(PWS= NA)
+   } else {
+     PWSconcat <- cbind(assessPWSsummary(assessPWS(stationData, NITRATE_mg_L, LEVEL_NITRATE, 10), 'PWS_Nitrate'),
+                        assessPWSsummary(assessPWS(stationData, CHLORIDE_mg_L, LEVEL_CHLORIDE, 250), 'PWS_Chloride'),
+                        assessPWSsummary(assessPWS(stationData, SULFATE_TOTAL_mg_L, LEVEL_SULFATE_TOTAL, 250), 'PWS_Total_Sulfate')) %>%
+       dplyr::select(-ends_with('exceedanceRate')) }
+    
+  # Freshwater Chloride Aquatic Life assessment, if data exists
+    if(nrow(filter(stationData, !is.na(CHLORIDE_mg_L))) > 0){
+      chlorideFreshwater <- rollingWindowSummary(
+        annualRollingExceedanceSummary(
+          annualRollingExceedanceAnalysis(chlorideFreshwaterAnalysis(stationData), 3) ), "CHL")
+    } else {chlorideFreshwater <- tibble(CHL_EXC = NA, CHL_STAT= NA)}
+    
+  # Water toxics combination with PWS, Chloride Freshwater, and water column PCB data
+  if(nrow(bind_cols(PWSconcat,
+                    chlorideFreshwater,
+                    PCBmetalsDataExists(filter(markPCB, str_detect(SampleMedia, 'Water')) %>%
+                                        filter(StationID %in% stationData$FDT_STA_ID), 'WAT_TOX')) %>%
+          dplyr::select(contains(c('_EXC','_STAT'))) %>%
+          mutate(across( everything(),  as.character)) %>%
+          pivot_longer(cols = contains(c('_EXC','_STAT')), names_to = 'parameter', values_to = 'values', values_drop_na = TRUE) %>% 
+          filter(! str_detect(values, 'WQS info missing from analysis')) %>% 
+          filter(! values == "S")) > 1) {
+    WCtoxics <- tibble(WAT_TOX_EXC = NA, WAT_TOX_STAT = 'Review')
+    } else { WCtoxics <- tibble(WAT_TOX_EXC = NA, WAT_TOX_STAT = NA)} 
+  
+  } else {
+    WCtoxics <- tibble(WAT_TOX_EXC = NA, WAT_TOX_STAT = NA)
+  }
+```
+
+
+### Public Water Supply Criteria
+
+Public Water Supply (PWS) human health criteria are assessed using the `assessPWS()` function and summarized for the Station Table by `assessPWSsummary()` function. These functions operate across PWS parameters, using non-standard evaluation techniques to allow users to specify which parameter to evaluate and the associated criteria using function arguments. If the WQS metadata linked to the station is designated as a PWS segment, the `assessPWS()` function first removes all Level I and Level II data and missing data before measures are averaged over a six year assessment period. The parameter six year average is rounded to even, compared against the provided criteria, and flagged if the average exceeds the provided criteria limit. 
+
+**Chloride, Sulfate, Total Dissolved Solids, Iron, and Foaming Agents are secondary criteria and are only applicable to data collected at the drinking water intake.** To be most protective, the automated assessment process evaluates all PWS designated segments for each of these criteria if data exists, regardless of the proximity of the station to the drinking water supply intake. It is the responsibility of the assessment staff to remove these decisions from the Station Table when they are not applicable. **The appropriate waterbody application identifies when a station is within XXX meters from a drinking water intake.**
+
+```{r automated assessment assessPWS, eval=FALSE}
+assessPWS <- function(stationData, fieldName, commentName, PWSlimit){
+  if(unique(stationData$PWS) %in% c("Yes")){
+    fieldName_ <- enquo(fieldName)
+    commentName_ <- enquo(commentName)
+    parameterData <- dplyr::select(stationData, FDT_DATE_TIME, !! fieldName_, !! commentName_) %>%
+      filter(!( !! commentName_ %in% c('Level II', 'Level I'))) %>% # get lower levels out
+      filter(!is.na(!!fieldName_ )) %>% #get rid of NA's
+      mutate(`Parameter Mean` = mean(!! fieldName_),
+             `Parameter Rounded to WQS Format` = signif(`Parameter Mean`, digits = 2),  # two significant figures based on WQS https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/
+             limit =  PWSlimit) %>%
+      rename(parameter = !!names(.[5])) %>% # rename columns to make functions easier to apply
+      mutate(exceeds = ifelse(parameter > limit, T, F)) # Identify where above WQS limit
+    return(parameterData)
+  }
+  return(NULL)
+}
+
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+#assessPWS(stationData, NITRATE_mg_L, LEVEL_NITRATE, 10)
+#assessPWS(stationData, CHLORIDE_mg_L, LEVEL_CHLORIDE, 250)
+#assessPWS(stationData, SULFATE_TOTAL_mg_L, LEVEL_SULFATE_TOTAL, 250)
+```
+
+The output of the `assessPWS()` function becomes the input for the `assessPWSsummary()` function when the user desires the results to be summarized for the Station Table. 
+
+```{r automated assessment assessPWSsummary, eval=FALSE}
+assessPWSsummary <- function(assessPWSresults, 
+                             outputName){
+  if(!is.null(assessPWSresults)){
+    return(quickStats(assessPWSresults, outputName))  
+  }
+  return(quickStats(tibble(limit = NA), outputName))
+}
+
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+#assessPWSsummary(assessPWS(stationData, NITRATE_mg_L, LEVEL_NITRATE, 10), 'PWS_Nitrate')
+#assessPWSsummary(assessPWS(stationData, CHLORIDE_mg_L, LEVEL_CHLORIDE, 250), 'PWS_Chloride')
+#assessPWSsummary(assessPWS(stationData, SULFATE_TOTAL_mg_L, LEVEL_SULFATE_TOTAL, 250), 'PWS_Total_Sulfate')
+```
+
+### Freshwater Chloride 
+
+
+
 ### PCB
 
 The `PCBmetalsDataExists()` function is used primarily for flagging whether or not certain data exist when building the Station Table. Most stations evaluated during an assessment period do not have metals or toxics data, so it is important to flag when data require review. This particular function can be used to flag when data exist across water column PCB, sediment PCB, fish tissue metals, and fish tissue PCB data. When data exists for these toxics parameters, regional assessment staff may investigate them against applicable thresholds inside the waterbody-specific shiny assessment application. 
@@ -2602,6 +2703,8 @@ PCBmetalsDataExists <- function(datasetType, # any of the preorganized PCB or fi
 # PCBmetalsDataExists(filter(fishMetals, Station_ID %in% '2-JKS023.61'), 'FISH_MET')
 # PCBmetalsDataExists(filter(fishPCB, `DEQ rivermile` %in%  '2-JKS023.61'), 'FISH_TOX')
 ```
+
+
 
 
 ### Metals
