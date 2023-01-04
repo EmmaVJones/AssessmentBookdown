@@ -1414,7 +1414,7 @@ for(i in 1:nrow(stationTable)){
     if(nrow(filter(stationData, !is.na(CHLORIDE_mg_L))) > 0){
       chlorideFreshwater <- rollingWindowSummary(
         annualRollingExceedanceSummary(
-          annualRollingExceedanceAnalysis(chlorideFreshwaterAnalysis(stationData), 3) ), "CHL")
+          annualRollingExceedanceAnalysis(chlorideFreshwaterAnalysis(stationData), yearsToRoll = 3, aquaticLifeUse = TRUE) ), "CHL")
     } else {chlorideFreshwater <- tibble(CHL_EXC = NA, CHL_STAT= NA)}
     
   # Water toxics combination with PWS, Chloride Freshwater, and water column PCB data
@@ -1471,7 +1471,8 @@ for(i in 1:nrow(stationTable)){
       # Ammonia 
       rollingWindowSummary(
         annualRollingExceedanceSummary(
-          annualRollingExceedanceAnalysis(ammoniaAnalysisStation, yearsToRoll = 3)), parameterAbbreviation = "AMMONIA"),
+          annualRollingExceedanceAnalysis(ammoniaAnalysisStation, yearsToRoll = 3, aquaticLifeUse = FALSE)), 
+        parameterAbbreviation = "AMMONIA"),
     
       # Flag for whether or not metals data exists
       metalsData(filter(WCmetals, Station_Id %in% stationData$FDT_STA_ID), 'WAT_MET'),
@@ -2436,7 +2437,8 @@ freshwaterNH3limit <- function(stationData, # dataframe with station data
 
 #### annualRollingExceedanceAnalysis
 
-Calculating the appropriate ammonia criteria is just the first part of assessing ammonia. To assess ammonia in free-flowing and tidal waters for Wildlife and Aquatic Life Uses, acute, chronic and four day criteria must not exceed respective criteria more than once every three years on the average. Helper functions have been established to assist with the automation of these decisions. The `annualRollingExceedanceAnalysis()` helper function takes in the output of the `freshwaterNH3limit()` function and an additional argument (`yearsToRoll`) that established the number of years to roll analyses over, for our use case we will use three years. 
+Calculating the appropriate ammonia criteria is just the first part of assessing ammonia. To assess ammonia in free-flowing and tidal waters for Wildlife and Aquatic Life Uses, acute, chronic and four day criteria must not exceed respective criteria more than once every three years on the average. Helper functions have been established to assist with the automation of these decisions. The `annualRollingExceedanceAnalysis()` helper function takes in the output of the `freshwaterNH3limit()` function and an additional argument (`yearsToRoll`) that established the number of years to roll analyses over, for our use case we will use three years. The argument `aquaticLifeUse` allows this function to be used across multiple data input types. The default allows for the logic from the ammonia `freshwaterNH3limit()` function to be used to flag whether or not a window is valid for later assessment steps. An example of when one would change the default argument for `aquaticLifeUse` from FALSE to TRUE is if they were assessing freshwater chloride for the Aquatic Life Designated Use. When `aquaticLifeUse` is set to TRUE, the function uses the Aquatic Life Use definition of valid windows to flag windows for later assessment steps. The Assessment Guidance states:
+"For toxic pollutant assessment of Aquatic Life Designated Use in free-flowing streams, both chronic and acute criteria can be assessed whenever sufficient data are available as applicable. Chronic criteria are to be assessed when multiple grab samples are collected within two separate four-day periods within a three-year period, or when there are two or more separate 30-day SPMD deployments within a three-year period. Two samples (either grab or SPMD) taken within three consecutive years are sufficient to assess acute criteria."
 
 The function extracts the year from each data window analyzed and drops any criteria that do not meet sample count rules (e.g. chronic or four day window results that were calculated on 1 or fewer samples). Based on the unique years of the input data windows and the `yearsToRoll` argument (3 in our case), the function loops over data within each `yearsToRoll` window range to calculate the number of exceedances in the rolled window (and whether or not the window is valid) by criteria type (e.g. acute, chronic, or four day) and appends all data used for the summary in a listcolumn called `associatedData` to simplify data review. Unique window ranges are not repeated thanks to the logic outlined in the `windowRange` range established for the for loop.
 
@@ -2446,7 +2448,11 @@ The function extracts the year from each data window analyzed and drops any crit
 #  using subsequent annualRollingExceedanceSummary()
 # analyze results by 3 year windows, not a strict rolling window, roll by year
 annualRollingExceedanceAnalysis <- function(dataToAnalyze,
-                                            yearsToRoll){
+                                            yearsToRoll, # number of years to roll analysis over
+                                            aquaticLifeUse = FALSE # whether or not this function is being used for Aquatic Life Use criteria
+                                            # default = FALSE, which uses the Ammonia definition for window validity for chronic and four day sampling criteria
+                                            # if TRUE, two samples across the rolled window length ensures a valid window
+                                            ){
   
   if(is.null(dataToAnalyze)){return(NULL)}
   
@@ -2459,32 +2465,43 @@ annualRollingExceedanceAnalysis <- function(dataToAnalyze,
                               associatedData = list())
   dataToAnalyze <- dataToAnalyze %>% 
     mutate(Year = year(WindowDateTimeStart),
-           `Valid Window` = case_when(`Criteria Type` %in% c("Chronic", "Four Day")  & `Sample Count` > 1 ~ TRUE,
-                                      TRUE ~ NA))
+           `Valid Window` = case_when(`Valid Window` = case_when(`Criteria Type` %in% c("Acute") ~ TRUE, # just to make people feel good later on
+                                                                 `Criteria Type` %in% c("Chronic", "Four Day")  & `Sample Count` > 1 ~ TRUE,
+                                                                 TRUE ~ NA))
   
-   # First, identify all window start options
+  # First, identify all window start options
   windowOptions <- unique(year(dataToAnalyze$WindowDateTimeStart))
-  # Now, stop loop from repeating windows by capping the top end by yearsToRoll-1 (so don't have 3 yr windows exceeding 
-  #  assessment period), then remove any windowRange options that don't actually have data in those years
+  # Now, stop loop from repeating windows by capping the top end by yearsToRoll-1 (so don't have 3 yr windows exceeding assessment period), then remove any
+  #  windowRange options that don't actually have data in those years
   windowRange <- (min(windowOptions):(max(windowOptions)- (yearsToRoll- 1)))[(min(windowOptions):(max(windowOptions)- (yearsToRoll- 1))) %in% windowOptions]
+  
 
-
-  for(i in min(windowRange):(max(windowRange)- (yearsToRoll- 1))){ #i = min(min(windowRange):(max(windowRange)- (yearsToRoll- 1))[1])
-    # print(i)}
+  for(i in windowRange){ #i = min(min(windowRange):(max(windowRange)- (yearsToRoll- 1))[1])
     dataWindow <- filter(dataToAnalyze, Year %in% i:(i + yearsToRoll- 1) ) # minus 1 year for math to work
-    dataWindowAnalysis <- suppressMessages( dataWindow %>% 
-                                              group_by(FDT_STA_ID, #FDT_DEPTH, 
-                                                       `Criteria Type`) %>%
-                                              summarise(`Criteria Type` = unique(`Criteria Type`),
-                                                        `Window Begin` = year(min(WindowDateTimeStart)),
-                                                        `Years Analysis Rolled Over` = yearsToRoll, 
-                                                        `Exceedances in Rolled Window` = sum(Exceedance),
-                                                        `Valid Window` = all(`Valid Window` == T)) %>% 
-                                              bind_cols(tibble(associatedData = list(dataWindow))) ) 
-    dataWindowResults <- bind_rows(dataWindowResults, dataWindowAnalysis) 
-  }
+    for(k in unique(dataWindow$`Criteria Type`)){
+      dataWindowCriteria <- filter(dataWindow, `Criteria Type` %in% k)
+      dataWindowAnalysis <- suppressMessages( dataWindowCriteria %>% 
+                                                group_by(FDT_STA_ID, #FDT_DEPTH, 
+                                                         `Criteria Type`) %>%
+                                                {if(aquaticLifeUse == FALSE)
+                                                  summarise(., `Criteria Type` = unique(`Criteria Type`),
+                                                            `Window Begin` = year(min(WindowDateTimeStart)),
+                                                            `Years Analysis Rolled Over` = yearsToRoll, 
+                                                            `Exceedances in Rolled Window` = sum(Exceedance),
+                                                            `Valid Window` = all(`Valid Window` == T))
+                                                  else summarise(., `Criteria Type` = unique(`Criteria Type`),
+                                                                 `Window Begin` = year(min(WindowDateTimeStart)),
+                                                                 `Years Analysis Rolled Over` = yearsToRoll, 
+                                                                 `Exceedances in Rolled Window` = sum(Exceedance),
+                                                                 `Valid Window` = ifelse(nrow(dataWindowCriteria) >= 2, TRUE, NA))
+                                                  }   %>% 
+                                                bind_cols(tibble(associatedData = list(dataWindowCriteria))) )
+      dataWindowResults <- bind_rows(dataWindowResults, dataWindowAnalysis) 
+      }
+    }
   return(dataWindowResults)
 }
+
 
 # Example Usage: (demonstrating nested function syntax and pipes, both result in the same output):
 # where stationData objects are already in your environment, see Automated Assessment for environment set up help
@@ -2493,12 +2510,19 @@ annualRollingExceedanceAnalysis <- function(dataToAnalyze,
 #                    trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
 #                    mussels = TRUE,
 #                    earlyLife = TRUE),
-#   yearsToRoll = 3)
+#   yearsToRoll = 3, aquaticLifeUse = FALSE)
 # freshwaterNH3limit(stationData,
 #                    trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
 #                    mussels = TRUE,
 #                    earlyLife = TRUE) %>% 
-#   annualRollingExceedanceAnalysis(yearsToRoll = 3)
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3, aquaticLifeUse = FALSE)
+
+# Freshwater Chloride Example:
+# annualRollingExceedanceAnalysis(
+#   chlorideFreshwaterAnalysis(stationData),
+#   yearsToRoll = 3, aquaticLifeUse = TRUE) 
+# chlorideFreshwaterAnalysis(stationData) %>%
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3, aquaticLifeUse = FALSE) 
 ```
 
 #### annualRollingExceedanceSummary
@@ -2543,13 +2567,22 @@ annualRollingExceedanceSummary <- function(rolledAnalysis){
 #                    trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
 #                    mussels = TRUE,
 #                    earlyLife = TRUE),
-#   yearsToRoll = 3)
+#   yearsToRoll = 3, aquaticLifeUse = FALSE)
 # )
 # freshwaterNH3limit(stationData,
 #                    trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
 #                    mussels = TRUE,
 #                    earlyLife = TRUE) %>%
-#   annualRollingExceedanceAnalysis(yearsToRoll = 3) %>% 
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3, aquaticLifeUse = FALSE) %>% 
+#   annualRollingExceedanceSummary()
+
+# Freshwater Chloride Example:
+# annualRollingExceedanceSummary(
+#   annualRollingExceedanceAnalysis(
+#     chlorideFreshwaterAnalysis(stationData),
+#     yearsToRoll = 3, aquaticLifeUse = TRUE) )
+# chlorideFreshwaterAnalysis(stationData) %>%
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3, aquaticLifeUse = FALSE) %>%
 #   annualRollingExceedanceSummary()
 ```
 
@@ -2573,21 +2606,6 @@ rollingWindowSummary <- function(annualRollingExceedanceSummaryOutput, parameter
   return(z)
 }
 
-# Example Usage:
-# where stationData objects are already in your environment, see Automated Assessment for environment set up help
-# rollingWindowSummary(
-#   annualRollingExceedanceSummary(
-#     annualRollingExceedanceAnalysis(
-#       freshwaterNH3limit(stationData,
-#                          trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
-#                          mussels = TRUE,
-#                          earlyLife = TRUE),
-#       yearsToRoll = 3)
-#     ),
-#   "AMMONIA"
-# )
-
-
 # Example Usage: (demonstrating nested function syntax and pipes, both result in the same output):
 # where stationData objects are already in your environment, see Automated Assessment for environment set up help
 # rollingWindowSummary(
@@ -2597,7 +2615,7 @@ rollingWindowSummary <- function(annualRollingExceedanceSummaryOutput, parameter
 #                          trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
 #                          mussels = TRUE,
 #                          earlyLife = TRUE),
-#       yearsToRoll = 3)
+#       yearsToRoll = 3, aquaticLifeUse = FALSE)
 #     ),
 #   parameterAbbreviation = "AMMONIA"
 # )
@@ -2605,9 +2623,22 @@ rollingWindowSummary <- function(annualRollingExceedanceSummaryOutput, parameter
 #                    trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
 #                    mussels = TRUE,
 #                    earlyLife = TRUE) %>%
-#   annualRollingExceedanceAnalysis(yearsToRoll = 3) %>%
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3, aquaticLifeUse = FALSE) %>%
 #   annualRollingExceedanceSummary() %>% 
 #   rollingWindowSummary(parameterAbbreviation = "AMMONIA")
+
+
+# Freshwater Chloride Example:
+# rollingWindowSummary(
+#         annualRollingExceedanceSummary(
+#           annualRollingExceedanceAnalysis(
+#             chlorideFreshwaterAnalysis(stationData),
+#             yearsToRoll = 3, aquaticLifeUse = TRUE) ),
+#         parameterAbbreviation = "CHL")
+# chlorideFreshwaterAnalysis(stationData) %>%
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3, aquaticLifeUse = FALSE) %>%
+#   annualRollingExceedanceSummary() %>%
+#   rollingWindowSummary(parameterAbbreviation = "CHL")
 ```
 
 
@@ -2795,10 +2826,10 @@ chlorideFreshwaterAnalysis <- function(stationData){
 #         annualRollingExceedanceSummary(
 #           annualRollingExceedanceAnalysis(
 #             chlorideFreshwaterAnalysis(stationData), 
-#             yearsToRoll = 3) ),  
+#             yearsToRoll = 3, aquaticLifeUse = TRUE) ),  
 #         parameterAbbreviation = "CHL")
 # chlorideFreshwaterAnalysis(stationData) %>% 
-#   annualRollingExceedanceAnalysis(yearsToRoll = 3) %>% 
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3, aquaticLifeUse = FALSE) %>% 
 #   annualRollingExceedanceSummary() %>% 
 #   rollingWindowSummary(parameterAbbreviation = "CHL")
 ```
