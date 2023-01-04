@@ -1532,7 +1532,7 @@ timeDiff = Sys.time()- startTime
 
 ## Individual Parameter Analyses
 
-The functions detailed in this section are called in either the [automated assessment workflow report ](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target="_blank"} or by waterbody-specific shiny applications that unpack the output of the [automated assessment workflow report ](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target="_blank"}. All the automated assessment functions are stored in a single .R file that is shared amongst the shiny applications and Rmarkdown report to minimize labor involved in maintaining these critical functions. One day, these functions will be published as an R package, but until then, you can access the latest version of this script [here](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/automatedAssessmentFunctions.R){target="_blank"}. 
+The functions detailed in this section are called in either the [automated assessment workflow report ](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target="_blank"} or by waterbody-specific shiny applications that unpack the output of the [automated assessment workflow report ](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/HowToRunAutomatedAssessmentIR2024.Rmd){target="_blank"}. All of the automated assessment functions are stored in a single .R file that is shared among the waterbody-specific shiny assessment applications and Rmarkdown report to minimize the labor involved in maintaining these critical functions. One day, these functions will be published as an R package, but until then, you can access the latest version of this script [here](https://github.com/EmmaVJones/IR2024/blob/main/3.automatedAssessment/automatedAssessmentFunctions.R){target="_blank"}. 
 
 ### How to Test Individual Parameter Functions
 
@@ -2177,6 +2177,8 @@ bacteriaAssessmentDecisionClass <- function(stationData, # input dataframe with 
 
 ### Nutrients
 
+
+
 ```{r automated assessment nutrients, eval=FALSE}
 ```
 
@@ -2184,7 +2186,7 @@ bacteriaAssessmentDecisionClass <- function(stationData, # input dataframe with 
 
 [Ammonia](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section155/){target="_blank"} is evaluated using acute, chronic, and four-day criteria across rolling three year windows that may not exceed more than once every three years on the average in free flowing streams. The presence or absence of trout, freshwater mussel species, and early life stages of fish during most times of the year each affect the calculation of ammonia criteria for a given waterbody. The WQS state that ["the Department of Environmental Quality, after consultation with the Virginia Department of Wildlife Resources and the U.S. Fish and Wildlife Service, has determined that the majority of Virginia freshwaters are likely to contain, or have contained in the past, freshwater mussel species in the family Unionidae and contain early life stages of fish during most times of the year. Therefore, the ammonia criteria presented in subsections B and C of this section are designed to provide protection to these species and life stages."](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section155/){target="_blank} In practice, this means, unless demonstrated otherwise, mussels and fish early life stages are assumed present for criteria method calculations. Once the method for criteria calculation has been established for a waterbody, individual temperature and pH measurements are required to calculate individual criteria, and averages of these parameters are required when more than one measure is present within a given criteria window (for chronic, 30 day, and four day criteria). 
 
-Ammonia is a complicated criteria to program and understand. The automated assessment scripts have organized ammonia criteria calculation into nested functions such that individual components of the analysis can be extracted when needed (e.g. during interactive application data visualization). To expedite application rendering time, calculated ammonia results are stored in a R dataset (.RDS) and provided to the application instead of recalculating the criteria on the fly in the application. As such, the WQS (including trout present/absent) attributed to a station in the metadata attribution process as well as mussels and early life fish stages present values are the default values when exploring ammonia criteria analyses in the interactive assessment applications. Should sufficient justification exist to depart from these default values for individual stations, please contact the [WQA Technical Support Team](#wqa-technical-support-team). 
+Ammonia is a complicated criteria to program and understand. The automated assessment scripts have organized ammonia criteria calculation into nested functions such that individual components of the analysis can be extracted when needed (e.g. during interactive application data visualization). To expedite application rendering time, calculated ammonia results are stored in a R dataset (.RDS) and provided to the application instead of recalculating the criteria on the fly in the application. As such, the WQS (including trout present/absent) attributed to a station in the metadata attribution process as well as mussels and early life fish stages present values are the default values when exploring ammonia criteria analyses in the interactive waterbody-specific shiny assessment applications. Should sufficient justification exist to depart from these default values for individual stations, please contact the [WQA Technical Support Team](#wqa-technical-support-team). 
 
 #### freshwaterNH3limit
 
@@ -2484,7 +2486,7 @@ annualRollingExceedanceAnalysis <- function(dataToAnalyze,
   return(dataWindowResults)
 }
 
-# Example Usage:
+# Example Usage: (demonstrating nested function syntax and pipes, both result in the same output):
 # where stationData objects are already in your environment, see Automated Assessment for environment set up help
 # annualRollingExceedanceAnalysis(
 #   freshwaterNH3limit(stationData,
@@ -2492,6 +2494,11 @@ annualRollingExceedanceAnalysis <- function(dataToAnalyze,
 #                    mussels = TRUE,
 #                    earlyLife = TRUE),
 #   yearsToRoll = 3)
+# freshwaterNH3limit(stationData,
+#                    trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
+#                    mussels = TRUE,
+#                    earlyLife = TRUE) %>% 
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3)
 ```
 
 #### annualRollingExceedanceSummary
@@ -2528,7 +2535,7 @@ annualRollingExceedanceSummary <- function(rolledAnalysis){
     
 }
 
-# Example Usage:
+# Example Usage: (demonstrating nested function syntax and pipes, both result in the same output):
 # where stationData objects are already in your environment, see Automated Assessment for environment set up help
 # annualRollingExceedanceSummary(
 #   annualRollingExceedanceAnalysis(
@@ -2538,6 +2545,12 @@ annualRollingExceedanceSummary <- function(rolledAnalysis){
 #                    earlyLife = TRUE),
 #   yearsToRoll = 3)
 # )
+# freshwaterNH3limit(stationData,
+#                    trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
+#                    mussels = TRUE,
+#                    earlyLife = TRUE) %>%
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3) %>% 
+#   annualRollingExceedanceSummary()
 ```
 
 
@@ -2573,12 +2586,34 @@ rollingWindowSummary <- function(annualRollingExceedanceSummaryOutput, parameter
 #     ),
 #   "AMMONIA"
 # )
+
+
+# Example Usage: (demonstrating nested function syntax and pipes, both result in the same output):
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+# rollingWindowSummary(
+#   annualRollingExceedanceSummary(
+#     annualRollingExceedanceAnalysis(
+#       freshwaterNH3limit(stationData,
+#                          trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
+#                          mussels = TRUE,
+#                          earlyLife = TRUE),
+#       yearsToRoll = 3)
+#     ),
+#   parameterAbbreviation = "AMMONIA"
+# )
+# freshwaterNH3limit(stationData,
+#                    trout = ifelse(unique(stationData$CLASS) %in% c('V','VI'), TRUE, FALSE),
+#                    mussels = TRUE,
+#                    earlyLife = TRUE) %>%
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3) %>%
+#   annualRollingExceedanceSummary() %>% 
+#   rollingWindowSummary(parameterAbbreviation = "AMMONIA")
 ```
 
 
 ### Water Column Toxics
 
-Since there is no place in the Station Table for individual Public Water Supply, freshwater chloride, or water column PCB criteria results, the WAT_TOX fields summarize exceedances for PWS criteria, freshwater chloride aquatic life use, and water column PCB status. The code snippet below (see [Automated Assessment Analysis](#automated-assessment-analysis)) outlines how these criteria results are combined into a single field in the Station Table. It is highly advised that assessment staff use this field as a flag when reviewing a station summary from the Station Table using the appropriate waterbody application to fully understand which criteria may be providing the WAT_TOX flag.
+Since there is no place in the Station Table for individual Public Water Supply, freshwater chloride, or water column PCB criteria results, the WAT_TOX fields summarize exceedances for PWS criteria, freshwater chloride aquatic life use, and water column PCB status. The code snippet below (see [Automated Assessment Analysis](#automated-assessment-analysis)) outlines how these criteria results are combined into a single field in the Station Table. It is highly advised that assessment staff use this field as a flag when reviewing a station summary from the Station Table using the appropriate waterbody-specific shiny assessment application to fully understand which criteria may be providing the WAT_TOX flag.
 
 See the [Public Water Supply Criteria](#public-water-supply-criteria), [Freshwater Chloride](#freshwater-chloride), and [PCB](#pcb) sections below for details on individual parameter functions demonstrated in the below chunk.
 
@@ -2626,7 +2661,7 @@ See the [Public Water Supply Criteria](#public-water-supply-criteria), [Freshwat
 
 Public Water Supply (PWS) human health criteria are assessed using the `assessPWS()` function and summarized for the Station Table by `assessPWSsummary()` function. These functions operate across PWS parameters, using non-standard evaluation techniques to allow users to specify which parameter to evaluate and the associated criteria using function arguments. If the WQS metadata linked to the station is designated as a PWS segment, the `assessPWS()` function first removes all Level I and Level II data and missing data before measures are averaged over a six year assessment period. The parameter six year average is rounded to even, compared against the provided criteria, and flagged if the average exceeds the provided criteria limit. 
 
-**Chloride, Sulfate, Total Dissolved Solids, Iron, and Foaming Agents are secondary criteria and are only applicable to data collected at the drinking water intake.** To be most protective, the automated assessment process evaluates all PWS designated segments for each of these criteria if data exists, regardless of the proximity of the station to the drinking water supply intake. It is the responsibility of the assessment staff to remove these decisions from the Station Table when they are not applicable. **The appropriate waterbody application identifies when a station is within XXX meters from a drinking water intake.**
+**Chloride, Sulfate, Total Dissolved Solids, Iron, and Foaming Agents are secondary criteria and are only applicable to data collected at the drinking water intake.** To be most protective, the automated assessment process evaluates all PWS designated segments for each of these criteria if data exists, regardless of the proximity of the station to the drinking water supply intake. It is the responsibility of the assessment staff to remove these decisions from the Station Table when they are not applicable. **The waterbody-specific shiny assessment applications flag stations within 100 meters from a drinking water intake.**
 
 ```{r automated assessment assessPWS, eval=FALSE}
 assessPWS <- function(stationData, fieldName, commentName, PWSlimit){
@@ -2672,6 +2707,102 @@ assessPWSsummary <- function(assessPWSresults,
 ```
 
 ### Freshwater Chloride 
+
+Chloride is assessed for Aquatic Life Uses using acute and chronic criteria only in freshwater environments. The evaluation of chloride data against acute and chronic criteria is performed by the `chlorideFreshwaterAnalysis()` function while the summarization of results to conduct an assessment decision is performed by the nested [`annualRollingExceedanceAnalysis()`](#annualrollingexceedanceanalysis), [`annualRollingExceedanceSummary()`](#annualrollingexceedancesummary), and [`rollingWindowSummary()`](#rollingwindowsummary) functions. These functions are detailed for ammonia, but the same logic rules apply to any parameter dataset provided to the function logic. An example of the freshwater chloride analysis and summarization for the Station Table are provided in the chunk below.
+
+The `chlorideFreshwaterAnalysis()` function first ensures the station provided to the function is designated a freshwater or transitional before removing all Level I and Level II data and missing data. If data exist after those initial filters are applied,  subsequent logic may be applied, if not, the function returns NULL. The function then creates storage objects for acute and chronic average results and loops through each row of data to correctly calculate acute criteria and find any chronic scenarios (if data exist). Each new sample event prompts the creation of acute and chronic data windows.
+
+If sufficient data exist in any of these windows, the appropriate criteria are applied to the window chloride average, rounded to even. To be most protective, chronic windows are calculated if one or more measure exists in any data window; this information is useful for assessor visualization and understanding in the application environment, but these results based on only one measure are culled from assessment decisions in later functions. The data analyzed within each window is saved as a listcolumn called `associatedData` that may be extracted for investigation later. The output of the function is a long dataset where each unique sample event could have a row summarizing the acute and chronic criteria, sample count in the given window, exceedance result, and associated data (`associatedData` listcolumn).
+
+```{r automated assessment chlorideFreshwaterAnalysis, eval=FALSE}
+chlorideFreshwaterAnalysis <- function(stationData){
+  # doesn't apply in class II transition zone
+  stationDataCHL <- filter(stationData, CLASS %in% c('III', "IV","V","VI","VII") |
+                             CLASS ==  "II" & ZONE == 'Tidal Fresh') %>% 
+    filter(!(LEVEL_CHLORIDE %in% c('Level II', 'Level I'))) %>% # get lower levels out
+    filter(!is.na(CHLORIDE_mg_L)) #get rid of NA's
+  
+  if(nrow(stationDataCHL) > 0){
+    
+    
+    # make a place to store analysis results
+    acuteCriteriaResults <- tibble(FDT_STA_ID = as.character(NA), WindowDateTimeStart = as.POSIXct(NA), FDT_DEPTH = as.numeric(NA),
+                                   Value = as.numeric(NA), ValueType = as.character(NA), 
+                                   `Criteria Type` = as.character(NA), CriteriaValue = as.numeric(NA), 
+                                   `Sample Count` = as.numeric(NA), 
+                                   parameterRound = as.numeric(NA), Exceedance = as.numeric(NA),
+                                   associatedData = list())
+    chronicCriteriaResults <- acuteCriteriaResults
+    
+    # loop through each row of data to correctly calculate criteria and find any chronic scenarios
+    for(k in stationDataCHL$FDT_DATE_TIME){  #k = stationDataCHL$FDT_DATE_TIME[1]
+      acuteDataWindow <- filter(stationDataCHL,  between(FDT_DATE_TIME, k, k + hours(1)))
+      chronicDataWindow <- filter(stationDataCHL,  between(FDT_DATE_TIME, k, k + days(4)))
+      
+      # Run acute analysis if data exists
+      if(nrow(acuteDataWindow) > 0){
+        acuteDataCriteriaAnalysis <- suppressMessages( 
+          dplyr::select(acuteDataWindow, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, CHLORIDE_mg_L) %>% 
+          group_by(FDT_STA_ID, FDT_DEPTH) %>% # can't group by datetime or summary can't happen
+          summarise(Value = mean(CHLORIDE_mg_L, na.rm=T),  # get hourly average
+                    `Sample Count` = length(CHLORIDE_mg_L)) %>%  #count sample that made up average
+          mutate(ValueType = 'Hourly Average',
+                 ID = paste( FDT_STA_ID, FDT_DEPTH, sep = '_'), # make a uniqueID in case >1 sample for given datetime
+                 `Criteria Type` = 'Acute', 
+                 CriteriaValue = 860) %>%  # 860,000ug/L criteria to mg/L
+          mutate(parameterRound = signif(Value, digits = 2), # two significant figures based on WQS https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/
+                 Exceedance = ifelse(parameterRound > CriteriaValue, 1, 0 ), # use 1/0 to easily summarize multiple results later
+                 WindowDateTimeStart = min(acuteDataWindow$FDT_DATE_TIME)) %>% 
+          dplyr::select(FDT_STA_ID, WindowDateTimeStart, everything(), -ID) ) %>% 
+          bind_cols(tibble(associatedData = list(dplyr::select(acuteDataWindow, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, CHLORIDE_mg_L) ) ))
+        # Save the results for viewing later
+        acuteCriteriaResults <- bind_rows(acuteCriteriaResults, acuteDataCriteriaAnalysis) 
+      } else {acuteCriteriaResults <- acuteCriteriaResults }
+      
+      # Run chronic analysis if data exists
+      if(nrow(chronicDataWindow) > 0){
+        chronicDataCriteriaAnalysis <- suppressMessages( 
+          dplyr::select(chronicDataWindow, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, CHLORIDE_mg_L) %>% 
+          group_by(FDT_STA_ID, FDT_DEPTH) %>% # can't group by datetime or summary can't happen
+          summarise(Value = mean(CHLORIDE_mg_L, na.rm=T),  # get hourly average
+                    `Sample Count` = length(CHLORIDE_mg_L)) %>%  #count sample that made up average
+          mutate(ValueType = 'Four Day Average',
+                 ID = paste( FDT_STA_ID, FDT_DEPTH, sep = '_'), # make a uniqueID in case >1 sample for given datetime
+                 `Criteria Type` = 'Chronic', 
+                 CriteriaValue = 230) %>%  # 230,000ug/L criteria to mg/L
+          mutate(parameterRound = signif(Value, digits = 2), # two significant figures based on WQS https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/
+                 Exceedance = ifelse(parameterRound > CriteriaValue, 1, 0 ), # use 1/0 to easily summarize multiple results later
+                 WindowDateTimeStart = min(chronicDataWindow$FDT_DATE_TIME)) %>% 
+          dplyr::select(FDT_STA_ID, WindowDateTimeStart, everything(), -ID) ) %>% 
+          bind_cols(tibble(associatedData = list(dplyr::select(chronicDataWindow, FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, CHLORIDE_mg_L) ) ))
+        # Save the results for viewing later
+        chronicCriteriaResults <- bind_rows(chronicCriteriaResults, chronicDataCriteriaAnalysis) 
+      } else {chronicCriteriaResults <- chronicCriteriaResults }
+    }
+    # summarize results
+    stationCriteriaResults <- bind_rows( acuteCriteriaResults, chronicCriteriaResults) %>% 
+      filter(!is.na(FDT_STA_ID)) %>% # drop placeholder rows
+      distinct(FDT_STA_ID, WindowDateTimeStart, FDT_DEPTH, `Criteria Type`, .keep_all = T) %>% # remove duplicates in case > 1 depth per datetime
+      arrange(FDT_STA_ID, WindowDateTimeStart, FDT_DEPTH, `Criteria Type`)
+    return(stationCriteriaResults)
+  } else { return(NULL)}
+}
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+# chlorideFreshwaterAnalysis(stationData) 
+# Example Usage for Station Table (demonstrating nested function syntax and pipes, both result in the same output):
+# rollingWindowSummary(
+#         annualRollingExceedanceSummary(
+#           annualRollingExceedanceAnalysis(
+#             chlorideFreshwaterAnalysis(stationData), 
+#             yearsToRoll = 3) ),  
+#         parameterAbbreviation = "CHL")
+# chlorideFreshwaterAnalysis(stationData) %>% 
+#   annualRollingExceedanceAnalysis(yearsToRoll = 3) %>% 
+#   annualRollingExceedanceSummary() %>% 
+#   rollingWindowSummary(parameterAbbreviation = "CHL")
+```
+
 
 
 
