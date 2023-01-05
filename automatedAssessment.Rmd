@@ -1426,7 +1426,7 @@ for(i in 1:nrow(stationTable)){
           mutate(across( everything(),  as.character)) %>%
           pivot_longer(cols = contains(c('_EXC','_STAT')), names_to = 'parameter', values_to = 'values', values_drop_na = TRUE) %>% 
           filter(! str_detect(values, 'WQS info missing from analysis')) %>% 
-          filter(! values == "S")) > 1) {
+          filter(! values == "S")) >= 1) {
     WCtoxics <- tibble(WAT_TOX_EXC = NA, WAT_TOX_STAT = 'Review')
     } else { WCtoxics <- tibble(WAT_TOX_EXC = NA, WAT_TOX_STAT = NA)} 
   
@@ -2678,7 +2678,7 @@ See the [Public Water Supply Criteria](#public-water-supply-criteria), [Freshwat
           mutate(across( everything(),  as.character)) %>%
           pivot_longer(cols = contains(c('_EXC','_STAT')), names_to = 'parameter', values_to = 'values', values_drop_na = TRUE) %>% 
           filter(! str_detect(values, 'WQS info missing from analysis')) %>% 
-          filter(! values == "S")) > 1) {
+          filter(! values == "S")) >= 1) {
     WCtoxics <- tibble(WAT_TOX_EXC = NA, WAT_TOX_STAT = 'Review')
     } else { WCtoxics <- tibble(WAT_TOX_EXC = NA, WAT_TOX_STAT = NA)} 
   
