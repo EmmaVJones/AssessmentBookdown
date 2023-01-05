@@ -116,3 +116,15 @@ application-operation-there-are-no-more-stations-to-attribute
 having-problems
 riverine-application-how-to
 lacustrine-application-how-to
+bioassessment-applications-how-to
+general-bioassessment-workflow
+application-use-bioassessment-dashboard
+map-tab
+sci-scores-tab
+sci-method-decision
+habitat-scores-tab
+station-summary-tab
+assessment-decision-tab
+application-use-benthic-assessment-fact-sheet-tool
+assessment-fact-sheet-tab
+general-purpose-biological-fact-sheet-tab

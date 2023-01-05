@@ -1,6 +1,6 @@
 # Bioassessment Applications How To
 
-```{r riverine setup, include=FALSE}
+```{r bioassessment setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -16,4 +16,62 @@ With the adoption of more automated methods throughout the assessment process, r
 
 When a station-level biological decision has been made, the regional biologists enter that decision and other metadata into a template [(download a copy of the template here)](https://covgov-my.sharepoint.com/:x:/g/personal/emma_jones_deq_virginia_gov/EcckR_eno0ZIiHTymTRmVy4BqPJIM4kAb5ZD3ACdNKeRAg?e=cG6yxA) {target="_blank"}. All fields must be completed in the template. When one or more bioassessment decisions are completed in the template, biologists may submit these decisions to be archived on the R server using the [Benthic Assessment Fact Sheet Tool](https://rconnect.deq.virginia.gov/BenthicAssessmentFactSheet/){target="_blank"}. This tool allows biologists to append their bioassessment decisions to a pinned dataset on the R server (with a point and click interface) and, once bioassessment decisions are pinned, they are able to generate and download a standardized biological fact sheet with the click of a button. There is no need to send these fact sheets to assessment staff and they have access to these fact sheets inside the  [Riverine Assessment Application](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/){target="_blank"} as soon as the bioassessment data is pinned (archived) on the R server. 
 
-## Bioassessment Dashboard How To
+## Application Use: Bioassessment Dashboard
+
+
+### Map Tab
+
+On load, the main panel of the [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2024bioassessmentDashboard/){target="_blank"} displays all biological sampling locations from the current IR cycle on the `Map` tab. The map allows users to zoom and pan interactively with the mouse. In the top left corner there are a number of tools to aid users. The plus and minus buttons offer fixed zoom in/out. The home button returns the map orientation to the original zoom level in case a user gets lost. Additional layers available in the map (by hovering over the layers button on the left side) include US EPA Level 3 Ecoregions and Assessment Regions (regional assessment boundaries).
+
+A table below the map displays station metadata information for all stations currently displayed in the map. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the `Column Visibility` button in the upper left corner) as well as copied to the user's clipboard. 
+
+Before proceeding to subsequent tabs, it is beneficial to refine the working dataset by Basin, Collector, StationID, or Replicate filters available in the left side panel. 
+
+**Pro Tip: These filters are cascading hierarchical filters. Starting from the top down, if a user chooses one or more Basins, then only the Collectors with data within these Basins are provided in the `Collector Filter` box. This logic is true of the `StationID Filter` box as well. Not every box must be filled in to utlize the heirarchical filtering.**
+
+**Pro Tip: Once the user has set the query conditions to their liking, the hamburger button in the blue navigation bar will hide/show the sidebar. Hiding the sidebar can be helpful to maximize data visualization features in the browser window space.**
+
+![](images/bioassessmentDashboard1.png)
+
+### SCI Scores Tab
+
+Based on the query terms, the Stream Condition Index (SCI) scores will appear in an interactive plot. The plot is composed of layers of replicate number by season by sampling method (e.g.`Rep 1 Fall (Boatable)` or `Rep 2 Spring (Riffle)`). Additionally, both VSCI and VCPMI criteria are plotted as layers. All layers may be turned on/off by clicking on them in the legend in the left hand side of the plot. Helpful interactive features of the plot include hovering over samples to reveal a popup box with additional sampling information, downloading the plot as a png, zooming to areas of the plot with mouse selection, autoscaling, resetting the axes, and more. Hover your mouse over the top right of the plot to reveal these features and more. 
+
+A table below the plot displays benthic sample information for all stations currently displayed in the plot. Sample information, SCI scores, and SCI metrics can be found for each sample in this table. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the `Column Visibility` button in the upper left corner) as well as copied to the user's clipboard. 
+
+![](images/bioassessmentDashboard2.png)
+
+#### SCI Method Decision
+
+SCI scores are provided for each station based on the station location to expedite application rendering time. Basin and Level 3 Ecoregion information spatially derived from the sample latitude and longitude provide the VCMPI method determination. Should you wish to investigate other SCI methods for a given station, the [CEDS Benthic Data Query Tool](https://rconnect.deq.virginia.gov/CEDSBenthicDataQueryTool/){target="_blank"} provides higher level of analytical control. 
+
+
+### Habitat Scores Tab
+
+Based on the query terms, the Total Habitat Scores will appear in an interactive plot. The plot is composed of layers of season by sampling method (e.g.`Fall (High Gradient Method)` or `Spring (Low Gradient Method)`). Additionally, the [Benthic Stressor Analysis](https://www.deq.virginia.gov/home/showpublisheddocument/4313/637461491358800000){target="_blank"} thresholds indicating probability of stress to aquatic life are plotted as layers. All layers may be turned on/off by clicking on them in the legend in the left hand side of the plot. Helpful interactive features of the plot include hovering over samples to reveal a popup box with additional sampling information, downloading the plot as a png, zooming to areas of the plot with mouse selection, autoscaling, resetting the axes, and more. Hover your mouse over the top right of the plot to reveal these features and more. 
+
+A table below the plot displays habitat sample information for all stations currently displayed in the plot. Sample information, individual habitat metric scores, and Total Habitat Scores can be found for each sample in this table. The cells are color coded in a red scheme where darker colors highlight lower scores for a given habitat metric. If a metric is <= 10, the metric is bolded. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the `Column Visibility` button in the upper left corner) as well as copied to the user's clipboard. 
+
+![](images/bioassessmentDashboard3.png)
+
+### Station Summary Tab
+
+Based on the query terms, the SCI Summary Table will display summaries of the SCI averages across various windows. Where data are available, these windows include the entire IR window (6 year average), most recent two years of the IR period average, spring sample average, fall sample average, and individual year averages. The number of samples in each window is provided in the `n Samples` field. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the `Column Visibility` button in the upper left corner) as well as copied to the user's clipboard. 
+
+The Total Habitat Summary Table will display summaries of the Total Habitat Scores averages across various windows. Where data are available, these windows include the entire IR window (6 year average), most recent two years of the IR period average, spring sample average, fall sample average, and individual year averages. The number of samples in each window is provided in the `n Samples` field. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the `Column Visibility` button in the upper left corner) as well as copied to the user's clipboard. 
+
+The Previous Integrated Report Cycle Bioassessment Information Table will display bioassessment decision information from previous IR windows, where this information is available in the standardized archived format. This information can be helpful to review when making biological assessments to understand any historical decisions. 
+![](images/bioassessmentDashboard4.png)
+
+### Assessment Decision Tab
+
+Based on the query terms, the Assessment Decision Summary Table displays bioassessment information for the current IR cycle. If you have uploaded information about the chosen station(s) to the VDEQ Benthic Assessment Fact Sheet Tool, you will see information that is saved on the server in the table below. If you upload new data about the selected station(s) to the VDEQ Benthic Assessment Fact Sheet Tool, that information will be reflect here after you refresh the dashboard.
+
+![](images/bioassessmentDashboard5.png)
+
+
+## Application Use: Benthic Assessment Fact Sheet Tool
+
+### Assessment Fact Sheet Tab
+
+### General Purpose Biological Fact Sheet Tab
