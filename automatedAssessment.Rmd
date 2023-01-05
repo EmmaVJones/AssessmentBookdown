@@ -2666,7 +2666,7 @@ See the [Public Water Supply Criteria](#public-water-supply-criteria), [Freshwat
     if(nrow(filter(stationData, !is.na(CHLORIDE_mg_L))) > 0){
       chlorideFreshwater <- rollingWindowSummary(
         annualRollingExceedanceSummary(
-          annualRollingExceedanceAnalysis(chlorideFreshwaterAnalysis(stationData), 3) ), "CHL")
+          annualRollingExceedanceAnalysis(chlorideFreshwaterAnalysis(stationData), yearsToRoll = 3, aquaticLifeUse = TRUE) ), "CHL")
     } else {chlorideFreshwater <- tibble(CHL_EXC = NA, CHL_STAT= NA)}
     
   # Water toxics combination with PWS, Chloride Freshwater, and water column PCB data

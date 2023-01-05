@@ -8,7 +8,8 @@ rmd_files: [
   "automatedAssessment.Rmd",
   "metadataApplication.Rmd",
   "riverineApplication.Rmd",
-  "lacustrineApplication.Rmd"
+  "lacustrineApplication.Rmd",
+  "bioassessmentApplications.Rmd"
 ]
 delete_merged_file: true 
 output_dir: "docs"
