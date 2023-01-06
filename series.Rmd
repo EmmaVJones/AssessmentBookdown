@@ -1,3 +1,438 @@
+--- 
+title: "DEQ Water Quality Automated Assessment User Guide"
+author: "DEQ Automated Assessment Team"
+date: "Last Updated: `r Sys.Date()`"
+site: bookdown::bookdown_site
+# output: bookdown::gitbook
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+colorlinks: yes
+github-repo: openscapes/series
+description: "A companion document describing the WQA automated assessment methodology."
+split_by: "section"
+---
+
+# Introduction {#Introduction}
+
+This manual serves as a companion document to DEQ's Water Quality Assessment (WQA) automated assessment methodology for completion of the biennial [305b/303d Integrated Report](https://www.deq.virginia.gov/water/water-quality/assessments/integrated-report). Virginia is among a handful of state agencies that have organized concerted efforts to systematically automate and expedite the water quality assessment process. These entities have all taken different approaches to best meet their state-specific analysis and reporting needs. Through the [Tools for Automated Data Assessment (TADA) working group](https://github.com/USEPA/TADA), EPA is organizing an effort to share code and create national tools to assist partners with assessment analyses. Considering the technological advances in water monitoring that have increased the quantity and types of data requiring consideration during an assessment period, as well as the static or decreasing staff time allocated to the assessment process, automation appears the only solution to keep up with Clean Water Act requirements and keep the public informed of the status of waterbody health and restoration timelines for those waterbodies not meeting water quality standards. By embracing automated assessment procedures, entities aim to provide constituents with higher quality, standardized, and transparent water quality assessment results while adhering to federally mandated deadlines. 
+
+Virginia has taken a hybrid approach to the process of automating the water quality assessments. DEQ relies upon an automated process to manipulate hundreds of thousands of water quality data collected throughout the state during a given assessment period (six year window). These scripts evaluate each record for exceedances of appropriate Water Quality Standards. Regional assessment staff may use interactive web-based analytical tools provide more context to tabular results of exceedance analyses to assist with Quality Assurance/Quality Control (QA/QC) prior to submitting data to EPA's [Assessment, Total Maximum Daily Load (TMDL) Tracking and Implementation System (ATTAINS)](https://www.epa.gov/waterdata/attains){target="_blank"} system through DEQ's internal [Comprehensive Environmental Data System (CEDS)](https://ceds.deq.virginia.gov/ui#){target="_blank"}. This approach maximizes the benefits of each partner in the assessment process, allowing computers to excel at systematic and expedited data manipulation and analysis at scale and allowing humans to digest multiple lines of evidence to identify any potential data collection or analysis errors or areas of environmental concern. 
+
+## How to Use Document {#HowToUseDocument}
+
+The following report is an agency effort to facilitate the further adoption of automated assessment methods statewide. The intention of this project is to provide a non-programmer audience with accessible and understandable narratives describing the automated water quality assessment process. This document is not a comprehensive [WQA Guidance Manual](https://www.deq.virginia.gov/water/water-quality/assessments/wqa-guidance-manual){target="_blank"}, nor is it an introduction to using the R programming language. Here, we document the overall automated assessment process, explaining reasons certain decisions were made, how to unpack analyses, and where to seek further assistance through additional resources or interactive data exploration through web-based application interfaces. 
+
+### Programming Expectations {#ProgrammingExpectations}
+
+The Water Quality Assessment process is complicated. Learning a programming language is complicated. Combine these topics, the subject of this book, and we arrive at complicated^2^.  
+
+The narrative script descriptions are written for understanding at an elementary programming level; however, the individual scripts utilize advanced programming techniques for parsimony, efficiency, and ease of long term maintenance. While it is not necessary to understand every element of code provided to run the automated assessment methods, certain programming themes listed below can be helpful:
+
+* [Tidyverse](https://www.tidyverse.org/){target="_blank"}
+* [Rmarkdown](https://rmarkdown.rstudio.com/){target="_blank"}
+* [Custom functions](https://datacarpentry.org/semester-biology/lessons/R-functions/){target="_blank"}
+* [Optimizing list objects with purrr](https://jennybc.github.io/purrr-tutorial/){target="_blank"}
+* [Pinned data](https://cran.r-project.org/web/packages/pins/vignettes/pins.html){target="_blank"}
+
+The internally-published [DEQ R Methods Encyclopedia](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/){target="_blank"} is a good resource when getting started with R. These articles are useful to familiarize yourself:
+
+* [Getting Started With R](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/gettingStartedWithR.html#gettingStartedWithR){target="_blank"}
+* [How to Learn (or Continue Learning) R?](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/gettingStartedWithR.html#how-to-learn-or-continue-learning-r){target="_blank"}
+* [Connecting to R Connect (for Pinned Data)](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/connectToConnectPins.html#connectToConnectPins){target="_blank"}
+
+The [WQA Technical Support Team](#wqa-technical-support-team) is available for assistance should you encounter any questions.
+
+
+
+## Project History{#ProjectHistory}
+
+The agency began efforts toward automating components of the IR with a dissolved metals assessment written in SAS. These tabular results were provided to regional assessment staff along with raw data queries encompassing data stored in CEDS for each IR data window. 
+
+The [Freshwater Probabilistic Monitoring](https://www.deq.virginia.gov/water/water-quality/monitoring/probabilistic-monitoring){target="_blank"} program began automating analyses and a final report for inclusion in the 2016 IR using the open source [R programming language](https://cran.r-project.org/){target="_blank"}. These practices have been further refined each IR cycle, improving report quality and graphics as well as significantly reducing the amount of time required to generate a report after data collection. These methods were identified as a possible solution to the ongoing challenges in the WQA program to complete vast amounts of data analysis on increasingly short timelines with limited staff.
+
+An effort to systematically analyze all water quality data stored in CEDS for assessments began in 2017. As a pilot project, lakes and reservoirs in the Blue Ridge Regional Office (BRRO) assessment region were selected for first waterbody type to undergo automation and receive an interactive web-based tool to assist regional assessment staff for the 2018 IR. These initial automated assessment efforts were completed using the open source [R programming language](https://cran.r-project.org/){target="_blank"} and interactive applications were built using the [Shiny](https://shiny.rstudio.com/){target="_blank"} package. Rivers and streams followed suit for the 2020 IR, joining lacustrine waterbodies with automated assessment methods and interactive assessment tools. The 2020 IR automated methods were scaled from just the BRRO region to statewide applicability. A pilot project to incorporate citizen monitoring data requiring assessment was undertaken in the BRRO assessment region for the 2020 IR. This pilot proved effective in standardizing and increasing efficiency of incorporating this disparate data and was officially adopted as a process for future IR windows. 
+
+After thorough QA from regional assessment staff across the state, the riverine and lacustrine automated assessment tools were rebooted for the 2022 IR with increased functionality and the ability to assess more parameters, including those not stored in CEDS. However, due to delays organizing citizen monitoring data statewide, automated results for these data were not provided for the 2022 IR. A new database schema for archiving station-specific water quality standards and assessment unit information was implemented. This system benefited the assessment process as well as numerous DEQ water programs that previously did not have access to WQS information at that spatial scale. Appendices and fact sheets for the IR were generated using R and [Rmarkdown](https://rmarkdown.rstudio.com/){target="_blank"} for the first time during the 2022 IR. 
+
+The 2024 IR further refines improvements to the riverine and lacustrine automated assessment methods and interactive tools. By partnering with the [Chesapeake Monitoring Cooperative (CMC)](https://www.allianceforthebay.org/project/chesapeake-monitoring-cooperative/){target="_blank"}, DEQ leveraged an existing public-facing citizen monitoring data portal to expand utility outside the Chesapeake Bay watershed and incorporate all of Virginia's citizen monitoring data. These data are now automatically cleaned and stored by the CMC and can more easily be incorporated in the automated assessment process with web scraping techniques.
+
+To date, no estuarine-specific assessment methods have been completed, but the WQA program is investigating utility and potential adoption among regions with estuarine waters.
+
+## WQA Technical Support Team
+
+Should you encounter any techical issues running the included scripts or have questions about the automated assessment methods described, please reach out to these technical staff for assistance: 
+
+* Emma Jones (emma.jones@deq.virginia.gov)
+* Joe Famularo (joseph.famularo@deq.virginia.gov)
+* Kristen Bretz (kristen.bretz@deq.virginia.gov)
+
+
+## Acknowledgements {#Acknowledgements}
+
+Many Water Quality Assessment (WQA) and Water Quality Standards (WQA) staff have contributed to this effort:
+
+* Emma Jones (emma.jones@deq.virginia.gov)
+* Joe Famularo (joseph.famularo@deq.virginia.gov)
+* Reid Downer (horace.downer@deq.virginia.gov)
+* Kristen Bretz (kristen.bretz@deq.virginia.gov)
+* Jason Hill (jason.hill@deq.virginia.gov)
+* Sandy Mueller (sandra.mueller@deq.virginia.gov)
+* Cleo Baker (cleo.baker@deq.virginia.gov)
+* Amanda Shaver (amanda.shaver@deq.virginia.gov)
+* Tish Robertson (tish.robertson@deq.virginia.gov)
+* Paula Main (paula.main@deq.virginia.gov)
+* Mary Dail (mary.dail@deq.virginia.gov)
+* Martha Chapman (martha.chapman@deq.virginia.gov)
+* Sara Jordan (sara.jordan@deq.virginia.gov)
+* Kristie Britt (kristie.britt@deq.virginia.gov)
+* Jennifer Palmore (jennifer.palmore@deq.virginia.gov)
+* Kelley West (kelley.west@deq.virginia.gov)
+* Rebecca Shoemaker (rebecca.shoemaker@deq.virginia.gov)
+
+
+
+Please direct any project questions to Emma Jones (emma.jones@deq.virginia.gov). 
+
+<!--chapter:end:index.Rmd-->
+
+# Data Organization
+
+```{r data organization setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(DT)
+```
+
+The assessment process requires hundreds of thousands of rows of data collected and stored by DEQ, other state agencies, and citizen partners. These disparate data sources require various levels of data manipulation prior to any analysis. SAS and R are used for the majority of the assessment data cleaning and manipulation processes. 
+
+#### Data Location
+
+Most data used for assessments are stored in DEQ's internal [Comprehensive Environmental Data System (CEDS)](https://ceds.deq.virginia.gov/ui#) and made available through a direct connection to the reporting database known as ODS. The agency is working towards storing all data required for assessments in CEDS, but as of the time of writing the following datasets are stored in locations outside of CEDS:
+
+* Fish Tissue Data
+* PCB Data
+* VDH Data
+* Citizen Monitoring Data
+* Station Metadata
+
+It is important to note that although the data that consitute the conventionals dataset are derive from CEDS/ODS, official assessment records of this data are only stored locally in Microsoft Excel outputs. 
+
+#### Data Availablility
+
+Most of the following data are provided at the beginning of the assessment process (approximately March of an assessment year). Any delays in data availability have ripple effects on the ability of regional assessors to complete their work on time. Should data be provided for assessment after the expected availability date, assessors may not be able to include said data in a given assessment window.
+
+Exceptions to the March data availability date usually apply to Citizen Monitoring, bioassessment, and fish tissue data. Citizen Monitoring data have historically been provided to regional assessment staff in April of a given assessment year. Bioassessment data for the most recent two years of an assessment window trickles in to the assessment process through the summer of a given assessment year due to the lengthy identification process associated with benthic macroinvertebrate samples. Fish tissue data requires protracted laboratory analyses before it is provided back to DEQ from contractor labs for assessment purposes.
+
+Due to these data delays, regional assessment staff generally have to delay certain assessment steps until all data is available for a given station/Assessment Unit, making automated assessment methods ever more important when data are provided.
+
+## Conventionals Data
+
+The conventionals dataset contains the bulk of the data analyzed during any given assessment window. Historically, this dataset has been queried using SAS and a direct connection to the raw monitoring data in the ODS reporting database (the database that makes CEDS data accessible to reporting tools). Recently, efforts to streamline the assessment process and standardize data provided across agency programs produced an effort to convert these SAS scripts into R. 
+
+The "conventionals query" combines WQM field and analyte data with data handling steps that standardize data discrepancies like multiple lab values returned for identical sample date/times, full parameter speciation but no total value, etc. This R query and data standardization method is considered to be under development as code review is a constant part of data improvement strategies. 
+
+The current version of the R based conventionals query is available [here](https://github.com/EmmaVJones/WQMdataQueryTool/blob/main/conventionalsFunction02032022.R). In order to access the data the conventionals function calls, users must have a direct connection to ODS from their environment. Please see the [DEQ R Methods Encyclopedia article on ODS](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/vnbellzNy/connectToODS.html#connectToODS) for more information.
+
+Once the official conventionals dataset is provided for a given assessment window, it is stored on the R server as a pinned dataset to preserve a standardized data version (the data of record) in a centralized location accessible by all DEQ staff. This expedites the amount of time it takes to pull the data into an R environment as well as improves assessment application rendering time. 
+
+An example conventionals dataset is available on the R server and may be retrieved using the script below. Please see the [DEQ R Methods Encyclopedia article on pinned data sources](https://rconnect.deq.virginia.gov/MethodsEncyclopedia/connectToConnectPins.html#connectToConnectPins) for more infomation on how to connect your local system to the R server to query this data. This version of the dataset is used for feature enhancements and application development for the IR2024 cycle. However, this is not the official IR2024 conventionals dataset.
+
+```{r dataOrganization conventionals, eval=FALSE}
+conventionals <- pin_get('ejones/conventionals2024draft', board = 'rsconnect')
+conventionals[1:50,] %>% # preview first 50 rows
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r dataOrganization conventionals real, echo=FALSE}
+conventionals <- readRDS('exampleData/conventionals.RDS')
+conventionals[1:50,] %>% # preview first 50 rows
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+
+## Water Column Metals
+
+query from Roger, for now
+
+## Sediment Metals
+
+query from Roger, for now
+
+## Fish Tissue Data
+
+provided by Rick & Gabe, for now
+
+## PCB Data
+
+From Mark Richards, not in CEDS
+
+## VDH Data
+
+Beach closure, HAB event
+
+## Citizen Monitoring Data
+
+Citizen Monitoring data have historically been provided to DEQ in various data formats and schema using numerous digital and analog storage methods. This data system required multiple iterations of lengthy data standardization and QA/QC processes in order to ensure the data were utilized for assessments. A standardized system requiring citizen groups to either upload their data to the [Chesapeake Monitoring Cooperative (CMC) Data Explorer](https://www.chesapeakemonitoringcoop.org/services/chesapeake-data-explorer/) and DEQ  scraping the CMC API using automated R scripts or provide all data to DEQ in a standardized template has replaced previous data receiving methods. Citizen data not stored in the CMC database live on DEQ staff computers and require further storage solutions. 
+
+A sample citizen monitoring dataset is available in the exampleData directory for you to download and use when practicing the automated scripts. 
+
+```{r dataOrganization citmon}
+citmon <-  readRDS('exampleData/citmon.RDS')
+citmon[1:50,] %>%  # preview first 50 rows
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+
+## Station Metadata
+
+Station metadata are critical to ensuring that stations are assessed appropriately whether an assessment is conducted by hand or with automation. These metadata include the appropriate Assessment Unit and Water Quality Standard information that apply to the station. After this information is identified for a given station, it may be assessed according the the assessment rules that apply to those standards for the specified waterbody type. 
+
+Metadata are provided for stations through a combination of automated spatial analyses and human review. **No metadata are ever linked to stations without regional assessor review.** The [Metadata Attribution](#metadata-attribution) section covers the details of attributing metadata to each station. 
+
+## Low Flow (7Q10) Data
+
+The 2024 IR is the first assessment window to use a standardized low flow analysis process. **Information presented below is still under review by regional assessment staff.** 
+
+The workflow first analyzes a 7Q10 low flow statistic for all available gages in VA based on the last 50 years of water data. The functions called to analyze the xQy flow statistics are identical to DEQ's Water Permitting protocols and were written by Connor Brogan. The water data is provided by the USGS NWIS data repository and is called in the xQy function by the USGS dataRetreival package. [Important assumptions of the xQy program are identified below.](#important-7q10-calculation-notes)
+
+Once flow statistics are generated for all available gages statewide, this information is compared to available flow data during a given assessment window. Any gages identified below the 7Q10 statistic are flagged for the appropriate time period. This information is spatially joined to a major river basin layer to extrapolate available flow data to areas without gaging stations. This is not an ideal extrapolation of flow data, but it serves as a decent initial flag for assessors to know when/where to investigate further. 
+
+These temporal low flow flags are joined to individual site monitoring data by major river basin during the automated assessment process. If parameters used to assess aquatic life condition are collected during low flow periods, then the data are flagged inside the assessment applications, indicating further review is necessary prior to accepting the automated assessment exceedance calculations for that site.
+
+### 7Q10 Method
+
+The method for identifying low flow information for the assessment period is detailed below. The [DFLOW_CoreFunctions_EVJ.R script](https://github.com/EmmaVJones/IR2024/blob/main/2.organizeMetadata/7Q10/DFLOW_CoreFunctions_EVJ.R) is an assessment-specific adaptation of Connor Brogan's xQy protocols that allow for minor adjustments to the DFLOW procedure to allow for assessment purposes (for more information on these changes, see the [Important 7Q10 Calculation Notes](#important-7q10-calculation-notes) section below. 
+
+This analysis needs to be performed on or after April 2 of each assessment window cutoff to ensure the entire final water year is included in the analysis. The results are posted on the R server for inclusion in the automated assessment methods.
+
+```{r dataOrganization 7q10setup, eval=F}
+library(tidyverse)
+library(zoo)
+library(dataRetrieval)
+library(e1071)
+library(sf)
+library(leaflet)
+library(inlmisc)
+library(DT)
+
+source('DFLOW_CoreFunctions_EVJ.R')
+```
+
+
+### USGS Site Data Gathering
+
+All USGS gage information sampled in the last 50 years need to be collected from USGS NWIS. We can use the whatNWISsites() function to identify which sites have daily discharge data (00060) in a designated area (stateCd = 'VA').
+
+```{r dataOrganization pull available gage numbers, eval = F}
+sites <- whatNWISsites(stateCd="VA",
+                       parameterCd="00060",
+                       hasDataTypeCd="dv") %>% 
+  filter(site_tp_cd %in% c('ST', 'SP')) # only keep ST (stream) and SP (spring) sites
+
+sites_sf <- sites %>% 
+   st_as_sf(coords = c("dec_long_va", "dec_lat_va"), 
+               remove = F, # don't remove these lat/lon cols from df
+               crs = 4326) # add projection, needs to be geographic for now bc entering lat/lng
+
+```
+
+Now we will pull daily flow data for each site identified and calculate 7Q10. This is saved in the local environment as a list object with each gage a unique list element.
+
+```{r dataOrganization 7Q10, eval = F}
+# store it somewhere
+flowAnalysis <- list()
+
+for(i in unique(sites$site_no)){
+  print(i)
+  siteFlow <- xQy_EVJ(gageID = i,#USGS Gage ID
+    DS="1972-03-31",#Date to limit the lower end of usgs gage data download in yyyy-mm-dd
+    DE="2023-04-01",#Date to limit the upper end of USGS gage data download in yyyy-mm-dd
+    WYS="04-01",#The start of the analysis season in mm-dd. Defaults to April 1.
+    WYE="03-31",#The end of the analysis season in mm-dd. Defaults to March 31.
+    x=7,#If you want to include a different xQY then the defaults, enter x here
+    y=10,
+    onlyUseAcceptedData = F )
+  
+  flowAnalysis[i] <- list(siteFlow)
+}
+```
+
+Using the purrr library, we can extract just the flow metric information for each gage and store in a tibble for use later.
+
+```{r dataOrganization 7Q10 extraction, eval = F}
+# extract 7Q10 by gageNo
+x7Q10 <- map_df(flowAnalysis, "Flows") # EVJ added in gageNo to xQy_EVJ()
+
+x7Q10[1:50,] %>% # preview first 50 rows
+    DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r dataOrganization 7Q10 extraction real, echo = F}
+readRDS('exampleData/x7Q10.RDS') %>% 
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+
+And we need the actual daily flow data to compare to the low flow metrics, so we will extract that next. 
+
+```{r dataOrganization extract flow data, eval = F}
+# now to extract flow data already pulled by function
+flows <- map_df(flowAnalysis, "outdat") 
+
+flows[1:50,] %>% # preview first 50 rows
+    DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r dataOrganization extract flow data real, echo = F}
+readRDS('exampleData/flows.RDS') %>% 
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+Since we only really care about flow data from our assessment window, let's extract just the flow data and filter to our IR window of interest. We can then join the low flow metrics by gage number and flag any daily average flow data that falls below the gage's 7Q10 metric.
+
+```{r dataOrganization assessment window, eval = F}
+# now just grab flow data in assessment window, join in 7Q10, identify any measures below 7Q10
+assessmentFlows <- map_df(flowAnalysis, "outdat") %>% 
+  filter(between(Date, as.Date("2017-01-01"), as.Date("2022-12-31"))) %>% 
+  left_join(x7Q10, by = c('Gage ID' = "gageNo")) %>% 
+  mutate(`7Q10 Flag` = case_when(Flow <= n7Q10 ~ '7Q10 Flag',
+                                 TRUE ~ as.character(NA)))
+
+assessmentFlows[1:50,] %>% # preview first 50 rows
+    DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r dataOrganization assessment window real, echo = F}
+readRDS('exampleData/assessmentFlows.RDS') %>% 
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+Here we limit our assessmentFlows object to just the rows where a 7Q10 flag is encountered. We can review these low flow events by organizing them by gage and date. 
+
+```{r dataOrganization 7Q10 flag, eval = F}
+# anything below 7Q10?
+lowAssessmentFlows <- filter(assessmentFlows, `7Q10 Flag` == '7Q10 Flag')
+unique(lowAssessmentFlows$`Gage ID`) # what gages do these occur at?
+
+# organize low flow events by Gage ID
+lowAssessmentFlows %>% 
+  arrange(`Gage ID`, Date))[1:50,] %>% # preview first 50 rows
+    DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```  
+
+```{r dataOrganization 7Q10 flag real, echo = F}
+readRDS('exampleData/lowAssessmentFlows1.RDS') %>% 
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+Next, let's review the low flow gages visually on a map. First, we need to transform this low flow information into a spatial object. 
+
+```{r dataOrganization low flow sites, eval = F}
+# see where spatially
+lowFlowSites <- lowAssessmentFlows %>% 
+  distinct(`Gage ID`) %>% 
+  left_join(sites_sf, by = c('Gage ID' = 'site_no')) %>% 
+  st_as_sf()
+```
+
+We will bring in major river subbasins to better understand how these low flow events happen across the landscape.
+
+```{r dataOrganization watersheds, eval = F}
+basins <- st_as_sf(pin_get("ejones/DEQ_VAHUSB_subbasins_EVJ", board = "rsconnect")) %>% 
+  group_by(BASIN_CODE, BASIN_NAME) %>% 
+  summarise()
+```
+
+```{r dataOrganization watersheds real, echo = F, warning=F, message=F }
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(inlmisc)
+basins <- readRDS('exampleData/basins.RDS') %>% 
+  group_by(BASIN_CODE, BASIN_NAME) %>% 
+  summarise()
+
+lowFlowSites <- readRDS('exampleData/lowFlowSites.RDS') 
+sites_sf <- readRDS('exampleData/sites_sf.RDS') 
+```
+
+And here is a map of the major river subbasins with all Virginia USGS gages (`USGS sites`) and just USGS gages with low flow events in the IR window (`Low Flow USGS sites`). 
+
+```{r dataOrganization map}
+CreateWebMap(maps = c("Topo","Imagery","Hydrography"), collapsed = TRUE,
+             options= leafletOptions(zoomControl = TRUE,minZoom = 5, maxZoom = 20,
+                                     preferCanvas = TRUE)) %>%
+  setView(-79.1, 37.7, zoom=7)  %>%
+  
+  addPolygons(data= basins,  color = 'black', weight = 1,
+              fillColor= 'blue', fillOpacity = 0.4,stroke=0.1,
+              group="Major River SubBasins", label = ~BASIN_NAME) %>% 
+  addCircleMarkers(data = sites_sf, color='gray', fillColor='gray', radius = 4,
+                   fillOpacity = 0.8,opacity=0.8,weight = 2,stroke=T, group="USGS sites",
+                   label = ~site_no)  %>%
+  addCircleMarkers(data = lowFlowSites, color='gray', fillColor='red', radius = 4,
+                   fillOpacity = 0.8,opacity=0.8,weight = 2,stroke=T, group="Low Flow USGS sites",
+                   label = ~`Gage ID`)  %>% 
+
+  addLayersControl(baseGroups=c("Topo","Imagery","Hydrography"),
+                   overlayGroups = c("Low Flow USGS sites","USGS sites","Major River SubBasins"),
+                   options=layersControlOptions(collapsed=T),
+                   position='topleft')
+```
+
+Now we need to join the watershed information to the low flow analysis so we can easily incorporate this information to all monitoring sites that fall in the watershed. 
+
+```{r dataOrganization low flow watershed, eval = F}
+lowFlowSitesHUC <- st_intersection(lowFlowSites, basins) %>%  
+  st_drop_geometry() %>% # for this analysis we don't actually need the spatial information
+  dplyr::select(`Gage ID` = `Gage.ID`, # spatial joins change tibble names, changing back to name we want
+                agency_cd:dec_long_va, BASIN_CODE, BASIN_NAME)
+
+lowAssessmentFlows <- left_join(lowAssessmentFlows, lowFlowSitesHUC, by = 'Gage ID') %>% 
+  dplyr::select(Agency, `Gage ID`, `Station Name` = station_nm, `Site Type` = site_tp_cd,
+                Latitude = dec_lat_va, Longitude = dec_long_va, Date:Status, 
+                `Water Year` = WY, n7Q10, `7Q10 Flag`,BASIN_CODE, BASIN_NAME)
+
+
+```
+
+
+This information is pinned to the R server so we can use it during the automated assessment process.
+
+```{r dataOrganization pin, eval=FALSE}
+pin_get('ejones/AssessmentWindowLowFlows', 'rsconnect')[1:50,] %>% # preview first 50 rows
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+```{r dataOrganization pin real, echo = F}
+readRDS('exampleData/lowAssessmentFlows.RDS') %>% 
+  DT::datatable(rownames = F, options = list(dom = 'lftip', pageLength = 5, scrollX = TRUE))
+```
+
+### Important 7Q10 Calculation Notes
+
+Information from the chief flow statistic programmer (Connor Brogan) about the assumptions of the 7Q10 function used in this analysis:
+
+1. Desired exceedance probability evaluation in check.fs() must be between 0 and 1 
+2. Only complete analysis years are included for calculation of both the Harmonic Mean and all low flows. Years with minimum flow of 0 are removed, but compensated for via USGS probability adjustment 
+3. Must have at least 2 analysis years of complete data (line 133) to calculate xQy flows (not necessary for Harmonic Mean)
+4. Provisional gage flow data is removed
+5. Negative flows (e.g. tidally reversed) are treated as NA following the USGS SW Toolbox
+6. Function only uses gage data where the water year is within the range of the years of DS and DE
+7. The gage data is filtered to only include data after the first date of the first analysis season and before the last date of the last analysis season. For instance, if WYS = “04-01” and WYE = “03-31” and DS and DE were 1972 to 2022, then the gage data would be limited to the dates between and including 1972-04-01 and 2022-03-31
+8. The start and end dates of the data must include one at least one instance of WYE
+9. The last few days in the analysis season are removed to ensure statistical independence between years
+10. Analysis season must have sufficient days to calculate a minimum flow such that at least 7-days are required to calculate a 7-day flow
+
+Based on the changes Emma Jones made to the original function for Water Quality Assessment purposes, here are important assumptions to know (numbered according to system above):
+
+3. Must have at least 10 analysis years of complete data to calculate xQy flows 
+4. Provisional gage flow data is accepted. This is important so water years can be calculated as soon as possible for assessment purposes. Waiting until all data are approved will result in too little time for assessors to review the data. Storm events usually are corrected in the provisional to accepted stage in the USGS QA process, so since we are interested in low flow events, this is not a major concern when using provisional data.
+
+<!--chapter:end:dataOrganization.Rmd-->
+
 # Automated Assessment Methods
 
 ```{r automated assessment setup, include=FALSE}
@@ -3499,4 +3934,303 @@ lowFlowFlagColumn <- function(stationData){
 
 This dataset is the end result of the automated assessment process. It is saved as a .csv and used for upload to both the riverine and lacustrine applications. The reason the data are stored in .csv and not on the server is to enable individual assessors to adjust AU information manually whenever needed (e.g. if an AU needs to be split). If this data were stored on the server, then the Assessment Data Analyst would need to be involved any time an assessor needed to adjust which AU(s) a station is connected to. This data is available for download from each of the riverine and lacustrine assessment applications.
 
+
+
+<!--chapter:end:automatedAssessment.Rmd-->
+
+# Regional Metadata Validation <br>Tool How To
+
+```{r metadata setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The [Regional Metadata Validation Tool](https://rconnect.deq.virginia.gov/RegionalAssessmentMetadataValidation/) is located on the R server.
+
+
+The purpose of this tool is to streamline the QA of metadata attached to individual stations that was performed by automated scripts. This metadata include Water Quality Standards (WQS) and Assessment Unit (AU) information that are necessary to properly analyze and organize assessment results. A scripted process automates the data organization of stations from disparate data sources, spatially joins these sites to the appropriate WQS and AUs where information is not available from previous cycles, and runs basic QA on the output to ensure all stations that were expected to receive metadata did in fact get attributed. These scripts are detailed in the [Metadata Attribution](#metadata-attribution) section. 
+
+It is the responsibility of each regional assessor to review the metadata linked through the automated snapping process to ensure the closest snapped information does in fact apply to the given station. This application offers an opportunity to perform QA on the spatial WQS and AU layers and communicate with Central Office Assessment/WQS staff when mistakes are found. 
+
+## Application Orientation
+
+This application expedites the review of the spatially joined output by organizing stations into the appropriate waterbody type, Assessment Region, and subbasin. The application is divided into two tabs (corresponding to AU review and WQS review) that can be navigated between using the navigation bar at the top of the page. The application opens to the Assessment Unit Review tab by default, but there is no specified order in which a reviewer must interact with either tab. Data for each tab are saved back to the R server independently. Each of these tabs have a drop down option that is accessible by clicking the triangle adjacent to the name of the tab. These options are identical for both the Assessment Unit QA and Water Quality Standards QA tabs. The top option called `Watershed Selection` allows users to choose certain types of stations to review and the bottom option called `Manual Review` allows users to visualize the stations selected in the `Watershed Selection` tab option in more detail. The final tab called "About" offers instructions to the user similar to what is detailed below.
+
+The following application workflow is applicable to both the Assessment Unit QA and Water Quality Standards QA sections of the application. For brevity, this user guide will only go over instructions for the WQS side of the application, but the application flow applied to the WQS side of the application mimics the application flow applied on the AU side of the application.
+
+## Application Use: <br>Water Quality Standards QA- <br>Watershed Selection Tab
+
+On load, the tab will provide three related drop down menus on the left hand side of the page. These interact in a top-down hierarchical system where the selection in the top drop down, `Select Waterbody Type`, dictates available options in the middle drop down, `Select DEQ Assessment Region`, which then dictates the available options in the bottom drop down, `Select Subbasin`. Users navigate through these cascading filters to identify the precise waterbody type (e.g. riverine, lacustrine, or estuarine), assessment region, and subbasin to tackle QA in a given session. 
+
+![](images/metadata1.PNG)
+
+Once the user is happy with their selection, they must click the `Begin Review With Subbasin Selection (Retrieves Last Saved Result)` button. This button uses the user provided information to retrieve all the applicable stations that require QA. This information is sourced from the R server in addition to all the applicable spatial layers necessary to produce meaningful maps in the subsequent `Manual Review` tab option. Once this information is retrieved from the R server, a basic interactive map of the selected subbasin populates the tab as well as verbal breakdowns of the type of information that needs to be reviewed for the selected subbasin (Preprocessing Data Recap for Selected Region/Subbasin/Type Combination).
+
+![](images/metadata2.PNG)
+
+Based on the summarized information about the stations in the selected subbasin, the user may choose to begin reviewing that subbasin or they might scroll through other waterbody type/region/subbasin combinations until a more desirable "to do list" is identified. Each time a user changes any of the drop down inputs, they must press the `Begin Review With Subbasin Selection (Retrieves Last Saved Result)` button to retrieve the associated station breakdown from the chosen subbasin. A small progress bar appears in the lower right corner of the browser window to communicate that large spatial data are being transmitted to the app. The popup disappears when the map re-renders and loads the new spatial information.
+
+Once a user is ready to review the stations in the selected subbasin, the user must navigate to the `Manual Review` tab under the Water Quality Standards QA drop down on the navigation bar.
+
+
+## Application Use: <br>Water Quality Standards QA- <br>Manual Review Tab
+
+On load, the `Manual Review` tab renders three buttons, an interactive map of Virginia, and an area for output information from the map that is blank until user input dictates. 
+
+### Map Orientation
+
+The map allows users to zoom and pan interactively with the mouse. In the top left corner there are a number of tools to aid users. The plus and minus buttons offer fixed zoom in/out. The home button returns the map orientation to the original zoom level in case a user gets lost. The magnifying glass button allows users to search for and zoom to a selected station. To use this feature, click on the magnifying glass, begin typing the StationID of interest in the text box (after each character entered, a dropdown of options based on the characters entered appears), once a station is selected, the map will zoom to that station and highlight it with a red circle. You may notice that if there isn't the `All Stations in Basin` layer on, then no station point appears inside the red circle. Additional layers available in the map (by hovering over the layers button on the left side) include `All Stations in Basin` (all other stations identified in the basin with data for the given IR window) and `Assessment Regions` (regional assessment boundaries). 
+
+![](images/metadata3.PNG)
+
+### What do the buttons do?
+
+The three buttons correspond to the station snapping summaries presented on the `Watershed Selection` tab. In the example above, we can see this subbasin has: 
+* There are 8 stations that snapped to 1 WQS segment in preprocessing.
+* There are 1 stations that snapped to > 1 WQS segment in preprocessing.
+* There are 1 stations that snapped to 0 WQS segments in preprocessing.
+
+By clicking the `Plot stations that snapped to 1 WQS Segment`, users will see all the stations that only retrieved one WQS segment in the spatial snapping process. They are colored from green to light red based on the buffer distance required to snap to a segment  (within the smallest set buffer distance of the sequence dictated to the automated snapping functions). Green stations snapped to segments at closer distances compared to red sites. The legend for the buffer distance stations colors is presented in the right corner of the app.
+
+By clicking the `Plot stations that snapped to >1 WQS Segment`, users will see all the stations that retrieved multiple WQS segments in the spatial snapping process  (within the smallest set buffer distance of the sequence dictated to the automated snapping functions). They are colored to red to indicate these stations need more attention. 
+
+By clicking the `Plot stations that snapped to 0 WQS Segment`, users will see all the stations that retrieved no WQS segments in the spatial snapping process (within the largest buffer distance of the sequence dictated to the automated snapping functions). They are colored to orange to indicate these stations need the most attention. 
+
+If any of the categories listed above had 0 stations, a warning message will appear in the lower right corner of the app indicating there is nothing for the button to plot.
+
+![](images/metadata4.PNG)
+
+### Application Operation
+
+The goal of this section of the application is to review each station and either accept or adjust the provided WQS information snapped to the site. To review a site, users may zoom to a selected map area and click on a site. By clicking a site, users are selecting a site to QA, as indicated by the green halo around the selected site. The associated metadata is now populated in the `Stations Data and Spatially Joined WQS` tab below the map. 
+
+The `Selected Station Information` table details information about the station including:
+* the WQS_ID of snapped segment(s)
+* the Buffer Distance (distance required to snap to the linked segment(s))
+* n (the number of segments linked to the station during spatial processing)
+* a hyperlink to the internal GIS Web Application that pulls up the appropriate WQS layer and station information in a new browser tab
+* additional station metadata information
+
+The `Spatially Joined WQS Information` table details information about the WQS segment(s) attached to the selected station including:
+* WQS_ID (unique code attributed to each WQS segment)
+* GNIS_Name (name of the WQS segment)
+* SEC (WQS section)
+* CLASS (WQS class)
+* SPSTDS (WQS special standards)
+* SECTION_DESCRIPTION (narrative description of the section location)
+* PWS (whether or not the section is designated as a Public Water Supply)
+* Tier_III (whether or not the section is designated as a Tier III water)
+* additional WQS segment information
+
+**Users may click on more than one station and subsequently reveal information about more than one station in the `Stations Data and Spatially Joined WQS` tab below the map.** If more than one row is presented in a table, a y scroll bar on the right side of the table will automatically appear such that the user may access all the table information.
+
+#### Application Operation: Clear Selection
+
+To deselect a station or stations, click the blue `Clear Selection` button below the map. 
+` 
+![](images/metadata5.PNG)
+
+### Application Operation: <br>Station that Snapped to 1 WQS Segment
+
+Should a user select a station for review that snapped to 1 WQS segment, the process for QAing that station is simple. With the station highlighted with the green halo, the user reviews all the information presented below the map in the `Stations Data and Spatially Joined WQS` tab. Additionally, when the `Plot stations that snapped to 1 WQS Segment` button was pressed, additional spatial layers became available in the layers drop down of the map. The user may now turn on the layer called `WQS Segments of Stations Snapped to 1 Segment` to reveal all the segments in that category. These segments may be clicked on in the map to reveal the same information from the `Selected Station Information` table in a popup on the map.
+
+![](images/metadata6.PNG)
+
+#### Application Operation: Accept
+
+If the user is satisfied with the snapped WQS segment, they may press the blue `Accept` button to reveal a modal window named `Accept Snapped WQS`. This modal shows the information from the `Selected Station Information` table one last time for review. There is a textbox below the table where users may input any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing `Dismiss` or `Cancel` if they choose to not proceed with that station.
+
+![](images/metadata7.PNG)
+
+Once the user presses the `Accept` button in the `Accept Snapped WQS` modal, the station and WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations "to do" in that category at the top of the page goes down by one. 
+
+
+#### Application Operation: Manual WQS Adjustment (1 segment)
+
+If the user is not satisfied with the snapped WQS segment, they may press the blue `Manual WQS Adjustment` button to reveal a modal window named `Manually Adjust WQS`. This modal shows the information from the `Selected Station Information` table one last time for review. There are two textboxes below the table where users may input the desired WQS_ID to attach to the StationID and any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing `Dismiss` or `Cancel` if they choose to not proceed with that station.
+
+**It is highly recommended that users copy and paste the desired WQS_ID from either this application or the GIS Web App to ensure the correct WQS_ID information is entered into the text box.** 
+
+
+**Pro Tip: By clicking the record in the WQS_ID cell of the table on the modal window three time quickly, the cell contents will be highlighted. Users may use the keyboard shortcuts to copy(ctrl+c)/paste(ctrl+v) this information into the text box below the table.**
+
+![](images/metadata8.PNG)
+
+Once the user presses the `Accept` button in the `Manually Adjust WQS` modal, the station and manually entered WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations "to do" in that category at the top of the page goes down by one. 
+
+
+#### Application Operation: Export Reviews
+
+All the work the user has completed so far accepting or manually adjusting WQS are only saved in the local application environment. **The only way to preserve the work completed in the application is to press the green `Export reviews` button.** It is highly recommended that users click the `Export reviews` button frequently (every 3-4 stations or after a particularly challenging review) to ensure their work is in fact saved on the server. 
+
+Users may "undo" any accidental work still in their local application environment by either closing the app or returning to the `Watershed Selection` tab without pressing the `Export reviews` button. This work flow would look like: 
+
+1. User selects station, Accept
+2. User selects station, Accept
+3. User selects station, Accept
+4. User presses `Export reviews` to save work to the R server
+5. User selects station, Accept- user realizes they made a mistake and doesn't want to save that accept to the server
+6. User closes the app or navigates back to the `Watershed Selection` tab without pressing the `Export reviews` button- **all information completed in the app since the last time `Export reviews` was pressed will not be saved**
+7. User opens the app or clicks the `Begin Review With Subbasin Selection (Retrieves Last Saved Result)` button on the `Watershed Selection` tab to pull the last information saved on the server
+8. User proceeds to the `Manual Review` tab and continues work
+
+
+### Application Operation: <br>Station that Snapped to >1 WQS Segment
+
+Should a user select a station for review that snapped to >1 WQS segment, the process for QAing that station is relatively simple. With the station highlighted with the green halo, the user reviews all the information presented below the map in the `Stations Data and Spatially Joined WQS` tab. Additionally, when the `Plot stations that snapped to >1 WQS Segment` button was pressed, additional spatial layers became available in the layers drop down of the map. The user may now turn on the layer called `WQS Segments of Stations Snapped to >1 Segment` to reveal all the segments in that category. These segments are plotted on a color ramp to distinguish them from one another and may be clicked on in the map to reveal the same information from the `Selected Station Information` table in a popup on the map. The GIS Web App hyperlinks may also be useful to use at this stage. 
+
+![](images/metadata9.PNG)
+
+
+#### Application Operation: Manual WQS Adjustment (> 1 segment)
+
+If the user needs to choose between multiple WQS segments, they must press the blue `Manual WQS Adjustment` button to reveal a modal window named `Manually Adjust WQS`. **The user cannot accept a single StationID that is linked to multiple WQS_ID's using the `Accept` button.** The `Manually Adjust WQS` modal shows the information from the `Selected Station Information` table one last time for review. There are two textboxes below the table where users may input the desired WQS_ID to attach to the StationID and any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing `Dismiss` or `Cancel` if they choose to not proceed with that station.
+
+**It is highly recommended that users copy and paste the desired WQS_ID from either this application or the GIS Web App to ensure the correct WQS_ID information is entered into the text box.** 
+
+**Pro Tip: By clicking the record in the WQS_ID cell of the table on the modal window three time quickly, the cell contents will be highlighted. Users may use the keyboard shortcuts to copy(ctrl+c)/paste(ctrl+v) this information into the text box below the table.**
+
+Once the user presses the `Accept` button in the `Manually Adjust WQS` modal, the station and manually entered WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations "to do" in that category at the top of the page goes down by one. 
+
+
+
+### Application Operation: <br>Station that Snapped to 0 WQS Segments
+
+Should a user select a station for review that snapped to no WQS segments, the process for QAing that station is more involved. With the station highlighted with the green halo, the user reviews all the information presented below the map in the `Stations Data and Spatially Joined WQS` tab. To preserve application rendering time, additional spatial layers are not available in the layers drop down of the map for this scenario. Instead, the user should click the `Open Link In New Tab` button in the `Selected Station Information` table to navigate to the GIS Web App to visualize all WQS segments around the station. 
+
+
+#### Application Operation: Manual WQS Adjustment (0 segments)
+
+Once the user has chosen an appropriate WQS segment, they must press the blue `Manual WQS Adjustment` button to reveal a modal window named `Manually Adjust WQS`. **The user cannot accept a single StationID that is linked to no WQS_ID's using the `Accept` button.** The `Manually Adjust WQS` modal shows the information from the `Selected Station Information` table one last time for review. This will show information about the station but no WQS_ID. There are two textboxes below the table where users may input the desired WQS_ID to attach to the StationID and any additional comments and documentation to archive with the snapped StationID and WQS segment information. This could be why the selection was made, notes to future assessors about this site/segment, or nothing at all. At this point the user may navigate away from the modal by pressing `Dismiss` or `Cancel` if they choose to not proceed with that station.
+
+**It is highly recommended that users copy and paste the desired WQS_ID from either this application or the GIS Web App to ensure the correct WQS_ID information is entered into the text box.** 
+
+
+Once the user presses the `Accept` button in the `Manually Adjust WQS` modal, the station and manually entered WQS segment are linked, the modal disappears, the station changes to a purple (completed) color, and the count of stations "to do" in that category at the top of the page goes down by one. 
+
+
+### Application Operation: <br>There are no more stations to attribute
+
+Congratulations! That means you have completed the review of all the stations in this subbasin. Make sure you press the `Export reviews` button one more time to ensure all your hard work is saved on the server.
+
+At this point, the user may navigate back to the `Watershed selection` tab to choose another subbasin to review or close the application to end their metadata review session.
+
+
+## Having problems?
+
+Please contact Emma Jones (emma.jones@deq.virginia.gov) should you encounter any problems using the application, wonky situations to review, or long rendering times/app crashing. 
+
+<!--chapter:end:metadataApplication.Rmd-->
+
+# Riverine Application How To
+
+```{r riverine setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The [Riverine Assessment App](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/) is located on the R server. **update link to 2024 when pushed**
+
+<!--chapter:end:riverineApplication.Rmd-->
+
+# Lacustrine Application How To
+
+```{r lacustrine setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+The [Lakes Assessment App](https://rconnect.deq.virginia.gov/IR2022LakesAssessmentApp/) is located on the R server. **update link to 2024 when pushed**
+
+<!--chapter:end:lacustrineApplication.Rmd-->
+
+# Bioassessment Applications How To
+
+```{r bioassessment setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+There are two bioassessment tools designed to assist biological staff with the assessment process. They include the [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2024bioassessmentDashboard/){target="_blank"} and the [Benthic Assessment Fact Sheet Tool](https://rconnect.deq.virginia.gov/BenthicAssessmentFactSheet/){target="_blank"}. Both tools are helpful throughout the bioassessment process, providing standardized data queries, visualizations, and analyses for biologists. The [CEDS Benthic Data Query Tool](https://rconnect.deq.virginia.gov/CEDSBenthicDataQueryTool/){target="_blank"} is a supplementary resource for more in depth benthic analyses, but that tool will not be discussed in depth in this chapter.
+
+## General Bioassessment Workflow
+
+After benthic macroinvertebrate data collection, processing, identification, and CEDS data entry, regional biological staff should assess all samples collected within a given Integrated Report window and provide station-level summaries to regional assessment staff. Biologists are best suited to make biological assessment decisions due to their expertise in benthic community structure and because they visited the sites and thus have personal knowledge of the site, watershed, and sampling conditions that might affect how data should be interpreted. 
+
+Historically, biologists provided bioassessment decisions to regional assessment staff through individual bioassessment fact sheets. These one page documents summarize all benthic and habitat sampling data from a given site and are excellent resources for monitoring, assessment, and TMDL staff well after the fact sheet was written. Regional assessment staff rely on these fact sheets to relay expert interpretation of biological data readily into assessment decisions. These fact sheets improve communication between the monitoring and assessment arms of the programs and can help guide water planning efforts. However, these fact sheets were time consuming to create and difficult to keep track of during and after a given assessment cycle. 
+
+With the adoption of more automated methods throughout the assessment process, regional biologists received two automated tools to standardize and expedite the bioassessment process. The [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2024bioassessmentDashboard/){target="_blank"} is intended as a first stop for biologists as they begin bioassessment in a given cycle. The tool identifies all biological and habitat data collected within a given assessment cycle, along with station-specific bioassessment information from previous assessment cycles, to readily assist with biological assessment decisions. This interactive tool performs all necessary data querying, manipulation along with interactive mapping, plotting, and tabular data summaries. 
+
+When a station-level biological decision has been made, the regional biologists enter that decision and other metadata into a template [(download a copy of the template here)](https://covgov-my.sharepoint.com/:x:/g/personal/emma_jones_deq_virginia_gov/EcckR_eno0ZIiHTymTRmVy4BqPJIM4kAb5ZD3ACdNKeRAg?e=cG6yxA) {target="_blank"}. All fields must be completed in the template. When one or more bioassessment decisions are completed in the template, biologists may submit these decisions to be archived on the R server using the [Benthic Assessment Fact Sheet Tool](https://rconnect.deq.virginia.gov/BenthicAssessmentFactSheet/){target="_blank"}. This tool allows biologists to append their bioassessment decisions to a pinned dataset on the R server (with a point and click interface) and, once bioassessment decisions are pinned, they are able to generate and download a standardized biological fact sheet with the click of a button. There is no need to send these fact sheets to assessment staff and they have access to these fact sheets inside the  [Riverine Assessment Application](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/){target="_blank"} as soon as the bioassessment data is pinned (archived) on the R server. 
+
+## Application Use: Bioassessment Dashboard
+
+
+### Map Tab
+
+On load, the main panel of the [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2024bioassessmentDashboard/){target="_blank"} displays all biological sampling locations from the current IR cycle on the `Map` tab. The map allows users to zoom and pan interactively with the mouse. In the top left corner there are a number of tools to aid users. The plus and minus buttons offer fixed zoom in/out. The home button returns the map orientation to the original zoom level in case a user gets lost. Additional layers available in the map (by hovering over the layers button on the left side) include US EPA Level 3 Ecoregions and Assessment Regions (regional assessment boundaries).
+
+A table below the map displays station metadata information for all stations currently displayed in the map. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the `Column Visibility` button in the upper left corner) as well as copied to the user's clipboard. 
+
+Before proceeding to subsequent tabs, it is beneficial to refine the working dataset by Basin, Collector, StationID, or Replicate filters available in the left side panel. 
+
+**Pro Tip: These filters are cascading hierarchical filters. Starting from the top down, if a user chooses one or more Basins, then only the Collectors with data within these Basins are provided in the `Collector Filter` box. This logic is true of the `StationID Filter` box as well. Not every box must be filled in to utlize the heirarchical filtering.**
+
+**Pro Tip: Once the user has set the query conditions to their liking, the hamburger button in the blue navigation bar will hide/show the sidebar. Hiding the sidebar can be helpful to maximize data visualization features in the browser window space.**
+
+![](images/bioassessmentDashboard1.png)
+
+### SCI Scores Tab
+
+Based on the query terms, the Stream Condition Index (SCI) scores will appear in an interactive plot. The plot is composed of layers of replicate number by season by sampling method (e.g.`Rep 1 Fall (Boatable)` or `Rep 2 Spring (Riffle)`). Additionally, both VSCI and VCPMI criteria are plotted as layers. All layers may be turned on/off by clicking on them in the legend in the left hand side of the plot. Helpful interactive features of the plot include hovering over samples to reveal a popup box with additional sampling information, downloading the plot as a png, zooming to areas of the plot with mouse selection, autoscaling, resetting the axes, and more. Hover your mouse over the top right of the plot to reveal these features and more. 
+
+A table below the plot displays benthic sample information for all stations currently displayed in the plot. Sample information, SCI scores, and SCI metrics can be found for each sample in this table. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the `Column Visibility` button in the upper left corner) as well as copied to the user's clipboard. 
+
+![](images/bioassessmentDashboard2.png)
+
+#### SCI Method Decision
+
+SCI scores are provided for each station based on the station location to expedite application rendering time. Basin and Level 3 Ecoregion information spatially derived from the sample latitude and longitude provide the VCMPI method determination. Should you wish to investigate other SCI methods for a given station, the [CEDS Benthic Data Query Tool](https://rconnect.deq.virginia.gov/CEDSBenthicDataQueryTool/){target="_blank"} provides higher level of analytical control. 
+
+
+### Habitat Scores Tab
+
+Based on the query terms, the Total Habitat Scores will appear in an interactive plot. The plot is composed of layers of season by sampling method (e.g.`Fall (High Gradient Method)` or `Spring (Low Gradient Method)`). Additionally, the [Benthic Stressor Analysis](https://www.deq.virginia.gov/home/showpublisheddocument/4313/637461491358800000){target="_blank"} thresholds indicating probability of stress to aquatic life are plotted as layers. All layers may be turned on/off by clicking on them in the legend in the left hand side of the plot. Helpful interactive features of the plot include hovering over samples to reveal a popup box with additional sampling information, downloading the plot as a png, zooming to areas of the plot with mouse selection, autoscaling, resetting the axes, and more. Hover your mouse over the top right of the plot to reveal these features and more. 
+
+A table below the plot displays habitat sample information for all stations currently displayed in the plot. Sample information, individual habitat metric scores, and Total Habitat Scores can be found for each sample in this table. The cells are color coded in a red scheme where darker colors highlight lower scores for a given habitat metric. If a metric is <= 10, the metric is bolded. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the `Column Visibility` button in the upper left corner) as well as copied to the user's clipboard. 
+
+![](images/bioassessmentDashboard3.png)
+
+### Station Summary Tab
+
+Based on the query terms, the SCI Summary Table will display summaries of the SCI averages across various windows. Where data are available, these windows include the entire IR window (6 year average), most recent two years of the IR period average, spring sample average, fall sample average, and individual year averages. The number of samples in each window is provided in the `n Samples` field. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the `Column Visibility` button in the upper left corner) as well as copied to the user's clipboard. 
+
+The Total Habitat Summary Table will display summaries of the Total Habitat Scores averages across various windows. Where data are available, these windows include the entire IR window (6 year average), most recent two years of the IR period average, spring sample average, fall sample average, and individual year averages. The number of samples in each window is provided in the `n Samples` field. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the `Column Visibility` button in the upper left corner) as well as copied to the user's clipboard. 
+
+The Previous Integrated Report Cycle Bioassessment Information Table will display bioassessment decision information from previous IR windows, where this information is available in the standardized archived format. This information can be helpful to review when making biological assessments to understand any historical decisions. 
+![](images/bioassessmentDashboard4.png)
+
+### Assessment Decision Tab
+
+Based on the query terms, the Assessment Decision Summary Table displays bioassessment information for the current IR cycle. If you have uploaded information about the chosen station(s) to the VDEQ Benthic Assessment Fact Sheet Tool, you will see information that is saved on the server in the table below. If you upload new data about the selected station(s) to the VDEQ Benthic Assessment Fact Sheet Tool, that information will be reflect here after you refresh the dashboard.
+
+![](images/bioassessmentDashboard5.png)
+
+
+## Application Use: Benthic Assessment Fact Sheet Tool
+
+In an effort to make DEQ's custom applications more dynamic, the [Benthic Assessment Fact Sheet Tool](https://rconnect.deq.virginia.gov/BenthicAssessmentFactSheet/){target="_blank"} generates two types of standardized Benthic Fact Sheets for DEQ stations. The Assessment Fact Sheet tab uploads bioassessment decisions (from a [template](https://covgov-my.sharepoint.com/:x:/g/personal/emma_jones_deq_virginia_gov/EcckR_eno0ZIiHTymTRmVy4BqPJIM4kAb5ZD3ACdNKeRAg?e=cG6yxA) {target="_blank"}) to be archived on the R server as pinned data and generates fact sheets for data collected within a chosen data window. This tool was developed to be used after a regional biologist assesses stations using the [Bioassessment Dashboard](https://rconnect.deq.virginia.gov/IR2024bioassessmentDashboard/){target="_blank"}. Assessment decisions archived as pinned data on the R server feed the Riverine Assessment application. The General Purpose Biological Fact Sheet tab generates a generic fact sheet with benthic macroinvertebrate and habitat information. The format of this report follows the same structure of the Assessment Fact Sheet report, but it allows users to select specific sample windows from all available benthic data and leaves most of the comment sections blank for the user to fill out in the Word document. This version does not save any information to the R server.
+
+### Assessment Fact Sheet Tab
+
+On the Assessment Fact Sheet Tab, users may choose from stations that have existing assessment decisions saved on the R server or upload data to the application from a [template](https://covgov-my.sharepoint.com/:x:/g/personal/emma_jones_deq_virginia_gov/EcckR_eno0ZIiHTymTRmVy4BqPJIM4kAb5ZD3ACdNKeRAg?e=cG6yxA) {target="_blank"} to be archived on the R server. Once the data are archived on the R server as pinned data, these new decisions are available to generate benthic fact sheets. 
+
+Once a station and IR window is chosen, the `Generate Report` button compiles benthic and habitat data within the chosen IR window with biologist assessment decisions and writes a report, downloaded to the users Downloads folder. 
+
+![](images/bioassessmentDashboard6.png)
+
+### General Purpose Biological Fact Sheet Tab
+
+On the General Purpose Biological Fact Sheet Tab, users may choose from any station that has benthic macroinvertebrate information. Once a station is chosen, the `Generate Report` button compiles benthic and habitat data within the selected collection window chosen by the user and writes a Microsoft Word report with some basic plots and tables, downloaded to the users Downloads folder. This version is sparse and is meant to be completed by the biologist for the intended audience. Due to the nature of MS Word documents, the interactive color coded (and extremely wide) html tables do not translate well to that medium. Users may choose from a long version of SCI and habitat metrics (included as a default for their chosen station and collection window) or save images of the html tables presented in the application for manual inclusion in their report.
+
+![](images/bioassessmentDashboard7.png)
+
+<!--chapter:end:bioassessmentApplications.Rmd-->
 
