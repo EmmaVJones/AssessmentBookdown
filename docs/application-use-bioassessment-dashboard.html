@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>2.5 PCB Data | DEQ Water Quality Automated Assessment User Guide</title>
+  <title>7.2 Application Use: Bioassessment Dashboard | DEQ Water Quality Automated Assessment User Guide</title>
   <meta name="description" content="A companion document describing the WQA automated assessment methodology." />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="2.5 PCB Data | DEQ Water Quality Automated Assessment User Guide" />
+  <meta property="og:title" content="7.2 Application Use: Bioassessment Dashboard | DEQ Water Quality Automated Assessment User Guide" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="openscapes/series" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="2.5 PCB Data | DEQ Water Quality Automated Assessment User Guide" />
+  <meta name="twitter:title" content="7.2 Application Use: Bioassessment Dashboard | DEQ Water Quality Automated Assessment User Guide" />
   
   <meta name="twitter:description" content="A companion document describing the WQA automated assessment methodology." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="fish-tissue-data.html"/>
-<link rel="next" href="vdh-data.html"/>
+<link rel="prev" href="general-bioassessment-workflow.html"/>
+<link rel="next" href="application-use-benthic-assessment-fact-sheet-tool.html"/>
 <script src="libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -281,17 +281,53 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="pcb-data" class="section level2" number="2.5">
-<h2><span class="header-section-number">2.5</span> PCB Data</h2>
-<p>From Mark Richards, not in CEDS</p>
+<div id="application-use-bioassessment-dashboard" class="section level2" number="7.2">
+<h2><span class="header-section-number">7.2</span> Application Use: Bioassessment Dashboard</h2>
+<div id="map-tab" class="section level3" number="7.2.1">
+<h3><span class="header-section-number">7.2.1</span> Map Tab</h3>
+<p>On load, the main panel of the <a href="https://rconnect.deq.virginia.gov/IR2024bioassessmentDashboard/" target="_blank">Bioassessment Dashboard</a> displays all biological sampling locations from the current IR cycle on the <code>Map</code> tab. The map allows users to zoom and pan interactively with the mouse. In the top left corner there are a number of tools to aid users. The plus and minus buttons offer fixed zoom in/out. The home button returns the map orientation to the original zoom level in case a user gets lost. Additional layers available in the map (by hovering over the layers button on the left side) include US EPA Level 3 Ecoregions and Assessment Regions (regional assessment boundaries).</p>
+<p>A table below the map displays station metadata information for all stations currently displayed in the map. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the <code>Column Visibility</code> button in the upper left corner) as well as copied to the user’s clipboard.</p>
+<p>Before proceeding to subsequent tabs, it is beneficial to refine the working dataset by Basin, Collector, StationID, or Replicate filters available in the left side panel.</p>
+<p><strong>Pro Tip: These filters are cascading hierarchical filters. Starting from the top down, if a user chooses one or more Basins, then only the Collectors with data within these Basins are provided in the <code>Collector Filter</code> box. This logic is true of the <code>StationID Filter</code> box as well. Not every box must be filled in to utlize the heirarchical filtering.</strong></p>
+<p><strong>Pro Tip: Once the user has set the query conditions to their liking, the hamburger button in the blue navigation bar will hide/show the sidebar. Hiding the sidebar can be helpful to maximize data visualization features in the browser window space.</strong></p>
+<p><img src="images/bioassessmentDashboard1.png" /></p>
+</div>
+<div id="sci-scores-tab" class="section level3" number="7.2.2">
+<h3><span class="header-section-number">7.2.2</span> SCI Scores Tab</h3>
+<p>Based on the query terms, the Stream Condition Index (SCI) scores will appear in an interactive plot. The plot is composed of layers of replicate number by season by sampling method (e.g.<code>Rep 1 Fall (Boatable)</code> or <code>Rep 2 Spring (Riffle)</code>). Additionally, both VSCI and VCPMI criteria are plotted as layers. All layers may be turned on/off by clicking on them in the legend in the left hand side of the plot. Helpful interactive features of the plot include hovering over samples to reveal a popup box with additional sampling information, downloading the plot as a png, zooming to areas of the plot with mouse selection, autoscaling, resetting the axes, and more. Hover your mouse over the top right of the plot to reveal these features and more.</p>
+<p>A table below the plot displays benthic sample information for all stations currently displayed in the plot. Sample information, SCI scores, and SCI metrics can be found for each sample in this table. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the <code>Column Visibility</code> button in the upper left corner) as well as copied to the user’s clipboard.</p>
+<p><img src="images/bioassessmentDashboard2.png" /></p>
+<div id="sci-method-decision" class="section level4" number="7.2.2.1">
+<h4><span class="header-section-number">7.2.2.1</span> SCI Method Decision</h4>
+<p>SCI scores are provided for each station based on the station location to expedite application rendering time. Basin and Level 3 Ecoregion information spatially derived from the sample latitude and longitude provide the VCMPI method determination. Should you wish to investigate other SCI methods for a given station, the <a href="https://rconnect.deq.virginia.gov/CEDSBenthicDataQueryTool/" target="_blank">CEDS Benthic Data Query Tool</a> provides higher level of analytical control.</p>
+</div>
+</div>
+<div id="habitat-scores-tab" class="section level3" number="7.2.3">
+<h3><span class="header-section-number">7.2.3</span> Habitat Scores Tab</h3>
+<p>Based on the query terms, the Total Habitat Scores will appear in an interactive plot. The plot is composed of layers of season by sampling method (e.g.<code>Fall (High Gradient Method)</code> or <code>Spring (Low Gradient Method)</code>). Additionally, the <a href="https://www.deq.virginia.gov/home/showpublisheddocument/4313/637461491358800000" target="_blank">Benthic Stressor Analysis</a> thresholds indicating probability of stress to aquatic life are plotted as layers. All layers may be turned on/off by clicking on them in the legend in the left hand side of the plot. Helpful interactive features of the plot include hovering over samples to reveal a popup box with additional sampling information, downloading the plot as a png, zooming to areas of the plot with mouse selection, autoscaling, resetting the axes, and more. Hover your mouse over the top right of the plot to reveal these features and more.</p>
+<p>A table below the plot displays habitat sample information for all stations currently displayed in the plot. Sample information, individual habitat metric scores, and Total Habitat Scores can be found for each sample in this table. The cells are color coded in a red scheme where darker colors highlight lower scores for a given habitat metric. If a metric is &lt;= 10, the metric is bolded. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the <code>Column Visibility</code> button in the upper left corner) as well as copied to the user’s clipboard.</p>
+<p><img src="images/bioassessmentDashboard3.png" /></p>
+</div>
+<div id="station-summary-tab" class="section level3" number="7.2.4">
+<h3><span class="header-section-number">7.2.4</span> Station Summary Tab</h3>
+<p>Based on the query terms, the SCI Summary Table will display summaries of the SCI averages across various windows. Where data are available, these windows include the entire IR window (6 year average), most recent two years of the IR period average, spring sample average, fall sample average, and individual year averages. The number of samples in each window is provided in the <code>n Samples</code> field. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the <code>Column Visibility</code> button in the upper left corner) as well as copied to the user’s clipboard.</p>
+<p>The Total Habitat Summary Table will display summaries of the Total Habitat Scores averages across various windows. Where data are available, these windows include the entire IR window (6 year average), most recent two years of the IR period average, spring sample average, fall sample average, and individual year averages. The number of samples in each window is provided in the <code>n Samples</code> field. All tables in the dashboard are interactive and columns may be sorted or turned on/off (using the <code>Column Visibility</code> button in the upper left corner) as well as copied to the user’s clipboard.</p>
+<p>The Previous Integrated Report Cycle Bioassessment Information Table will display bioassessment decision information from previous IR windows, where this information is available in the standardized archived format. This information can be helpful to review when making biological assessments to understand any historical decisions.
+<img src="images/bioassessmentDashboard4.png" /></p>
+</div>
+<div id="assessment-decision-tab" class="section level3" number="7.2.5">
+<h3><span class="header-section-number">7.2.5</span> Assessment Decision Tab</h3>
+<p>Based on the query terms, the Assessment Decision Summary Table displays bioassessment information for the current IR cycle. If you have uploaded information about the chosen station(s) to the VDEQ Benthic Assessment Fact Sheet Tool, you will see information that is saved on the server in the table below. If you upload new data about the selected station(s) to the VDEQ Benthic Assessment Fact Sheet Tool, that information will be reflect here after you refresh the dashboard.</p>
+<p><img src="images/bioassessmentDashboard5.png" /></p>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="fish-tissue-data.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="vdh-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="general-bioassessment-workflow.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="application-use-benthic-assessment-fact-sheet-tool.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

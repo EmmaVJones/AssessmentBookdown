@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 3 Automated Assessment Methods | DEQ Water Quality Automated Assessment User Guide</title>
+  <title>7.3 Application Use: Benthic Assessment Fact Sheet Tool | DEQ Water Quality Automated Assessment User Guide</title>
   <meta name="description" content="A companion document describing the WQA automated assessment methodology." />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 3 Automated Assessment Methods | DEQ Water Quality Automated Assessment User Guide" />
+  <meta property="og:title" content="7.3 Application Use: Benthic Assessment Fact Sheet Tool | DEQ Water Quality Automated Assessment User Guide" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="openscapes/series" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 3 Automated Assessment Methods | DEQ Water Quality Automated Assessment User Guide" />
+  <meta name="twitter:title" content="7.3 Application Use: Benthic Assessment Fact Sheet Tool | DEQ Water Quality Automated Assessment User Guide" />
   
   <meta name="twitter:description" content="A companion document describing the WQA automated assessment methodology." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="low-flow-7q10-data.html"/>
-<link rel="next" href="metadata-attribution.html"/>
+<link rel="prev" href="application-use-bioassessment-dashboard.html"/>
+
 <script src="libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -281,18 +281,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="automated-assessment-methods" class="section level1" number="3">
-<h1><span class="header-section-number">Chapter 3</span> Automated Assessment Methods</h1>
-<p>This chapter details the specific steps required to transform the raw data outlined in the <a href="data-organization.html#data-organization">Data Organization</a> chapter into preliminary assessment results. The general process the automated assessment specifies begins with performing data manipulation and organization steps to prepare the data for analysis, then apply specific assessment functions to the appropriate data that specify the assessment guidance and Water Quality Standards (WQS), and finally, output a “stations table” that uses data from the assessment window to summarize each station for review and bulk upload into CEDS. See the <a href="automated-output.html#automated-output">Automated Output</a> section to understand the information provided in the stations table output.</p>
-<p>The automated assessment scripts are trained to systematically apply assessment guidance and WQS to all data for which the appropriate metadata is provided. This supervised system merely applies the rules that developers have programmed to mimic assessment protocols. These scripts do not provide assessment decisions. It is up to the human reviewer (regional assessor) to either accept the automated result or use best professional judgment to e.g. redact questionable data or interpret complex natural systems.</p>
+<div id="application-use-benthic-assessment-fact-sheet-tool" class="section level2" number="7.3">
+<h2><span class="header-section-number">7.3</span> Application Use: Benthic Assessment Fact Sheet Tool</h2>
+<p>In an effort to make DEQ’s custom applications more dynamic, the <a href="https://rconnect.deq.virginia.gov/BenthicAssessmentFactSheet/" target="_blank">Benthic Assessment Fact Sheet Tool</a> generates two types of standardized Benthic Fact Sheets for DEQ stations. The Assessment Fact Sheet tab uploads bioassessment decisions (from a <a href="https://covgov-my.sharepoint.com/:x:/g/personal/emma_jones_deq_virginia_gov/EcckR_eno0ZIiHTymTRmVy4BqPJIM4kAb5ZD3ACdNKeRAg?e=cG6yxA">template</a> {target="_blank"}) to be archived on the R server as pinned data and generates fact sheets for data collected within a chosen data window. This tool was developed to be used after a regional biologist assesses stations using the <a href="https://rconnect.deq.virginia.gov/IR2024bioassessmentDashboard/" target="_blank">Bioassessment Dashboard</a>. Assessment decisions archived as pinned data on the R server feed the Riverine Assessment application. The General Purpose Biological Fact Sheet tab generates a generic fact sheet with benthic macroinvertebrate and habitat information. The format of this report follows the same structure of the Assessment Fact Sheet report, but it allows users to select specific sample windows from all available benthic data and leaves most of the comment sections blank for the user to fill out in the Word document. This version does not save any information to the R server.</p>
+<div id="assessment-fact-sheet-tab" class="section level3" number="7.3.1">
+<h3><span class="header-section-number">7.3.1</span> Assessment Fact Sheet Tab</h3>
+<p>On the Assessment Fact Sheet Tab, users may choose from stations that have existing assessment decisions saved on the R server or upload data to the application from a <a href="https://covgov-my.sharepoint.com/:x:/g/personal/emma_jones_deq_virginia_gov/EcckR_eno0ZIiHTymTRmVy4BqPJIM4kAb5ZD3ACdNKeRAg?e=cG6yxA">template</a> {target="_blank"} to be archived on the R server. Once the data are archived on the R server as pinned data, these new decisions are available to generate benthic fact sheets.</p>
+<p>Once a station and IR window is chosen, the <code>Generate Report</code> button compiles benthic and habitat data within the chosen IR window with biologist assessment decisions and writes a report, downloaded to the users Downloads folder.</p>
+<p><img src="images/bioassessmentDashboard6.png" /></p>
 </div>
+<div id="general-purpose-biological-fact-sheet-tab" class="section level3" number="7.3.2">
+<h3><span class="header-section-number">7.3.2</span> General Purpose Biological Fact Sheet Tab</h3>
+<p>On the General Purpose Biological Fact Sheet Tab, users may choose from any station that has benthic macroinvertebrate information. Once a station is chosen, the <code>Generate Report</code> button compiles benthic and habitat data within the selected collection window chosen by the user and writes a Microsoft Word report with some basic plots and tables, downloaded to the users Downloads folder. This version is sparse and is meant to be completed by the biologist for the intended audience. Due to the nature of MS Word documents, the interactive color coded (and extremely wide) html tables do not translate well to that medium. Users may choose from a long version of SCI and habitat metrics (included as a default for their chosen station and collection window) or save images of the html tables presented in the application for manual inclusion in their report.</p>
+<p><img src="images/bioassessmentDashboard7.png" /></p>
+
+</div>
+</div>
+<!-- </div> -->
             </section>
 
           </div>
         </div>
       </div>
-<a href="low-flow-7q10-data.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="metadata-attribution.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="application-use-bioassessment-dashboard.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
