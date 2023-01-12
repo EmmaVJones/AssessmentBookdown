@@ -1512,7 +1512,6 @@ for(i in 1:nrow(stationTable)){
       StationTableStartingData(stationData),
       tempExceedances(stationData) %>% quickStats('TEMP'),
       DOExceedances_Min(stationData) %>% quickStats('DO'), 
-      # this will be removed for lake stations later since it does not apply
       pHExceedances(stationData) %>% quickStats('PH'),
       bacteriaAssessmentDecisionClass( # NEW for IR2024, bacteria only assessed in two most recent years of assessment period
         filter(stationData, between(FDT_DATE_TIME, assessmentPeriod[1] + years(4), assessmentPeriod[2])),
@@ -2226,12 +2225,317 @@ bacteriaAssessmentDecisionClass <- function(stationData, # input dataframe with 
 # bacteriaAssessmentDecisionClass(stationData)
 ```
 
-### Nutrients
+### Nutrients 
 
+Nutrients are assessed based on waterbody type. Lake stations have a rigorous protocol detailed below, but [automated assessment methods for non-lake stations](#nutrients-in-other-waterbodies) simply sum samples. An example workflow below describes how using the `lakeStation` field created during prior `stationData` [organization steps](#how-to-test-individual-parameter-functions) can appropriately assess nutrients for different station types. See below for more information on lake vs [other waterbody individual nutrient analyses](#nutrients-in-other-waterbodies). 
 
+```{r automated assessment nutrient analysis, eval=FALSE}
+# Example Usage for the Station Table output:
+# where stationData object is already in your environment, see Automated Assessment for environment set up help
 
-```{r automated assessment nutrients, eval=FALSE}
+# Nutrients: TP 
+if(unique(stationData$lakeStation) == TRUE){
+    TP <- TP_Assessment(stationData) 
+    } else {
+      TP <- countNutrients(stationData, PHOSPHORUS_mg_L, LEVEL_PHOSPHORUS, NA) %>% quickStats('NUT_TP') %>% 
+        mutate(NUT_TP_STAT = ifelse(NUT_TP_STAT != "S", "Review", NA)) } # if status isn't S, flag for follow up review
+  
+# Nutrients: Chl a 
+if(unique(stationData$lakeStation) == TRUE){
+  chla <- chlA_Assessment(stationData)
+  } else {
+    chla <- countNutrients(stationData, CHLOROPHYLL_A_ug_L, LEVEL_CHLOROPHYLL_A, NA) %>% quickStats('NUT_CHLA') %>%
+      mutate(NUT_CHLA_STAT = NA) } # don't show a real assessment decision 
 ```
+
+#### Nutrients in Lakes
+
+Nutrients are assessed in Virginia lakes and reservoirs based on lake-specific criteria [Section 187](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"}. Chlorophyll a and Total Phosphorus (TP) data collected in the top meter are assessed for Aquatic Life Use, with TP criteria only applying to stations designated in a lake's lacustrine zone in lakes where algaecides are applied any time during the monitoring period. The lacustrine zone designation is communicated to the automated assessment process in the Station Table LACUSTRINE field.  
+
+Assessment guidance states:
+"The 90th percentile of chlorophyll data collected at one meter or less within the lacustrine portion of the man-made lake or reservoir between April 1 and October 31 (considered a lake monitoring year) shall not exceed the chlorophyll a criterion for that waterbody in each of the two most recent monitoring years within the assessment window. For a waterbody that received algaecide treatment, the median of the total phosphorus data collected at one meter or less within the lacustrine portion of the man-made lake or reservoir between April 1 and October 31 shall not exceed the total phosphorus criterion in each of the two most recent years that total phosphorus data are available. The aquatic life (fishery) use of any lake assessment unit is considered impaired for nutrients if the criterion for either chlorophyll a or total phosphorus is exceeded at a station or pooled stations in that unit in each of the two most recent monitoring years within the assessment window."
+
+The TP and Chlorophyll a functions are designed to operate on individual station data and data from multiple stations (e.g. stations in the same AU).
+
+##### Total Phosphorus: Lakes
+
+Total Phosphorus (TP) is assessed using two functions, the `TP_analysis()` and `TP_Assessment()` functions. The `TP_analysis()` function calculates and compares annual median TP values to the lake-specific criteria, providing an output for the `TP_Assessment()` function to apply three year exceedance rules.
+
+The `TP_analysis()` first verifies the station is a lacustrine station in a Section 187 lake. Next, all Level I and Level II data,  missing data, data outside the sample season, and data greater than 1 meter depth are removed from further analyses steps. The median TP of each sample month is calculated before taking the median of each sample year, rounding the value to even, and comparing the results to the lake-specific TP criteria. The number of valid samples are totaled and returned with the annual median results and station lacustrine status.
+
+```{r automated assessment nutrients TP_analysis, eval=FALSE}
+TP_analysis <- function(stationData){
+  if(!is.na(unique(stationData$Lakes_187B))){
+    if(unique(stationData$Lakes_187B) == 'y'){
+      stationData <- filter(stationData, LACUSTRINE == 'Y')  }
+  }
+  
+  
+  TP <- filter(stationData, !is.na(PHOSPHORUS_mg_L)) %>%
+    filter(FDT_DEPTH <= 1) %>% # Guidance calls for top meter only
+    filter(!( LEVEL_PHOSPHORUS %in% c('Level II', 'Level I'))) %>% # get lower levels out
+    dplyr::select(FDT_STA_ID, FDT_DEPTH, FDT_DATE_TIME, SampleDate, PHOSPHORUS_mg_L, `Total Phosphorus (mg/L)`, LACUSTRINE)%>%
+    mutate(Year= year(FDT_DATE_TIME), Month=month(FDT_DATE_TIME)) %>%
+    filter(Month %in% c(4, 5, 6, 7, 8, 9, 10)) # make sure only assess valid sample months
+  if(length(unique(TP$FDT_STA_ID)) > 1){
+    TPResults <- TP %>%
+      group_by(Month, Year) %>%
+      summarise(samplesPerMonth = n(),
+                medianPHOSPHORUS_mg_L = median(PHOSPHORUS_mg_L, na.rm = T),
+                `Total Phosphorus (mg/L)` = unique(`Total Phosphorus (mg/L)`)) %>%
+      ungroup() %>%
+      group_by(Year) %>%
+      summarise(samplesPerYear = n(),
+                `Annual Median TP` = median(medianPHOSPHORUS_mg_L, na.rm = TRUE),
+                `Total Phosphorus (mg/L)` = unique(`Total Phosphorus (mg/L)`)) %>%
+      mutate(`Annual Median TP Rounded to WQS Format` = signif(`Annual Median TP`, digits = 1),  # one significant figures based on WQS https://lis.virginia.gov/cgi-bin/legp604.exe?000+reg+9VAC25-260-187&000+reg+9VAC25-260-187
+             TP_Exceedance = ifelse(`Annual Median TP Rounded to WQS Format` > `Total Phosphorus (mg/L)`, T, F),
+             ID305B = unique(stationData$ID305B_1))  %>%
+      dplyr::select(ID305B, Year, samplesPerYear, `Annual Median TP`, `Annual Median TP Rounded to WQS Format`, everything())
+  } else {
+    TPResults <- TP %>%
+      group_by(Year) %>%
+      mutate(samplesPerYear = n(),
+             `Annual Median TP` = median(PHOSPHORUS_mg_L, na.rm = TRUE),
+             `Annual Median TP Rounded to WQS Format` = signif(`Annual Median TP`, digits = 1),  # one significant figures based on WQS https://lis.virginia.gov/cgi-bin/legp604.exe?000+reg+9VAC25-260-187&000+reg+9VAC25-260-187
+             TP_Exceedance = ifelse(`Annual Median TP Rounded to WQS Format` > `Total Phosphorus (mg/L)`, T, F)) %>%
+      dplyr::select(FDT_STA_ID, Year, samplesPerYear, `Annual Median TP`, `Annual Median TP Rounded to WQS Format`,`Total Phosphorus (mg/L)`, TP_Exceedance, LACUSTRINE) %>%
+      distinct(Year, .keep_all=T)
+  }
+  return(TPResults)
+}
+
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+#TP_analysis(stationData)
+#TP_analysis(AUdata) # where AUdata is the stationData from all stations in the same AU
+```
+
+The `TP_Assessment()` function analyzes and transforms annual TP results into the Station Table output format. The function first uses the `TP_analysis()` function to establish annual TP exceedance results. Annual TP results are only analyzed in years with six or greater samples. With nested if/else logic, the function identifies if/when any exceedances exist. If no exceedances occurred in the most recent two years, "S" is returned in the status field. If both of the most recent two years exceeded median TP criteria, "IM" is returned in the status field. If one of two years had a median TP exceedance, the third most recent year is brought in as a tiebreak. If two of the most recent three years have a median TP exceedance, "IM" is returned in the status field, but if one in the most recent three years have a median TP exceedance then "Review" is returned in the status field. The sample count returned is the number of years analyzed in the analysis and the exceedance field reports the number of years where the median TP exceeds criteria in the most recent two or three years.
+
+```{r automated assessment nutrients TP_assessment, eval=FALSE}
+TP_Assessment <- function(stationData){
+  TP_Results <- TP_analysis(stationData) %>% ungroup()
+  
+  if(nrow(TP_Results) > 0){
+    if(is.na(unique(TP_Results$`Total Phosphorus (mg/L)`))){ # bail out if nutrient standards didn't join properly
+      return(tibble(NUT_TP_EXC= NA, NUT_TP_SAMP = NA,	NUT_TP_STAT = NA))}
+    validYears <- filter(TP_Results, samplesPerYear >= 6) # need at least 6 samples per year
+    mostRecent2years <- slice_max(validYears, Year, n = 2) # get most recent two years of results
+    if(nrow(mostRecent2years) == 2){ 
+      if(all(unique(mostRecent2years$TP_Exceedance) == FALSE)){ # no exceedances in last two years
+        return(tibble(NUT_TP_EXC= 0, NUT_TP_SAMP = nrow(mostRecent2years),	NUT_TP_STAT = 'S') )
+      } else { # at least one TP_Exceedance exists
+        if(all(unique(mostRecent2years$TP_Exceedance) == TRUE)){ # both years exceed
+          return(tibble(NUT_TP_EXC= nrow(mostRecent2years), NUT_TP_SAMP = nrow(mostRecent2years),	NUT_TP_STAT = 'IM'))
+        } else { # run a tiebreak with third most recent year
+          mostRecent3years <- slice_max(validYears, Year, n = 3)  # get most recent three years of results
+          mostRecent3yearsExceed <- filter(mostRecent3years, TP_Exceedance == TRUE)
+          if(nrow(mostRecent3yearsExceed) >= 2){
+            return(tibble(NUT_TP_EXC= nrow(mostRecent3yearsExceed), NUT_TP_SAMP = nrow(mostRecent3years),	NUT_TP_STAT = 'IM'))
+          } else {
+            return(tibble(NUT_TP_EXC= nrow(mostRecent3yearsExceed), NUT_TP_SAMP = nrow(mostRecent3years),	NUT_TP_STAT = 'Review')) }
+        }}} else {return(tibble(NUT_TP_EXC= NA, NUT_TP_SAMP = nrow(validYears),	NUT_TP_STAT = 'IN') ) }
+  } else {    return(tibble(NUT_TP_EXC= NA, NUT_TP_SAMP = NA,	NUT_TP_STAT = NA) )  }
+}
+
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+#TP_Assessment(stationData)
+#TP_Assessment(AUdata) # where AUdata is the stationData from all stations in the same AU
+```
+
+
+##### Chlorophyll a: Lakes
+
+Chlorophyll a is assessed using two functions, the `chlA_analysis()` and `chlA_Assessment()` functions. The `chlA_analysis()` function calculates and compares the annual 90th percentile of chlorophyll a values to the lake-specific criteria, providing an output for the `chlA_Assessment()` function to apply three year exceedance rules.
+
+The `chlA_analysis()` first verifies the station is a lacustrine station in a Section 187 lake. Next, all Level I and Level II data,  missing data, data outside the sample season, and data greater than 1 meter depth are removed from further analyses steps. The median chlorophyll a of each sample month is calculated before taking the 90th percentile of chlorophyll a values from each sample year, rounding the value to even, and comparing the results to the lake-specific chlorophyll a criteria. The number of valid samples are totaled and returned with the annual 90th percentile results and station lacustrine status.
+
+```{r automated assessment nutrients chlA_analysis, eval=FALSE}
+chlA_analysis <- function(stationData){
+  if(!is.na(unique(stationData$Lakes_187B))){
+    if(unique(stationData$Lakes_187B) == 'y'){
+      stationData <- filter(stationData, LACUSTRINE == 'Y')  } }
+  
+  chla <- filter(stationData, !is.na(CHLOROPHYLL_A_ug_L)) %>%
+    filter(FDT_DEPTH <= 1) %>% # Guidance calls for top meter only
+    filter(!( LEVEL_CHLOROPHYLL_A %in% c('Level II', 'Level I'))) %>% # get lower levels out
+    dplyr::select(FDT_STA_ID, FDT_DEPTH, FDT_DATE_TIME, SampleDate, CHLOROPHYLL_A_ug_L, `Chlorophyll a (ug/L)`, LACUSTRINE)%>%
+    mutate(Year= year(FDT_DATE_TIME), Month=month(FDT_DATE_TIME)) %>%
+    filter(Month %in% c(4, 5, 6, 7, 8, 9, 10)) # make sure only assess valid sample months
+  if(length(unique(chla$FDT_STA_ID)) > 1){
+    chlaResults <- chla %>%
+      group_by(Month, Year) %>%
+      summarise(samplesPerMonth = n(),
+             medianCHLOROPHYLL_A_ug_L = median(CHLOROPHYLL_A_ug_L, na.rm = T),
+             `Chlorophyll a (ug/L)` = unique(`Chlorophyll a (ug/L)`)) %>%
+      ungroup() %>%
+      group_by(Year) %>%
+      summarise(samplesPerYear = n(),
+                pct90 = quantile(medianCHLOROPHYLL_A_ug_L, 0.9),
+                `Chlorophyll a (ug/L)` = unique(`Chlorophyll a (ug/L)`)) %>%
+      mutate(`90th Percentile Rounded to WQS Format` = signif(pct90, digits = 2),  # two significant figures based on WQS https://lis.virginia.gov/cgi-bin/legp604.exe?000+reg+9VAC25-260-187&000+reg+9VAC25-260-187
+             chlA_Exceedance = ifelse(`90th Percentile Rounded to WQS Format` > `Chlorophyll a (ug/L)`, T, F),
+             ID305B = unique(stationData$ID305B_1))  %>%
+      dplyr::select(ID305B, Year, samplesPerYear, pct90, `90th Percentile Rounded to WQS Format`, everything())
+  } else {
+    chlaResults <- chla %>%
+      group_by(Year) %>%
+      mutate(samplesPerYear = n(),
+             pct90 = quantile(CHLOROPHYLL_A_ug_L, 0.9),
+             `90th Percentile Rounded to WQS Format` = signif(pct90, digits = 2),  # two significant figures based on WQS https://lis.virginia.gov/cgi-bin/legp604.exe?000+reg+9VAC25-260-187&000+reg+9VAC25-260-187
+             chlA_Exceedance = ifelse(`90th Percentile Rounded to WQS Format` > `Chlorophyll a (ug/L)`, T, F)) %>%
+      dplyr::select(FDT_STA_ID, Year, samplesPerYear, pct90, `90th Percentile Rounded to WQS Format`,`Chlorophyll a (ug/L)`, chlA_Exceedance, LACUSTRINE) %>%
+      distinct(Year, .keep_all=T)
+  }
+  return(chlaResults)
+}
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+#chlA_analysis(stationData)
+#chlA_analysis(AUdata) # where AUdata is the stationData from all stations in the same AU
+```
+
+The `chlA_Assessment()` function analyzes and transforms annual chlorophyll a results into the Station Table output format. The function first uses the `chlA_analysis()` function to establish annual chlorophyll a exceedance results. Annual chlorophyll a results are only analyzed in years with six or greater samples. With nested if/else logic, the function identifies if/when any exceedances exist. If no exceedances occurred in the most recent two years, "S" is returned in the status field. If both of the most recent two years exceeded the chlorophyll a criteria, "IM" is returned in the status field. If one of two years had a chlorophyll a exceedance, the third most recent year is brought in as a tiebreak. If two of the most recent three years have a chlorophyll a exceedance, "IM" is returned in the status field, but if one in the most recent three years have a chlorophyll a exceedance then "Review" is returned in the status field. The sample count returned is the number of years analyzed in the analysis and the exceedance field reports the number of years where the chlorophyll a exceeds criteria in the most recent two or three years.
+
+```{r automated assessment nutrients chlA_Assessment, eval=FALSE}
+chlA_Assessment <- function(stationData){
+  chlA_Results <- chlA_analysis(stationData) %>% ungroup()
+  
+  if(nrow(chlA_Results) > 0){
+    if(is.na(unique(chlA_Results$`Chlorophyll a (ug/L)`))){ # bail out if nutrient standards didn't join properly
+      return(tibble(NUT_CHLA_EXC= NA, NUT_CHLA_SAMP = NA,	NUT_CHLA_STAT = NA))}
+    validYears <- filter(chlA_Results, samplesPerYear >= 6) # need at least 6 samples per year
+    mostRecent2years <- slice_max(validYears, Year, n = 2) # get most recent two years of results
+    if(nrow(mostRecent2years) == 2){ 
+      if(all(unique(mostRecent2years$chlA_Exceedance) == FALSE)){ # no exceedances in last two years
+        return(tibble(NUT_CHLA_EXC= 0, NUT_CHLA_SAMP = nrow(mostRecent2years),	NUT_CHLA_STAT = 'S') )
+      } else { # at least one chlA_Exceedance exists
+        if(all(unique(mostRecent2years$chlA_Exceedance)) == TRUE){ # both years exceed
+          return(tibble(NUT_CHLA_EXC= nrow(mostRecent2years), NUT_CHLA_SAMP = nrow(mostRecent2years),	NUT_CHLA_STAT = 'IM'))
+        } else { # run a tiebreak with third most recent year
+          mostRecent3years <- slice_max(validYears, Year, n = 3) # get most recent three years of results
+          mostRecent3yearsExceed <- filter(mostRecent3years, chlA_Exceedance == TRUE)
+          if(nrow(mostRecent3yearsExceed) >= 2){
+            return(tibble(NUT_CHLA_EXC= nrow(mostRecent3yearsExceed), NUT_CHLA_SAMP = nrow(mostRecent3years),	NUT_CHLA_STAT = 'IM'))
+          } else {
+            return(tibble(NUT_CHLA_EXC= nrow(mostRecent3yearsExceed), NUT_CHLA_SAMP = nrow(mostRecent3years),	NUT_CHLA_STAT = 'Review')) }
+        }}} else {return(tibble(NUT_CHLA_EXC= NA, NUT_CHLA_SAMP = nrow(validYears),	NUT_CHLA_STAT = 'IN') ) }
+    } else {    return(tibble(NUT_CHLA_EXC= NA, NUT_CHLA_SAMP = NA,	NUT_CHLA_STAT = NA) )  }
+}
+
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+#chlA_Assessment(stationData)
+#chlA_analysis(AUdata) # where AUdata is the stationData from all stations in the same AU
+```
+
+#### Nutrients in Other Waterbodies 
+
+Non-lake station use the `countNutrients()` function to sum nutrient samples for the Station Table. Using non-standard evaluation techniques in the function arguments allows users to specify which parameter to evaluate and the associated criteria. Criteria or thresholds may be established in the `nutrientLimit` function arguments for analytical purposes, but NA is used for the Station Table output.  All Level I and Level II data and missing data are removed for the selected parameter before the samples compared against the value in the `nutrientLimit` argument. The `quickStats()` function can then use that output to efficiently tabulate the number of samples and exceedances. 
+
+```{r automated assessment countNutrients, eval=FALSE}
+countNutrients <- function(stationData, fieldName, commentName, nutrientLimit){
+  fieldName_ <- enquo(fieldName)
+  commentName_ <- enquo(commentName)
+  
+  dplyr::select(stationData,FDT_STA_ID,FDT_DATE_TIME, !! fieldName_, !! commentName_)%>% # Just get relevant columns
+    filter(!( !! commentName_ %in% c('Level II', 'Level I'))) %>% # get lower levels out
+    filter(!is.na(!!fieldName_ )) %>% #get rid of NA's
+    rename(parameter = !!names(.[3])) %>% # rename columns to make functions easier to apply
+    mutate(limit = nutrientLimit, 
+           exceeds = ifelse(parameter > limit, T, F)) # Identify where above WQS limit
+}
+
+# Example Usage:
+# where stationData object is already in your environment, see Automated Assessment for environment set up help
+
+# countNutrients(stationData, PHOSPHORUS_mg_L, LEVEL_PHOSPHORUS, 0.2) %>%
+#   quickStats('NUT_TP')
+# countNutrients(stationData, CHLOROPHYLL_A_ug_L, LEVEL_CHLOROPHYLL_A, NA)  %>%
+#   quickStats('NUT_CHLA')
+```
+
+
+
+#### Trophic State Index (TSI): Lakes
+
+TSI is calculated for lakes not defined in [Section 187](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section187/){target="_blank"} of the Virginia Water Quality Standards (e.g. lakes without nutrient criteria). The [Carlson][ref1] TSI equations use secchi depth (SD), surface chlorophyll a (CA), and surface total phosphorus (TP) to estimate algal biomass to determine if DO problems in lakes and reservoirs are natural. These calculations are applied to stratified lakes using aggregated station data from mid-June through mid-September. The TSI index is calculated with equations for secchi depth, chlorophyll a, and TP, each resulting in a continuous variable from 0-100. If any of the parameters results in index values of 60 or greater, nutrient enrichment could be adversely affecting the waterbody's designated uses. 
+
+The `TSIcalculation()` function calculates all three TSI equations for individual stations not designated as Section 187 lakes (in the linked WQS metadata). Depth and temporal filters established by the WQA Guidance are applied to the station dataset and sample secchi depth measures are carried across all relevant measures (because secchi depth measures are only stored at the 0.3 meter depth record for all samples). All Level I and Level II data and missing data are removed from each parameter before measures are run through the appropriate TSI equation. The mean of each parameter TSI index results is calculated and reported back with a listcolumn of associated data. 
+
+
+[ref1]: Carlson, R.E. 1977. A trophic state index for lakes. Limnology and Oceanography. 22:361-369.
+
+```{r automated assessment nutrients TSI, eval=FALSE}
+TSIcalculation <- function(stationData){
+  if(unique(stationData$lakeStation) == TRUE){
+    if(is.na(unique(stationData$Lakes_187B))){
+      # first fill down secchi depth in case it isn't stored exactly at 0.3 meter
+      secchiFix <- stationData %>%
+        group_by(FDT_STA_ID, FDT_DATE_TIME) %>% 
+        fill(SECCHI_DEPTH_M, .direction = "downup") %>%
+        filter(FDT_DEPTH <= 0.3) %>%
+        # remove all data except those from mid June through mid September (going with June 15 and Sept 15 since guidance does not specify)
+        mutate(monthday = as.numeric(paste0(month(FDT_DATE_TIME), day(FDT_DATE_TIME)))) %>%
+        filter(between(monthday, 615, 915 )) %>%
+        dplyr::select(-monthday)
+      
+      # Calculate Secchi depth TSI
+      SDdata <- filter(secchiFix, !is.na(SECCHI_DEPTH_M) ) %>%
+          filter(!( LEVEL_SECCHI_DEPTH %in% c('Level II', 'Level I'))) %>% # get lower levels out
+          dplyr::select(FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH,SECCHI_DEPTH_M) %>%
+        mutate(TSI_SD = 10*(6 - (log(SECCHI_DEPTH_M) / log(2))) )
+      SD <- suppressWarnings(suppressMessages(
+        SDdata %>%
+          group_by(FDT_STA_ID) %>%
+          summarise(meanSD = mean(SECCHI_DEPTH_M, na.rm = T), # take average of all secchi depths first
+                    TSI_SD = 10*(6 - (log(meanSD) / log(2))) ) ))# log() is natural log in R
+      
+      # Calculate Chlorophyll a TSI
+      chlaData <- filter(secchiFix, !is.na(CHLOROPHYLL_A_ug_L) ) %>%
+          filter(!( LEVEL_CHLOROPHYLL_A %in% c('Level II', 'Level I'))) %>% # get lower levels out
+          dplyr::select(FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, CHLOROPHYLL_A_ug_L) %>%
+        mutate(TSI_chla = 10*(6 - (2.04 - 0.68 * (log( CHLOROPHYLL_A_ug_L))) / log(2))) 
+      chla <- suppressWarnings(suppressMessages(
+        chlaData %>% 
+          group_by(FDT_STA_ID) %>%
+          summarise(meanchla = mean(CHLOROPHYLL_A_ug_L, na.rm = T), # take average of all chl a first
+                    TSI_chla = 10*(6 - (2.04 - 0.68 * (log(meanchla))) / log(2)))  ))# log() is natural log in R
+      
+      # Calculate Total Phosphorus TSI
+      TPdata <- filter(secchiFix, !is.na(PHOSPHORUS_mg_L) ) %>%
+          filter(!( LEVEL_PHOSPHORUS %in% c('Level II', 'Level I'))) %>% # get lower levels out
+          dplyr::select(FDT_STA_ID, FDT_DATE_TIME, FDT_DEPTH, PHOSPHORUS_mg_L) %>%
+          mutate(PHOSPHORUS_ug_L = PHOSPHORUS_mg_L * 1000,# first convert mg/L to ug/L
+                 TSI_TP = 10*(6 - (log( (48 / PHOSPHORUS_ug_L )) / log(2))) )   
+      TP <- suppressWarnings(suppressMessages(
+        TPdata %>%
+          group_by(FDT_STA_ID) %>%
+          summarise(meanTP = mean(PHOSPHORUS_ug_L, na.rm = T), # take average of all TP first
+                    TSI_TP = 10*(6 - (log( (48 / meanTP)) / log(2))) ) ))# log() is natural log in R
+      
+      TSI <- full_join(SD, chla, by = c('FDT_STA_ID')) %>%
+        full_join(TP, by = c('FDT_STA_ID')) %>%
+        bind_cols(tibble(associatedData = list(full_join(SDdata, chlaData, by = c('FDT_STA_ID', 'FDT_DATE_TIME', 'FDT_DEPTH')) %>%
+                                                 full_join(TPdata, by = c('FDT_STA_ID', 'FDT_DATE_TIME', 'FDT_DEPTH'))) ))
+      
+      return(TSI)
+      
+    } else {return(NULL)}
+  } else {return(NULL)} 
+}
+
+
+# Example Usage:
+# where stationData objects are already in your environment, see Automated Assessment for environment set up help
+# TSIcalculation(stationData)
+```
+
+
+
+
 
 ### Ammonia
 
@@ -3276,7 +3580,11 @@ This helper function allows for easier lake name cleanup to allow for joins on l
 ```{r automated assessment lakeNameStandardization, eval=FALSE}
 # Lake name standardization
 lakeNameStandardization <- function(x){
+  # flexibility to handle new and old naming conventions
   x %>% 
+    {if("WaterName" %in% names(x))
+      rename(x, WATER_NAME = WaterName)
+      else .} %>% 
     mutate(Lake_Name = case_when(WATER_NAME %in% c('Abel Lake Reservoir (Long Branch)') ~ 'Abel Lake',
                                  WATER_NAME %in% c('Big Cherry Reservior') ~ 'Big Cherry Lake',
                                  WATER_NAME %in% c('Dan River','Buffalo Creek','Bluestone Creek') ~ 'Kerr Reservoir',
