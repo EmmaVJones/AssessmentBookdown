@@ -15,3 +15,35 @@ This tool is a companion to the Station Table throughout the decision-making pro
 ## Application Orientation
 
 This application brings station-level automated analyses provided in the Station Table to life through interactive data visualizations, maps, and tables. The tool is divided into three tabs that must be visited sequentially for proper application functionality. The `Data Upload` tab provides a basic overview of application data sources, provides download of the statewide Station Table resultant from previous automated assessment procedures, and requires upload of either the default Station Table or a custom Station Table (e.g. the Station Table filtered to a specific region). The `Watershed Selection` tab allows further investigation of particular assessment watersheds (VAHU6) by assessment region and major basin. This tab offers high level summaries of stations within a chosen assessment watershed as well as detailed exceedance summaries across assessment units through tools embedded in modal windows. The `Assessment Unit Review` tab dives into all assessment units and stations contained within a selected assessment watershed. By drilling down from watershed to assessment unit to station, users may explore assessment data against applicable Water Quality Standards and criteria to better understand how assessment guidance leads assessment staff to appropriate decisions across designated uses. Previous assessment decisions are provided along with all centrally stored assessment data to provide a full picture of stations that require addressing during a given assessment cycle.
+
+## Application Use: Data Upload Tab
+
+The `Data Upload` tab is the first screen to appear on application load. The purpose of this screen is to orient users to basic application usage and data sources and to provide a location to upload the Station Table. The Station Table is key to running any subsequent parts of this application. Users may download the latest copy of the statewide Station Table using the `Download statewide example dataset to upload to the tool.` button at the bottom of the screen. Helptext below the download button indicates the last time the Station Table template was last updated. 
+
+The Station Table must be uploaded to the application each time the tool is used. The reason the tool requires an upload of the Station Table each use is to allow flexibility for regional assessment staff to change station assessment unit (AU) designations throughout the assessment process. If this dataset were sourced from the R server like all other datasets used by the Riverine App, then assessors would need to notify the Assessment Data Analyst each time a station AU changes, is split, or requires additional AUs. By allowing the regional assessment staff to edit this information in a .csv, the application allows self-service changes to station organization.
+
+Users may upload the entire statewide Station Table to the `Browse` button in the tool or a version filtered ans saved locally with just the region of interest. 
+
+![](images/riverine1.png)
+
+## Application Use: Watershed Selection Tab
+
+The `Watershed Selection` tab allows users to choose a particular region to investigate further. Using the drop down menu in the sidebar panel, users must choose one assessment region and then click `Retrieve Assessment Units From Server` in order to proceed with any analyses. Based on the assessment region selected, the application then extracts the appropriate spatial data from standardized datasets saved on the R server and provides that information to the application. A progress message is visible in the lower right of the screen while this data transaction occurs.
+
+Once this data is available to the application, the user may further refine data by dynamic filtering drop downs on the sidebar panel. Users may select from only the subbasins within the selected assessment region and then only the assessment watersheds (VAHU6) within the selected subbasin. An interactive map dynamically updates to display the user selection on the main panel of the application. Additional information about the each VAHU6 may be found in the popup table revealed upon clicking on a VAHU6 in the map. 
+
+
+![](images/riverine2.png)
+Proceeding down the sidebar panel, two buttons reveal modal dialog boxes with additional information about the selected VAHU6. The `Spatially Preview Stations and Assessment Units` button reveals a modal dialog box with an interactive map of all stations and AUs that fall within the chosen VAHU6. This box provides a preview summarizing the amount of information that must be addressed for the current IR cycle in the chosen VAHU6. AUs are colored by their desingated name and hovering over the AU reveals the name. Clicking the AU segment brings up a popup table with additional AU information. All stations with information related to the current IR cycle are displayed based on whether or not they have data within the cycle. Hovering and clicking on a given station reveals additional station information with dialog boxes and popup tables, respectively. The dialog box may be closed by either clicking outside the box in the grayed out area of the application or by using the `Dismiss` button.
+
+![](images/riverine3.png)
+
+The `Watershed Status Overview` button reveals a modal dialog box that quickly summarizes station parameter statuses throughout the selected VAHU6. For application rendering speed, the statuses displayed are from the uploaded Station Table. Should a user change a parameter status in the Station Table uploaded to the application, then the resultant status map could change.
+
+![](images/riverine4.png)
+
+The map presents an overall station overview where each station in the selected VAHU6 is colored based on the most harmful status category (e.g. if a station has 8 Supporting parameter statuses, 2 Insufficient parameter statuses, and 1 Impaired status, the station will be colored red to reflect the Impaired status). The number of statuses in the most harmful category is reported for each station in the popup table (accessed by clicking the station in the map). The `Choose parameter to report station status` drop down is set to "Overall Status" by default on modal load, but any parameter specified in the Station Table may be selected to redraw the map with only that parameter status displayed. The dialog box may be closed by either clicking outside the box in the grayed out area of the application or by using the `Dismiss` button.
+
+![](images/riverine5.png)
+
+## Application Use: Assessment Unit Review Tab
