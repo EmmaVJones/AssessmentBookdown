@@ -4,4 +4,10 @@
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The [Riverine Assessment App](https://rconnect.deq.virginia.gov/IR2022riverineAssessmentApplication/) is located on the R server. **update link to 2024 when pushed**
+The [Riverine Assessment App](https://rconnect.deq.virginia.gov/IR2024riverineAssessmentApp/) is located on the R server. **The linked version of the application is in draft development stage with DRAFT DATA until after the data solicitation deadline and final product release. Expect this release in late April 2023.**
+
+The purpose of this tool is to expand upon the Station Table summary provided by the automated assessment methodology. A single parameter summary (or in the case of metals, toxics, etc. a single summary of multiple parameters) does not do justice to the data analyzed by the automated assessment process. The Riverine Assessment App provides an interactive data analysis experience to improve users' understanding of automated assessment analyses and decisions. The intended audience is any DEQ employee from regional assessors and field staff, to managers, providing better data understanding through interactive data visualizations, descriptive standard application and WQA guidance explanations, and statewide applicability. 
+
+A notable benefit of these standardized tools is the increased accessibility of assessment decisions. No longer are assessment tools limited to regional assessment staff, resulting in bottlenecks when assessment questions arise. These self-service tools articulate assessment procedures to guide data and decision discussions across mutliple end users. 
+
+

@@ -2829,7 +2829,10 @@ annualRollingExceedanceAnalysis <- function(dataToAnalyze,
   windowOptions <- unique(year(dataToAnalyze$WindowDateTimeStart))
   # Now, stop loop from repeating windows by capping the top end by yearsToRoll-1 (so don't have 3 yr windows exceeding assessment period)
   windowRange <- (min(windowOptions):(max(windowOptions)- (yearsToRoll- 1)))
-  
+  # windowRange check to remove unnecessary windows that occur before the first windowRange year 
+  # e.g. if only one year of data is available, window range will return: year, year - 1, and year -2 which isn't necessary, so stop that behavior
+  if(length(windowRange) > 1 & windowRange[2] < windowRange[1]){    windowRange <- windowRange[1]  }
+
 
   for(i in windowRange){ #i = min(min(windowRange):(max(windowRange)- (yearsToRoll- 1))[1])
     dataWindow <- filter(dataToAnalyze, Year %in% i:(i + yearsToRoll- 1) ) # minus 1 year for math to work
@@ -2896,23 +2899,29 @@ annualRollingExceedanceSummary <- function(rolledAnalysis){
   # make a valid dataset for this analysis
   validDataForExceedanceSummary <- bind_rows(
     rolledAnalysis %>% 
-      filter(`Criteria Type` == 'Chronic' & `Valid Window` == TRUE),
+      filter(str_detect(`Criteria Type`, 'Chronic') & `Valid Window` == TRUE), # more flexible so metals can pass through this function
     rolledAnalysis %>% 
-      filter(`Criteria Type` == 'Acute')  ) %>% 
+      filter(str_detect(`Criteria Type`,  'Acute'))  ) %>% 
     {if("Four Day" %in% unique(rolledAnalysis$`Criteria Type`))
       bind_rows(.,
                 filter(rolledAnalysis, `Criteria Type` == "Four Day"& `Valid Window` == TRUE) )
-      else . }
+      else . } %>% 
+    {if(any(grep("All Other Surface Waters", unique(rolledAnalysis$`Criteria Type`))) )
+      bind_rows(.,
+                filter(rolledAnalysis, str_detect(`Criteria Type`,  "All Other Surface Waters") & `Valid Window` == TRUE) )
+      else . } 
 
   
-  suppressMessages(
+   suppressMessages(
     validDataForExceedanceSummary %>% 
     group_by(FDT_STA_ID, FDT_DEPTH, `Criteria Type`) %>% 
     summarise(`n Windows Fine` = sum(`Exceedances in Rolled Window` < 2),
               `n Windows Exceeding` = sum(`Exceedances in Rolled Window` >= 2)) %>% 
-    mutate(`Suggested Result` = case_when(`n Windows Fine` > `n Windows Exceeding` ~ "Supporting",
-                                          `n Windows Fine` < `n Windows Exceeding` ~ "Review",
-                                          `n Windows Fine` == `n Windows Exceeding` ~ "Review",
+    mutate(`Suggested Result` = case_when(`n Windows Exceeding` >=2 ~ "Impaired",
+                                          `n Windows Exceeding` < 2 & `n Windows Fine` > `n Windows Exceeding` ~ "Supporting",
+                                          `n Windows Exceeding` < 2 & `n Windows Fine` < `n Windows Exceeding` ~ "Review",
+                                          `n Windows Exceeding` < 2 & `n Windows Fine` == `n Windows Exceeding` ~ "Review",
+                                          #`n Windows Exceeding` >=2 ~ "Impaired",
                                           TRUE ~ as.character(NA))))
     
 }
