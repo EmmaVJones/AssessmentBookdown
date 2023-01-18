@@ -3240,6 +3240,8 @@ PCBmetalsDataExists <- function(datasetType, # any of the preorganized PCB or fi
 
 There are three functions that support the surface water metals assessment. These functions are used to determine criteria, identify exceedances of those criteria, and report these results in the stations table format. Surface water metals criteria are dependent on the designated use (aquatic life or human health). The aquatic life use is subdivided into freshwater and saltwater, which are further subdivided into acute and chronic criteria. The human health designated use is subdivided into public water supply and all other surface waters. Some criteria are specified outright, but a subset of criteria require calculation, which can involve a combination of variables (i.e., hardness, water effect ratio, and correction factor). For more information on surface water metals criteria see [9VAC25-260-140](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/){target="_blank"}. The functions that are used to assess surface water metals are further described below.
 
+Metals assessed for Aquatic Life Use designations use the rolling window analysis procedure detailed in the [Ammonia](#ammonia) section. 
+
 ![](images/MetalsFig.png)
 
 #### metalsCriteriaFunction
@@ -3318,7 +3320,10 @@ After these data windows are created for an individual sample, the process descr
 
 After this process is completed for all samples at a station, the results from raw, acute, and chronic metals assessment are combined into a single dataframe (`stationCriteriaResults`), which is the output of the function.
 
+Output from the `metalsAnalysis()` function are manipulated to utilize the [`annualRollingExceedanceAnalysis()`](#annualRollingExceedanceAnalysis) and [`annualRollingExceedanceSummary()`](#annualRollingExceedanceSummary) functionality as described in the example below. The result of metals analyses analyzed by the `annualRollingExceedanceSummary()` function is then sent to the `metalsAssessmentFunction()` function.
+
 ```{r automated assessment metalsAnalysis, eval=FALSE}
+# For use with rolling aquatic life use method
 metalsAnalysis <- function(stationMetalsData, stationData, WER){
   # If no WER supplied, use 1
   WER <- ifelse(is.na(WER), 1, WER)
@@ -3341,8 +3346,9 @@ metalsAnalysis <- function(stationMetalsData, stationData, WER){
   # make a place to store raw analysis results
   rawCriteriaResults <- tibble(Station_Id = as.character(NA), WindowDateTimeStart = as.POSIXct(NA), FDT_DEPTH = as.numeric(NA),
                                CLASS = as.factor(NA), PWS = as.factor(NA), ZONE = as.factor(NA), `Assess As` = as.character(NA),
-                               Metal = as.character(NA), ValueType = as.character(NA), Value = as.numeric(NA), Criteria = as.character(NA), 
+                               Metal = as.character(NA), Value = as.numeric(NA), ValueType = as.character(NA), Criteria = as.character(NA), 
                                `Criteria Type` = as.character(NA), Waterbody = as.character(NA), CriteriaValue = as.numeric(NA),
+                               `Sample Count` = as.numeric(NA),
                                parameterRound = as.numeric(NA), Exceedance = as.numeric(NA))
   acuteCriteriaResults <- rawCriteriaResults 
   chronicCriteriaResults <- acuteCriteriaResults 
@@ -3369,7 +3375,8 @@ metalsAnalysis <- function(stationMetalsData, stationData, WER){
           else .}
       # Join appropriate criteria to rawData for comparison to averaged data
       rawDataCriteriaAnalysis <- left_join(rawData, rawDataCriteria, by = c('ID', 'Metal')) %>% 
-        mutate(parameterRound = signif(Value, digits = 2), # two significant figures based on WQS https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/
+        mutate(`Sample Count` = 1, # will be 1 here
+               parameterRound = signif(Value, digits = 2), # two significant figures based on WQS https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/
                Exceedance = ifelse(parameterRound > CriteriaValue, 1, 0 ),
                WindowDateTimeStart = min(rawDataWindow$FDT_DATE_TIME)) %>%  # use 1/0 to easily summarize multiple results later
         filter(!is.na(Criteria)) %>%  # filter out metals that don't have chronic criteria
@@ -3381,13 +3388,14 @@ metalsAnalysis <- function(stationMetalsData, stationData, WER){
     # Run acute analysis if data exists
     if(nrow(acuteDataWindow) > 0){
       acuteData <- suppressMessages(acuteDataWindow %>% 
-        group_by(Station_Id, FDT_DEPTH, CLASS, PWS, ZONE, `Assess As`) %>% # can't group by datetime or summary can't happen
-        dplyr::select(-c(contains('RMK_'))) %>% 
-        pivot_longer(cols = Antimony:Hardness, names_to = "Metal", values_to = "CriteriaValue") %>% 
-        ungroup() %>% group_by(Station_Id, FDT_DEPTH, CLASS, PWS, ZONE, `Assess As`, Metal) %>% 
-        summarise(Value = mean(CriteriaValue, na.rm=T)) %>%  # get hourly average
-        mutate(ValueType = 'Hourly Average',
-               ID = paste(Station_Id, FDT_DEPTH, sep = '_')) ) # make a uniqueID in case >1 sample for given datetime
+                                      group_by(Station_Id, FDT_DEPTH, CLASS, PWS, ZONE, `Assess As`) %>% # can't group by datetime or summary can't happen
+                                      dplyr::select(-c(contains('RMK_'))) %>% 
+                                      pivot_longer(cols = Antimony:Hardness, names_to = "Metal", values_to = "CriteriaValue") %>% 
+                                      ungroup() %>% group_by(Station_Id, FDT_DEPTH, CLASS, PWS, ZONE, `Assess As`, Metal) %>% 
+                                      summarise(`Sample Count` = length(CriteriaValue),
+                                                Value = mean(CriteriaValue, na.rm=T)) %>%  # get hourly average
+                                      mutate(ValueType = 'Hourly Average',
+                                             ID = paste(Station_Id, FDT_DEPTH, sep = '_')) ) # make a uniqueID in case >1 sample for given datetime
       # Calculate criteria based on hourly averaged data
       acuteDataCriteria <- metalsCriteriaFunction(filter(acuteData, Metal == "Hardness")$ID, filter(acuteData, Metal == "Hardness")$Value, WER = 1) %>% 
         filter(`Criteria Type` == 'Acute') %>% # don't need other criteria for acute window
@@ -3405,20 +3413,21 @@ metalsAnalysis <- function(stationMetalsData, stationData, WER){
                Exceedance = ifelse(parameterRound > CriteriaValue, 1, 0 ), # use 1/0 to easily summarize multiple results later
                WindowDateTimeStart = min(acuteDataWindow$FDT_DATE_TIME)) %>% 
         filter(!is.na(Criteria)) %>% # filter out metals that don't have chronic criteria
-        dplyr::select(Station_Id, WindowDateTimeStart, everything(), -ID)
-      # Save the results for viewing later
+        dplyr::select(names(rawDataCriteriaAnalysis))
+      # dplyr::select(Station_Id, WindowDateTimeStart, everything(), -ID)      # Save the results for viewing later
       acuteCriteriaResults <- bind_rows(acuteCriteriaResults, acuteDataCriteriaAnalysis) 
     } else {acuteCriteriaResults <- acuteCriteriaResults }
     # Run chronic analysis if data exists
     if(nrow(chronicDataWindow) > 0){
       chronicData <- suppressMessages(chronicDataWindow %>% 
-        group_by(Station_Id, FDT_DEPTH, CLASS, PWS, ZONE, `Assess As`) %>% # can't group by datetime or summary can't happen
-        dplyr::select(-c(contains('RMK_'))) %>% 
-        pivot_longer(cols = Antimony:Hardness, names_to = "Metal", values_to = "CriteriaValue") %>% 
-        ungroup() %>% group_by(Station_Id, FDT_DEPTH, CLASS, PWS, ZONE, `Assess As`, Metal) %>% 
-        summarise(Value = mean(CriteriaValue, na.rm=T)) %>% # get four day average
-        mutate(ValueType = 'Four Day Average',
-               ID = paste(Station_Id, FDT_DEPTH, sep = '_')) ) # make a uniqueID in case >1 sample for given datetime
+                                        group_by(Station_Id, FDT_DEPTH, CLASS, PWS, ZONE, `Assess As`) %>% # can't group by datetime or summary can't happen
+                                        dplyr::select(-c(contains('RMK_'))) %>% 
+                                        pivot_longer(cols = Antimony:Hardness, names_to = "Metal", values_to = "CriteriaValue") %>% 
+                                        ungroup() %>% group_by(Station_Id, FDT_DEPTH, CLASS, PWS, ZONE, `Assess As`, Metal) %>% 
+                                        summarise(`Sample Count` = length(CriteriaValue),
+                                                  Value = mean(CriteriaValue, na.rm=T)) %>% # get four day average
+                                        mutate(ValueType = 'Four Day Average',
+                                               ID = paste(Station_Id, FDT_DEPTH, sep = '_')) ) # make a uniqueID in case >1 sample for given datetime
       # Calculate criteria based on hourly averaged data
       chronicDataCriteria <- metalsCriteriaFunction(filter(chronicData, Metal == "Hardness")$ID, filter(chronicData, Metal == "Hardness")$Value, WER = 1) %>% 
         filter(`Criteria Type` == 'Chronic') %>% # don't need other criteria for chronic window analysis
@@ -3436,7 +3445,8 @@ metalsAnalysis <- function(stationMetalsData, stationData, WER){
                Exceedance = ifelse(parameterRound > CriteriaValue, 1, 0 ), # use 1/0 to easily summarize multiple results later
                WindowDateTimeStart = min(chronicDataWindow$FDT_DATE_TIME)) %>% 
         filter(!is.na(Criteria)) %>% # filter out metals that don't have chronic criteria
-        dplyr::select(Station_Id, WindowDateTimeStart, everything(), -ID)
+        dplyr::select(names(rawDataCriteriaAnalysis))
+      # dplyr::select(Station_Id, WindowDateTimeStart, everything(), -ID)
       # Save the results for viewing later
       chronicCriteriaResults <- bind_rows(chronicCriteriaResults, chronicDataCriteriaAnalysis) 
     } else {chronicCriteriaResults <- chronicCriteriaResults }
@@ -3453,28 +3463,36 @@ metalsAnalysis <- function(stationMetalsData, stationData, WER){
 # metalsAnalysis(filter(WCmetalsForAnalysis, Station_Id %in%  stationData$FDT_STA_ID), stationData, WER= 1)
 # filter(WCmetalsForAnalysis, Station_Id %in%  stationData$FDT_STA_ID) %>%
 #   metalsAnalysis(stationData, WER= 1) 
+
+# Example usage with rolling analyses
+# filter(WCmetalsForAnalysis, Station_Id %in%  stationData$FDT_STA_ID) %>% 
+#       metalsAnalysis( stationData, WER = 1) %>% 
+#       rename(FDT_STA_ID = Station_Id) %>% 
+#       mutate(`Criteria Type` = Criteria) %>% 
+#       annualRollingExceedanceAnalysis(yearsToRoll = 3, aquaticLifeUse = TRUE) %>% 
+#       annualRollingExceedanceSummary()
 ```
 
 #### metalsAssessmentFunction
 
-This final function takes the output of `metalsAnalysis()` and converts it into the stations table format. However, because there are multiple metals and only 2 columns in the stations table available to describe these results, the total number of exceedances across all metals for a station is reported in the WAT_MET_EXC field. The WAT_MET_STAT field returns "S" if no exceedances exist and "Review" if any exceedances are found in any metal. In the WAT_MET_COMMENT field, this function returns a string that includes the criteria that were exceeded with the number of exceedances in parentheses (e.g., Cadmium Chronic Freshwater (2), Barium PWS (1), Copper Acute Freshwater (4), etc.). The WAT_MET_COMMENT is not reported directly in the Station Table but is instead combined into the overall station COMMENT field to comply with standardized assessment application features. 
+This final function analyzes the output of `metalsAnalysis()` function that was run through the rolling window summary functions, and converts it into the stations table format. However, because there are multiple metals and only 2 columns in the stations table available to describe these results, the total number of exceedances across all metals for a station is reported in the WAT_MET_EXC field. The WAT_MET_STAT field returns "S" if no exceedances exist and "Review" if any exceedances are found in any metal. In the WAT_MET_COMMENT field, this function returns a string that includes the criteria that were exceeded with the number of exceedances in parentheses (e.g., Cadmium Chronic Freshwater (2), Barium PWS (1), Copper Acute Freshwater (4), etc.). The WAT_MET_COMMENT is not reported directly in the Station Table but is instead combined into the overall station COMMENT field to comply with standardized assessment application features. 
 
 ```{r automated assessment metalsAssessmentFunction, eval=FALSE}
-# Metals Assessment function that makes sense of output from metalsAnalysis()
+# Metals Assessment function that makes sense of output from metalsAnalysis() passed through the rolling window functions
 metalsAssessmentFunction <- function(metalsAnalysisResults){
   #Check to make sure that metals data exist
   if(nrow(metalsAnalysisResults) > 0){
     
-    #  Organize results to include Staion_Id, Criteria, and the # of Exceedances
+    #  Organize results to include Station_Id, Criteria, and the # of Exceedances
     metalsExceedances <- metalsAnalysisResults %>%
-      group_by(Station_Id, Criteria) %>%
-      summarise(Exceedances = sum(Exceedance, na.rm = T)) %>%
-      arrange(Criteria)%>%  # arrange on just Criteria to make column order make more sense
+      group_by(FDT_STA_ID, `Criteria Type` ) %>%
+      summarise(Exceedances = sum(`n Windows Exceeding`, na.rm = T)) %>%
+      arrange(`Criteria Type`) %>%  # arrange on just Criteria to make column order make more sense
       filter(Exceedances > 0)
     
     # If there are any exceedances, create a string that includes the metal name(s) and the number of exceedances in parentheses
     if(nrow(metalsExceedances)>0){
-      WAT_MET_STATstring<-sapply(seq_len(nrow(metalsExceedances)), function(i) paste0(metalsExceedances$Criteria[i]," (", metalsExceedances$Exceedances[i], ")")) %>%
+      WAT_MET_STATstring<-sapply(seq_len(nrow(metalsExceedances)), function(i) paste0(metalsExceedances$`Criteria Type`[i]," (", metalsExceedances$Exceedances[i], ")")) %>%
         toString()
       # Create tibble in the format of the stations table that takes the sum of all exceedances for the WAT_MET_EXC field and returns the string created above for the WAT_MET_STAT field
       metalsResults <- tibble("WAT_MET_EXC" = sum(metalsExceedances$Exceedances), "WAT_MET_STAT" = "Review", "WAT_MET_COMMENT" = WAT_MET_STATstring)
@@ -3488,14 +3506,16 @@ metalsAssessmentFunction <- function(metalsAnalysisResults){
   return(metalsResults)
 }
 
+
 # Example Usage for Station Table (demonstrating nested function syntax and pipes, both result in the same output):
 # where stationData and WCmetalsForAnalysis objects are already in your environment, see Automated Assessment for environment set up help
-# metalsAssessmentFunction(
-#   metalsAnalysis(filter(WCmetalsForAnalysis, Station_Id %in%  stationData$FDT_STA_ID),
-#                stationData, WER= 1))
 # filter(WCmetalsForAnalysis, Station_Id %in%  stationData$FDT_STA_ID) %>% 
-#   metalsAnalysis(stationData, WER= 1) %>% 
-#   metalsAssessmentFunction()
+#       metalsAnalysis( stationData, WER = 1) %>% 
+#       rename(FDT_STA_ID = Station_Id) %>% 
+#       mutate(`Criteria Type` = Criteria) %>% 
+#       annualRollingExceedanceAnalysis(yearsToRoll = 3, aquaticLifeUse = TRUE) %>% 
+#       annualRollingExceedanceSummary() %>% 
+#       metalsAssessmentFunction()
 
 ```
 
