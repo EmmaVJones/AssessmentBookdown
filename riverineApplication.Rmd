@@ -68,3 +68,94 @@ The "PWS Criteria" table indicates PWS criteria results if the chosen station ha
 
 
 ![](images/riverine7.png)
+
+
+The "Assessment Unit Raw Data Review and Visualization" area organizes all the standardized statewide datasets organized for automated assessment uses in one area to expedite data review for individual stations. The area is divided into multiple tabs, each with subtabs. These hierarchical tabs organize the conventionals data and all associated parameter modules, benthic data, metals data, and toxics data. Future iterations of this application may include more data review areas as the underlying data sources undergo rigorous organizational steps in order to be sourced by the automated applications and scripts.
+
+By clicking any of the above mentioned tabs, users may begin to dig into different types of data for a chosen station.
+
+![](images/riverine8.png)
+
+
+### Conventionals Data Tab
+
+The "Conventionals" tab provides visualization and analysis modules for each parameter with waterbody-specific criteria or standards. 
+
+The "Raw Data" subtab presents all the conventionals data filtered to the current cycle. Users may download or copy this information to their clipboard for investigation in other programs. The Data Summary section provides AU and station record counts.
+
+![](images/riverine9.png)
+
+The "Temperature" subtab displays an interactive graph of all temperature data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the "WQS for Analysis" drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+A low flow flag appears when the station selected contains data (Temperature, pH, or DO) collected on the same date where a USGS gage in the major river basin (James, York, Potomac, etc.) fell below the gage-specific 7Q10 calculation. Red bold language appears to indicate the chosen station contains data that might have been collected during a low flow event. The data that is flagged for 7Q10 is represented with a red halo behind it in the interactive plot. Users may find out more information about the proximity of this flagged gage to the station, flow statistics, and USGS NWIS links inside the modal visible by clicking the "Review Low Flow Information" button. The table at the bottom of that modal recalculates the station's exceedance statistics based on the assumption that the data flagged with the 7Q10 flag should not be used for assessment. It is up to the assessor to determine whether or not this data should be assessed or not due to flow on the day the sample was collected. 
+
+![](images/riverine10.png)
+
+The "pH" subtab displays an interactive graph of all pH data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the "WQS for Analysis" drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to visualize thresholds of potential stress to aquatic organisms for increased data context.
+
+A low flow flag appears when the station selected contains data (Temperature, pH, or DO) collected on the same date where a USGS gage in the major river basin (James, York, Potomac, etc.) fell below the gage-specific 7Q10 calculation. Red bold language appears to indicate the chosen station contains data that might have been collected during a low flow event. The data that is flagged for 7Q10 is represented with a red halo behind it in the interactive plot. Users may find out more information about the proximity of this flagged gage to the station, flow statistics, and USGS NWIS links inside the modal visible by clicking the "Review Low Flow Information" button. The table at the bottom of that modal recalculates the station's exceedance statistics based on the assumption that the data flagged with the 7Q10 flag should not be used for assessment. It is up to the assessor to determine whether or not this data should be assessed or not due to flow on the day the sample was collected. 
+
+![](images/riverine11.png)
+
+
+
+
+
+The "DO" subtab displays an interactive graph of all dissolved oxygen data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the "WQS for Analysis" drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. Daily average DO exceedances and summary statistics are visible below the raw data analysis.
+
+The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to visualize thresholds of potential stress to aquatic organisms for increased data context.
+
+A low flow flag appears when the station selected contains data (Temperature, pH, or DO) collected on the same date where a USGS gage in the major river basin (James, York, Potomac, etc.) fell below the gage-specific 7Q10 calculation. Red bold language appears to indicate the chosen station contains data that might have been collected during a low flow event. The data that is flagged for 7Q10 is represented with a red halo behind it in the interactive plot. Users may find out more information about the proximity of this flagged gage to the station, flow statistics, and USGS NWIS links inside the modal visible by clicking the "Review Low Flow Information" button. The table at the bottom of that modal recalculates the station's exceedance statistics based on the assumption that the data flagged with the 7Q10 flag should not be used for assessment. It is up to the assessor to determine whether or not this data should be assessed or not due to flow on the day the sample was collected. 
+
+![](images/riverine12.png)
+
+
+The "Specific Conductance" subtab displays an interactive graph of all specific conductivity data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to visualize thresholds of potential stress to aquatic organisms for increased data context.
+
+
+![](images/riverine13.png)
+
+The "Salinity" subtab displays an interactive graph of all salinity data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+
+![](images/riverine14.png)
+
+
+The "Total Nitrogen" subtab displays an interactive graph of all TN data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to visualize thresholds of potential stress to aquatic organisms for increased data context.
+
+
+![](images/riverine15.png)
+
+
+The "Ammonia" subtab displays an interactive graph of all ammonia data for the chosen station as well as the applicable WQS. The Freshwater Criteria Default Analysis Settings
+section identifies the criteria settings applied to the station based on the WQS Class attributed to the station. All analyses presented reflect these conditions. The default WQS settings are specified to expedite application rendering time. If the default analysis settings do not meet your needs, please contact Emma Jones (emma.jones@deq.virginia.gov). Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+The Combined Ammonia Criteria Analysis Results section allows users to explore this complicated ammonia standard interactively. All ammonia records that are above the acute, chronic, or four day criteria for the selected site are highlighted below.
+
+![](images/riverine16.png)
+
+
+
+
+
+
+The "Total Phosphorus" subtab displays an interactive graph of all TP data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to visualize thresholds of potential stress to aquatic organisms for increased data context.
+
+
+![](images/riverine17.png)
+
+
+
+
+
+
+
+
