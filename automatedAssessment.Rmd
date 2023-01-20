@@ -3238,11 +3238,10 @@ PCBmetalsDataExists <- function(datasetType, # any of the preorganized PCB or fi
 
 ### Water Column Metals
 
-There are three functions that support the surface water metals assessment. These functions are used to determine criteria, identify exceedances of those criteria, and report these results in the stations table format. Surface water metals criteria are dependent on the designated use (aquatic life or human health). The aquatic life use is subdivided into freshwater and saltwater, which are further subdivided into acute and chronic criteria. The human health designated use is subdivided into public water supply and all other surface waters. Some criteria are specified outright, but a subset of criteria require calculation, which can involve a combination of variables (i.e., hardness, water effect ratio, and correction factor). For more information on surface water metals criteria see [9VAC25-260-140](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/){target="_blank"}. The functions that are used to assess surface water metals are further described below.
+There are five functions that support the surface water metals assessment. These functions are used to determine criteria, identify exceedances of those criteria, apply rolling windows to these exceedances, and report these results in the stations table format. Surface water metals criteria are dependent on the designated use (aquatic life or human health). The aquatic life use is subdivided into freshwater and saltwater, which are further subdivided into acute and chronic criteria. The human health designated use is subdivided into public water supply and all other surface waters. Some criteria are specified outright, but a subset of criteria require calculation, which can involve a combination of variables (i.e., hardness, water effect ratio, and correction factor). For more information on surface water metals criteria see [9VAC25-260-140](https://law.lis.virginia.gov/admincode/title9/agency25/chapter260/section140/){target="_blank"}. The functions that are used to assess surface water metals are further described below. Note that the metals assessed for Aquatic Life Use designations use the rolling window analysis procedure detailed in the [Ammonia](#ammonia) section.
 
-Metals assessed for Aquatic Life Use designations use the rolling window analysis procedure detailed in the [Ammonia](#ammonia) section. 
 
-![](images/MetalsFig.png)
+![](images/Metals_Figure.png)
 
 #### metalsCriteriaFunction
 
@@ -3320,7 +3319,7 @@ After these data windows are created for an individual sample, the process descr
 
 After this process is completed for all samples at a station, the results from raw, acute, and chronic metals assessment are combined into a single dataframe (`stationCriteriaResults`), which is the output of the function.
 
-Output from the `metalsAnalysis()` function are manipulated to utilize the [`annualRollingExceedanceAnalysis()`](#annualRollingExceedanceAnalysis) and [`annualRollingExceedanceSummary()`](#annualRollingExceedanceSummary) functionality as described in the example below. The result of metals analyses analyzed by the `annualRollingExceedanceSummary()` function is then sent to the `metalsAssessmentFunction()` function.
+Output from the `metalsAnalysis()` function are manipulated to utilize the [`annualRollingExceedanceAnalysis()`](#annualRollingExceedanceAnalysis) and [`annualRollingExceedanceSummary()`](#annualRollingExceedanceSummary) functionality. An example of this workflow is included at the end of the code chunk below. The result of metals analyses analyzed by the `annualRollingExceedanceSummary()` function is then sent to the `metalsAssessmentFunction()` function.
 
 ```{r automated assessment metalsAnalysis, eval=FALSE}
 # For use with rolling aquatic life use method
@@ -3475,21 +3474,20 @@ metalsAnalysis <- function(stationMetalsData, stationData, WER){
 
 #### metalsAssessmentFunction
 
-This final function analyzes the output of `metalsAnalysis()` function that was run through the rolling window summary functions, and converts it into the stations table format. However, because there are multiple metals and only 2 columns in the stations table available to describe these results, the total number of exceedances across all metals for a station is reported in the WAT_MET_EXC field. The WAT_MET_STAT field returns "S" if no exceedances exist and "Review" if any exceedances are found in any metal. In the WAT_MET_COMMENT field, this function returns a string that includes the criteria that were exceeded with the number of exceedances in parentheses (e.g., Cadmium Chronic Freshwater (2), Barium PWS (1), Copper Acute Freshwater (4), etc.). The WAT_MET_COMMENT is not reported directly in the Station Table but is instead combined into the overall station COMMENT field to comply with standardized assessment application features. 
+This final function analyzes the output of `metalsAnalysis()` function that was run through the rolling window summary functions, and converts it into the stations table format. However, because there are multiple metals and only 3 columns in the stations table available to describe these results, the total number of windows with exceedances across all criteria for a station are reported in the WAT_MET_EXC field. The WAT_MET_STAT field returns "S" if no exceedances exist and "Review" if any exceedances occurred during any data window for any metal criteria. In the WAT_MET_COMMENT field, this function returns a string that includes the criteria that were exceeded with the number of windows with exceedances in parentheses (e.g., Cadmium Chronic Freshwater (2), Barium PWS (1), Copper Acute Freshwater (4), etc.). The WAT_MET_COMMENT is not reported directly in the Station Table but is instead combined into the overall station COMMENT field to comply with standardized assessment application features.
 
 ```{r automated assessment metalsAssessmentFunction, eval=FALSE}
-# Metals Assessment function that makes sense of output from metalsAnalysis() passed through the rolling window functions
+# Metals Assessment function that makes sense of output from metalsAnalysis()
 metalsAssessmentFunction <- function(metalsAnalysisResults){
   #Check to make sure that metals data exist
   if(nrow(metalsAnalysisResults) > 0){
-    
-    #  Organize results to include Station_Id, Criteria, and the # of Exceedances
+   
+    #  Organize results to include Staion_Id, Criteria, and the # of Exceedances
     metalsExceedances <- metalsAnalysisResults %>%
-      group_by(FDT_STA_ID, `Criteria Type` ) %>%
-      summarise(Exceedances = sum(`n Windows Exceeding`, na.rm = T)) %>%
+      rename("Exceedances" = `n Windows Exceeding`)%>%
       arrange(`Criteria Type`) %>%  # arrange on just Criteria to make column order make more sense
-      filter(Exceedances > 0)
-    
+      filter(Exceedances > 0 & `Suggested Result` != "Supporting")
+   
     # If there are any exceedances, create a string that includes the metal name(s) and the number of exceedances in parentheses
     if(nrow(metalsExceedances)>0){
       WAT_MET_STATstring<-sapply(seq_len(nrow(metalsExceedances)), function(i) paste0(metalsExceedances$`Criteria Type`[i]," (", metalsExceedances$Exceedances[i], ")")) %>%
