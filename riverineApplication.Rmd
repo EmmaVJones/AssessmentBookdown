@@ -184,3 +184,13 @@ The "Analyzed Data (Each window with an individual STV and geomean assessment de
 
 The results of the "old Enterococci standard" is presented at the bottom of the modal to communicate how the data compare to previous assessment cycles.
 
+
+The "Chlorophyll a" subtab displays an interactive graph of all chlorophyll a data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+
+![](images/riverine25.png)
+
+The "Suspended Sediments" subtab displays an interactive graph of all suspended sediment data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+
+![](images/riverine26.png)
