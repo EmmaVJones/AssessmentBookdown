@@ -133,15 +133,16 @@ The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to 
 ![](images/riverine15.png)
 
 
-The "Ammonia" subtab displays an interactive graph of all ammonia data for the chosen station as well as the applicable WQS. The Freshwater Criteria Default Analysis Settings
-section identifies the criteria settings applied to the station based on the WQS Class attributed to the station. All analyses presented reflect these conditions. The default WQS settings are specified to expedite application rendering time. If the default analysis settings do not meet your needs, please contact Emma Jones (emma.jones@deq.virginia.gov). Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
-
-The Combined Ammonia Criteria Analysis Results section allows users to explore this complicated ammonia standard interactively. All ammonia records that are above the acute, chronic, or four day criteria for the selected site are highlighted below.
+The "Ammonia" subtab displays an interactive graph of all ammonia data for the chosen station as well as the applicable WQS. The Freshwater Criteria Default Analysis Settings are preset based on the WQS Class attributed to the station. All analyses presented reflect these conditions. The default WQS settings are specified to expedite application rendering time. If the default analysis settings do not meet your needs, please contact Emma Jones (emma.jones@deq.virginia.gov). Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
 ![](images/riverine16.png)
 
+The Combined Ammonia Criteria Analysis Results section allows users to explore this complicated ammonia standard interactively. All ammonia records that are above the acute, chronic, or four day criteria for the selected site are highlighted in the top table. The next section allows users to interactively explore data in each three year rolled window for each criteria type. By clicking any of the rows in the "Three year window summaries" table, users will update a table that contains all data within the chosen three year window filtered to the selected criteria analysis type. The next table summarizes all three year windows by criteria type to suggest a final decision.
 
+![](images/riverine18.png)
+The last part of the modal features an "Ammonia Criteria In Depth Analysis." Users may investigate each ammonia measurement by criteria type to better understand the data and criteria calculation for each data point collected.
 
+![](images/riverine19.png)
 
 
 
@@ -153,6 +154,10 @@ The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to 
 ![](images/riverine17.png)
 
 
+The "Fecal Coliform" subtab displays an interactive graph of all fecal coliform data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+
+![](images/riverine20.png)
 
 
 
