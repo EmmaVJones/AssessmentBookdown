@@ -160,7 +160,27 @@ The "Fecal Coliform" subtab displays an interactive graph of all fecal coliform 
 ![](images/riverine20.png)
 
 
+The "E. Coli" subtab displays an interactive graph of all E.coli data for the chosen station. The most recent two years of the assessment period are highlighted on the graph in gray to illustrate the data that are considered for assessment decisions per assessment guidance. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. The next two tables highlight any exceedances (STV or geomean) of the new recreation E.coli standard (STV= 410 CFU / 100 mL, geomean = 126 CFU / 100 mL with additional sampling requirements) on the left table and then summarizes the rolling windows to suggest an assessment decision with standardized language for input into CEDS WQA. 
+
+![](images/riverine21.png)
+
+The new bacteria standards are complicated. The "New Recreation Standard In Depth Analysis" section unpacks these rolling windows across the entire dataset to better explain the suggested assessment result above. The table to the left allows users to select any sample and plots a graph on the right with all data contained within that data point's 90 day rolling window. The table highlights all data collected within the most recent two years of the assessment period (data valid for assessment decisions) in gray. The interactive plot on the right plots the STV and geomean criteria as well as all data and the window calculated geomean. The orange line corresponds to the window geomean; wide black dashed line corresponds to the geomean criteria; thin black dashed line corresponds to the STV limit. Below the plot is a table with specific assessment logic regarding the data included in the selected 90 day window. The Valid Assessment Window field is a boolean result communicating whether the chosen data window is valid for assessment (contain all unique data). Implementing this check ensures rolling window calculations do not proceed beyond the addition of new bacteria data.
+
+The "Analyzed Data (Each window with an individual STV and geomean assessment decisions)" offers detailed information on STV and geomean assessments for every 90 day window in the dataset. Data valid for recreational use assessment are colored in gray.
+
+![](images/riverine22.png)
+The results of the "old E.coli standard" is presented at the bottom of the modal to communicate how the data compare to previous assessment cycles.
 
 
+The "Enterococci" subtab displays an interactive graph of all enterococci data for the chosen station. The most recent two years of the assessment period are highlighted on the graph in gray to illustrate the data that are considered for assessment decisions per assessment guidance. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. The next two tables highlight any exceedances (STV or geomean) of the new recreation enteroccoci standard  (STV= 130 CFU / 100 mL, geomean = 35 CFU / 100 mL with additional sampling requirements) on the left table and then summarizes the rolling windows to suggest an assessment decision with standardized language for input into CEDS WQA. 
 
+![](images/riverine23.png)
+
+The new bacteria standards are complicated. The "New Recreation Standard In Depth Analysis" section unpacks these rolling windows across the entire dataset to better explain the suggested assessment result above. The table to the left allows users to select any sample and plots a graph on the right with all data contained within that data point's 90 day rolling window. The table highlights all data collected within the most recent two years of the assessment period (data valid for assessment decisions) in gray. The interactive plot on the right plots the STV and geomean criteria as well as all data and the window calculated geomean. The orange line corresponds to the window geomean; wide black dashed line corresponds to the geomean criteria; thin black dashed line corresponds to the STV limit. Below the plot is a table with specific assessment logic regarding the data included in the selected 90 day window. The Valid Assessment Window field is a boolean result communicating whether the chosen data window is valid for assessment (contain all unique data). Implementing this check ensures rolling window calculations do not proceed beyond the addition of new bacteria data.
+
+The "Analyzed Data (Each window with an individual STV and geomean assessment decisions)" offers detailed information on STV and geomean assessments for every 90 day window in the dataset. Data valid for recreational use assessment are colored in gray.
+
+![](images/riverine24.png)
+
+The results of the "old Enterococci standard" is presented at the bottom of the modal to communicate how the data compare to previous assessment cycles.
 
