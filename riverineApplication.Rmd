@@ -238,3 +238,37 @@ The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to 
 
 ![](images/riverine30.png)
 
+### Benthic Data Tab
+
+The Benthic Data Tab presents benthic Stream Condition Index (SCI) scores and raw metrics for all data within the assessment window. If no benthic information is presented, then there is no macroinvertebrate data for the station. Always review biologist fact sheets to assist assessment decisions. This information is greatly enhanced by detailed bioassessments provided by regional biological staff for each station sampled in the assessment window. Please discuss with your regional biologist any questions you might have about bioassessment decisions. It is very important for biological staff to participate in the bioassessment archiving process (detailed instructions available through the [Bioassessment Applications How To](#bioassessment-applications-how-to) section). This archive is the only method for standardizing and archiving bioassessment data for future staff as well as generates fact sheets for biological data to provide to citizens, assessors, and other DEQ staff. Participation expedites the regional assessor's workload for biological assessments.
+
+The "Default Biological Information" subtab is populated regardless of regional biological staff participating in standardized bioassessment archiving processes. The "Only analyze wadeable method samples" checkbox is checked by default to only analyze data with approved SCI methods. Users may toggle this off to visualize all biological data. The SCI methods are only validated on wadeable methods. Boatable data should be viewed for informational purposes only. 
+
+The "Only analyze replicate 1 samples" checkbox is checked by default. Users may toggle this off to visualize all biological data. Only replicate 1 samples should be assessed.
+
+A table provides subbasin and Level III Ecoregion information based on the sample location. This information is used to suggest the most appropriate SCI method to assess the benthic data, but confirmation from regional biological staff is highly recommended. The "SCI for Analysis" drop down is autopopulated with a recommended SCI based on subbasin and ecoregion information. Should a user want to change the SCI methodology and reassess using a different method, all three SCI methods are available for data exploration.
+
+An interactive graph presents of all SCI results (based on selection in the "SCI for Analysis" drop down above) for the chosen station. The appropriate SCI threshold is plotted along with all SCI results. 
+
+![](images/riverine32.png)
+
+The "Stream Condition Index Sampling Metrics" section details sampling and SCI metrics as well as yearly average SCI results in the assessment window. All raw benthic metric results are available for further exploration in the "Raw Benthic Results" table.
+
+
+![](images/riverine33.png)
+
+
+The "Bioassessment Additional Information" subtab is populated if your regional biological staff participate in the standardized bioassessment archiving process. Two tabs divide this data by bioassessment information in the current cycle ("Current Integrated Report Window Bioassessment Information") and previous cycles ("Previous Integrated Report Windows Bioassessment Information"). All data presented in this module was submitted by the Regional Biologist referenced in each table by submitting bioassessment data into the Bioassessment Fact Sheet Generator Tool and saved on the R server. Please follow up with that biologist to answer any questions about this station.
+
+The "Current Integrated Report Window Bioassessment Information" subtab offers additional bioassessment information if regional biological staff have completed the bioassessment process in the current assessment cycle. The "Generate Report" button autogenerates a biological fact sheet based on all biological, habtitat, and bioassessment information available for the station. Users may view this downloaded fact sheet in a browser of their choosing. 
+
+
+![](images/riverine34.png)
+
+The "Previous Integrated Report Windows Bioassessment Information" subtab offers additional bioassessment information if regional biological staff have completed the bioassessment process in any previous assessment cycle. This information is important for historical understanding of bioassessments for the selected station.
+
+
+![](images/riverine35.png)
+
+
+
