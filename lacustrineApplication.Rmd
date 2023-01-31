@@ -5,4 +5,4 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-The [Lakes Assessment App](https://rconnect.deq.virginia.gov/IR2022LakesAssessmentApp/) is located on the R server. **update link to 2024 when pushed**
+The [Lakes Assessment App](https://rconnect.deq.virginia.gov/IR2024lakesAssessmentApp/) is located on the R server. **update link to 2024 when pushed**

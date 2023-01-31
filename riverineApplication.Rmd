@@ -81,15 +81,22 @@ By clicking any of the above mentioned tabs, users may begin to dig into differe
 
 The "Conventionals" tab provides visualization and analysis modules for each parameter with waterbody-specific criteria or standards. 
 
+
+#### Raw Data
+
 The "Raw Data" subtab presents all the conventionals data filtered to the current cycle. Users may download or copy this information to their clipboard for investigation in other programs. The Data Summary section provides AU and station record counts.
 
 ![](images/riverine9.png)
+
+#### Temperature
 
 The "Temperature" subtab displays an interactive graph of all temperature data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the "WQS for Analysis" drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
 A low flow flag appears when the station selected contains data (Temperature, pH, or DO) collected on the same date where a USGS gage in the major river basin (James, York, Potomac, etc.) fell below the gage-specific 7Q10 calculation. Red bold language appears to indicate the chosen station contains data that might have been collected during a low flow event. The data that is flagged for 7Q10 is represented with a red halo behind it in the interactive plot. Users may find out more information about the proximity of this flagged gage to the station, flow statistics, and USGS NWIS links inside the modal visible by clicking the "Review Low Flow Information" button. The table at the bottom of that modal recalculates the station's exceedance statistics based on the assumption that the data flagged with the 7Q10 flag should not be used for assessment. It is up to the assessor to determine whether or not this data should be assessed or not due to flow on the day the sample was collected. 
 
 ![](images/riverine10.png)
+
+#### pH
 
 The "pH" subtab displays an interactive graph of all pH data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the "WQS for Analysis" drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
@@ -100,7 +107,7 @@ A low flow flag appears when the station selected contains data (Temperature, pH
 ![](images/riverine11.png)
 
 
-
+#### Dissolved Oxygen
 
 
 The "DO" subtab displays an interactive graph of all dissolved oxygen data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the "WQS for Analysis" drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. Daily average DO exceedances and summary statistics are visible below the raw data analysis.
@@ -111,6 +118,7 @@ A low flow flag appears when the station selected contains data (Temperature, pH
 
 ![](images/riverine12.png)
 
+#### Specific Conductance
 
 The "Specific Conductance" subtab displays an interactive graph of all specific conductivity data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
@@ -119,11 +127,14 @@ The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to 
 
 ![](images/riverine13.png)
 
+#### Salinity
+
 The "Salinity" subtab displays an interactive graph of all salinity data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
 
 ![](images/riverine14.png)
 
+#### Total Nitrogen
 
 The "Total Nitrogen" subtab displays an interactive graph of all TN data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
@@ -132,6 +143,7 @@ The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to 
 
 ![](images/riverine15.png)
 
+#### Ammonia
 
 The "Ammonia" subtab displays an interactive graph of all ammonia data for the chosen station as well as the applicable WQS. The Freshwater Criteria Default Analysis Settings are preset based on the WQS Class attributed to the station. All analyses presented reflect these conditions. The default WQS settings are specified to expedite application rendering time. If the default analysis settings do not meet your needs, please contact Emma Jones (emma.jones@deq.virginia.gov). Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
@@ -144,7 +156,7 @@ The last part of the modal features an "Ammonia Criteria In Depth Analysis." Use
 
 ![](images/riverine19.png)
 
-
+#### Total Phosphorus
 
 The "Total Phosphorus" subtab displays an interactive graph of all TP data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
@@ -153,12 +165,14 @@ The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to 
 
 ![](images/riverine17.png)
 
+#### Fecal Coliform
 
 The "Fecal Coliform" subtab displays an interactive graph of all fecal coliform data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
 
 ![](images/riverine20.png)
 
+#### E. Coli
 
 The "E. Coli" subtab displays an interactive graph of all E.coli data for the chosen station. The most recent two years of the assessment period are highlighted on the graph in gray to illustrate the data that are considered for assessment decisions per assessment guidance. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. The next two tables highlight any exceedances (STV or geomean) of the new recreation E.coli standard (STV= 410 CFU / 100 mL, geomean = 126 CFU / 100 mL with additional sampling requirements) on the left table and then summarizes the rolling windows to suggest an assessment decision with standardized language for input into CEDS WQA. 
 
@@ -171,6 +185,7 @@ The "Analyzed Data (Each window with an individual STV and geomean assessment de
 ![](images/riverine22.png)
 The results of the "old E.coli standard" is presented at the bottom of the modal to communicate how the data compare to previous assessment cycles.
 
+#### Enterococci
 
 The "Enterococci" subtab displays an interactive graph of all enterococci data for the chosen station. The most recent two years of the assessment period are highlighted on the graph in gray to illustrate the data that are considered for assessment decisions per assessment guidance. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. The next two tables highlight any exceedances (STV or geomean) of the new recreation enteroccoci standard  (STV= 130 CFU / 100 mL, geomean = 35 CFU / 100 mL with additional sampling requirements) on the left table and then summarizes the rolling windows to suggest an assessment decision with standardized language for input into CEDS WQA. 
 
@@ -184,17 +199,21 @@ The "Analyzed Data (Each window with an individual STV and geomean assessment de
 
 The results of the "old Enterococci standard" is presented at the bottom of the modal to communicate how the data compare to previous assessment cycles.
 
+#### Chlorophyll a
 
 The "Chlorophyll a" subtab displays an interactive graph of all chlorophyll a data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
 
 ![](images/riverine25.png)
 
+#### Suspended Sediments
+
 The "Suspended Sediments" subtab displays an interactive graph of all suspended sediment data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
 
 ![](images/riverine26.png)
 
+#### Nitrate
 
 The "Nitrate" subtab displays an interactive graph of all nitrate data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
@@ -205,6 +224,7 @@ The "Apply Public Water Supply Water Quality Standards" checkbox is automaticall
 
 ![](images/riverine27.png)
 
+#### Chloride
 
 The "Chloride" subtab displays an interactive graph of all chloride data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
@@ -220,7 +240,7 @@ The Freshwater Chloride Criteria Analysis Results section allows users to explor
 
 ![](images/riverine29.png)
 
-
+#### Sulfate
 
 The "Sulfate" subtab displays offers total sulfate and dissolved sulfate analyses and visualizations.  Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
@@ -271,4 +291,21 @@ The "Previous Integrated Report Windows Bioassessment Information" subtab offers
 ![](images/riverine35.png)
 
 
+### Metals Data Tab
+
+The Metals Data tab organizes data into three subtabs based on the data type: Water Column Metals, Sediment Metals, and Fish Tissue Metals.
+
+#### Water Column Metals
+
+The "Water Column Metals" subtab allows users to interactively explore water column metals data for a chosen station. Where water column metals data exist for a chosen station, the "Analyzed Data" subtab provides an Aquatic Life Use rolling window suggested result for each water column metal criteria. The default Water Effects Ratio (WER) used for module analysis is set to 1 to expedite application rendering time, but users may reassess the data on the fly using the WER that is most appropriate to the given station. All subsequent analyses in that module are updated when a user changes the WER field.
+
+![](images/riverine36.png)
+
+
+The "Three Year Window Summaries" section allows users to explore these complicated criteria interactively. Uusers may interactively explore data in each three year rolled window for each criteria any parameter type. By clicking any of the rows in the "Three year window summaries" table, users will update a table that contains all data within the chosen three year window filtered to the selected criteria analysis type. 
+
+![](images/riverine37.png)
+All raw water column metals data for the chosen station are presented in the "Raw Data" subtab.
+
+![](images/riverine38.png)
 
