@@ -159,6 +159,6 @@ sci-method-decision
 habitat-scores-tab
 station-summary-tab
 assessment-decision-tab
-application-use-benthic-assessment-fact-sheet-tool
+application-use-benthic-assessment-fact-sheet-generator
 assessment-fact-sheet-tab
 general-purpose-biological-fact-sheet-tab
