@@ -149,6 +149,12 @@ sulfate
 benthic-data-tab
 metals-data-tab
 water-column-metals-2
+sediment-metals-1
+fish-tissue-metals
+toxics-data-tab
+public-water-supply-water-column-metals
+water-column-pcbs
+sediment-pcbs
 lacustrine-application-how-to
 bioassessment-applications-how-to
 general-bioassessment-workflow

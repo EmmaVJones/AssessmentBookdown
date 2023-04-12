@@ -253,6 +253,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5.4.1" data-path="application-use-assessment-unit-review-tab.html"><a href="application-use-assessment-unit-review-tab.html#conventionals-data-tab"><i class="fa fa-check"></i><b>5.4.1</b> Conventionals Data Tab</a></li>
 <li class="chapter" data-level="5.4.2" data-path="application-use-assessment-unit-review-tab.html"><a href="application-use-assessment-unit-review-tab.html#benthic-data-tab"><i class="fa fa-check"></i><b>5.4.2</b> Benthic Data Tab</a></li>
 <li class="chapter" data-level="5.4.3" data-path="application-use-assessment-unit-review-tab.html"><a href="application-use-assessment-unit-review-tab.html#metals-data-tab"><i class="fa fa-check"></i><b>5.4.3</b> Metals Data Tab</a></li>
+<li class="chapter" data-level="5.4.4" data-path="application-use-assessment-unit-review-tab.html"><a href="application-use-assessment-unit-review-tab.html#toxics-data-tab"><i class="fa fa-check"></i><b>5.4.4</b> Toxics Data Tab</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="lacustrine-application-how-to.html"><a href="lacustrine-application-how-to.html"><i class="fa fa-check"></i><b>6</b> Lacustrine Application How To</a></li>
@@ -301,8 +302,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><img src="images/riverine6.png" /></p>
 <p>Information specific to the current assessment cycle is presented below the general station information panel. The “Station Table Results” table outputs the site specific results for direct export to the Station Table. It also serves to highlight where exceedances are present and should be reviewed in the individual parameter visualization tabs below. If no station table appears, then there is no data within the assessment window for the selected station. Please investigate the Historical Station Information table above for information as to why this station is included in the application. In the “Station Table Results” table, parameters are highlighted in different colors to indicate further review may be necessary. Parameters highlighted in yellow have at least one violation of a standard or criteria. When BENTHIC_STAT is highlighted, it indicates there is benthic data available for that site and the assessor should review that information with information presented in the <code>Benthic</code> tab below and their Regional Biologist. Parameters highlighted in red exceed the 10.5% exceedance rate. Both scenarios warrant further investigation and may require comments in the Station Table and CEDS WQA.</p>
 <p><strong>Pro Tip: The “Station Table Results” table is editable by the user. This is helpful when the user wants to minimize the number of applications running throughout a given assessment session. Should the assessor determine that an automated result presented in the table requires changing, they may triple-click (click three times in rapid succession) on the cell that needs the change to reveal a text entry box. The user may edit that cell to whatever they desire, preferably following the rules outlined in the Data Entry Manual. Regardless whether any cells were manipulated, the user may use the Copy/CSV/Excel buttons above the table to copy the table information to their clipboard or download the information as the chose file format.</strong></p>
-<p>The “PWS Criteria” table indicates PWS criteria results if the chosen station has PWS designation in the WQS metadata attached to the station. If PWS criteria apply to the station, note that Chloride, Sulfate, Total Dissolved Solids, Iron, and Foaming Agents are secondary criteria and are only applicable to data collected at the drinking water intake. A flag is presented in this section if the station selected falls within 100 meters of a drinking water intake to improve the assessment of these parameters. No set distance is established in guidance to define a station “at the intake” and assessor digression is encouraged to determine whether these secondary standards apply to data collected at the station.</p>
-<p><img src="images/riverine7.png" /></p>
 <p>The “Assessment Unit Raw Data Review and Visualization” area organizes all the standardized statewide datasets organized for automated assessment uses in one area to expedite data review for individual stations. The area is divided into multiple tabs, each with subtabs. These hierarchical tabs organize the conventionals data and all associated parameter modules, benthic data, metals data, and toxics data. Future iterations of this application may include more data review areas as the underlying data sources undergo rigorous organizational steps in order to be sourced by the automated applications and scripts.</p>
 <p>By clicking any of the above mentioned tabs, users may begin to dig into different types of data for a chosen station.</p>
 <p><img src="images/riverine8.png" /></p>
@@ -453,6 +452,42 @@ The results of the “old E.coli standard” is presented at the bottom of the m
 <p><img src="images/riverine37.png" />
 All raw water column metals data for the chosen station are presented in the “Raw Data” subtab.</p>
 <p><img src="images/riverine38.png" /></p>
+</div>
+<div id="sediment-metals-1" class="section level4" number="5.4.3.2">
+<h4><span class="header-section-number">5.4.3.2</span> Sediment Metals</h4>
+<p>The “Sediment Metals” subtab allows users to interactively explore sediment metals data raw data. Where sediment metals data exist for a chosen station, the subtab provides a a tabular output of data for the site.</p>
+<p><img src="images/riverine42.png" /></p>
+</div>
+<div id="fish-tissue-metals" class="section level4" number="5.4.3.3">
+<h4><span class="header-section-number">5.4.3.3</span> Fish Tissue Metals</h4>
+<p>The “Fish Tissue Metals” subtab allows users to interactively explore fish tissue metals data for a chosen station. Where fish tissue metals data exist for a chosen station, the top table of the subtab provides highlights any exceedances of new or previous DEQ screening values for each metals. The “new” DEQ screening values are highlighted in orange.</p>
+<p><img src="images/riverine43.png" /></p>
+<p>All raw fish tissue metals data for the chosen station are presented in the lower table of the subtab.</p>
+<p><img src="images/riverine44.png" /></p>
+</div>
+</div>
+<div id="toxics-data-tab" class="section level3" number="5.4.4">
+<h3><span class="header-section-number">5.4.4</span> Toxics Data Tab</h3>
+<p>The Toxics Data tab organizes data into four subtabs based on the data type: Public Water Supply Water Column Metals, Water Column PCBs, Sediment PCBs, and Fish Tissue PCBs.</p>
+<div id="public-water-supply-water-column-metals" class="section level4" number="5.4.4.1">
+<h4><span class="header-section-number">5.4.4.1</span> Public Water Supply Water Column Metals</h4>
+<p>The “Public Water Supply Water Column Metals” subtab allows users to interactively explore water column metals data compared to Public Water Supply (PWS) criteria for a chosen station. Where water column metals data exist for a chosen station, and only for stations attributed in a PWS segment, the to table of the subtab provides a summary of samples and exceedances for PWS metals criteria. The table indicates individual parameter exceedances as well as sample median exceedances.</p>
+<p>If PWS criteria apply to the station, note that Chloride, Sulfate, Total Dissolved Solids, Iron, and Foaming Agents are secondary criteria and are only applicable to data collected at the drinking water intake. A flag is presented in this section if the station selected falls within 100 meters of a drinking water intake to improve the assessment of these parameters. No set distance is established in guidance to define a station “at the intake” and assessor digression is encouraged to determine whether these secondary standards apply to data collected at the station.</p>
+<p><img src="images/riverine39.png" />
+The “Individual PWS Criteria” section allows users to further investigate individual parameter data with PWS criteria. The limit field indicates the parameter PWS criteria, exceeds is a boolean and is true when a parameter exceeds the limit field, and medianExceeds indicates when the median of the entire parameter dataset exceeds the PWS criteria (limit field).</p>
+</div>
+<div id="water-column-pcbs" class="section level4" number="5.4.4.2">
+<h4><span class="header-section-number">5.4.4.2</span> Water Column PCBs</h4>
+<p>The “Water Column PCBs” subtab allows users to interactively explore water column PCB data raw data. Where water column PCB data exist for a chosen station, the subtab provides a a tabular output of data for the site.</p>
+<p><img src="images/riverine40.png" /></p>
+</div>
+<div id="sediment-pcbs" class="section level4" number="5.4.4.3">
+<h4><span class="header-section-number">5.4.4.3</span> Sediment PCBs</h4>
+<p>The “Sediment PCBs” subtab allows users to interactively explore sediment PCB data raw data. Where sediment PCB data exist for a chosen station, the subtab provides a a tabular output of data for the site.</p>
+<p><img src="images/riverine41.png" />
+#### Fish Tissue PCBs</p>
+<p>The “Fish Tissue PCBs” subtab allows users to interactively explore fish tissue PCB data raw data. Where fish tissue PCB data exist for a chosen station, the subtab provides a a tabular output of data for the site. Any exceedances of the two DEQ screening values are highlighted in orange or purple.</p>
+<p><img src="images/riverine45.png" /></p>
 
 </div>
 </div>
