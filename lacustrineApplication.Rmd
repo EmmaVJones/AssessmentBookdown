@@ -248,3 +248,72 @@ With "Dissolved Sulfate" selected in the "Select Total or Dissolved Sulfate" dro
 ![](images/riverine30.png)
 
 
+### Metals Data Tab
+
+The Metals Data tab organizes data into three subtabs based on the data type: Water Column Metals, Sediment Metals, and Fish Tissue Metals.
+
+#### Water Column Metals
+
+The "Water Column Metals" subtab allows users to interactively explore water column metals data for a chosen station. Where water column metals data exist for a chosen station, the "Analyzed Data" subtab provides an Aquatic Life Use rolling window suggested result for each water column metal criteria. The default Water Effects Ratio (WER) used for module analysis is set to 1 to expedite application rendering time, but users may reassess the data on the fly using the WER that is most appropriate to the given station. All subsequent analyses in that module are updated when a user changes the WER field.
+
+![](images/riverine36.png)
+
+
+The "Three Year Window Summaries" section allows users to explore these complicated criteria interactively. Uusers may interactively explore data in each three year rolled window for each criteria any parameter type. By clicking any of the rows in the "Three year window summaries" table, users will update a table that contains all data within the chosen three year window filtered to the selected criteria analysis type. 
+
+![](images/riverine37.png)
+All raw water column metals data for the chosen station are presented in the "Raw Data" subtab.
+
+![](images/riverine38.png)
+
+#### Sediment Metals
+
+The "Sediment Metals" subtab allows users to interactively explore sediment metals data raw data. Where sediment metals data exist for a chosen station, the subtab provides a a tabular output of data for the site.
+
+![](images/riverine42.png)
+
+#### Fish Tissue Metals
+
+The "Fish Tissue Metals" subtab allows users to interactively explore fish tissue metals data for a chosen station. Where fish tissue metals data exist for a chosen station, the top table of the subtab provides highlights any exceedances of new or previous DEQ screening values for each metals. The "new" DEQ screening values are highlighted in orange. 
+
+
+![](images/riverine43.png)
+
+All raw fish tissue metals data for the chosen station are presented in the lower table of the subtab.
+
+![](images/riverine44.png)
+
+
+
+
+### Toxics Data Tab
+
+The Toxics Data tab organizes data into four subtabs based on the data type: Public Water Supply Water Column Metals, Water Column PCBs, Sediment PCBs, and Fish Tissue PCBs.
+
+#### Public Water Supply Water Column Metals
+
+The "Public Water Supply Water Column Metals" subtab allows users to interactively explore water column metals data compared to Public Water Supply (PWS) criteria for a chosen station. Where water column metals data exist for a chosen station, and only for stations attributed in a PWS segment, the to table of the subtab provides a summary of samples and exceedances for PWS metals criteria. The table indicates individual parameter exceedances as well as sample median exceedances.
+
+If PWS criteria apply to the station, note that Chloride, Sulfate, Total Dissolved Solids, Iron, and Foaming Agents are secondary criteria and are only applicable to data collected at the drinking water intake. A flag is presented in this section if the station selected falls within 100 meters of a drinking water intake to improve the assessment of these parameters. No set distance is established in guidance to define a station "at the intake" and assessor digression is encouraged to determine whether these secondary standards apply to data collected at the station.
+
+![](images/riverine39.png)
+The "Individual PWS Criteria" section allows users to further investigate individual parameter data with PWS criteria. The limit field indicates the parameter PWS criteria, exceeds is a boolean and is true when a parameter exceeds the limit field, and medianExceeds indicates when the median of the entire parameter dataset exceeds the PWS criteria (limit field).
+
+
+#### Water Column PCBs
+
+The "Water Column PCBs" subtab allows users to interactively explore water column PCB data raw data. Where water column PCB data exist for a chosen station, the subtab provides a a tabular output of data for the site.
+
+![](images/riverine40.png)
+
+#### Sediment PCBs
+
+The "Sediment PCBs" subtab allows users to interactively explore sediment PCB data raw data. Where sediment PCB data exist for a chosen station, the subtab provides a a tabular output of data for the site.
+
+![](images/riverine41.png)
+
+#### Fish Tissue PCBs
+
+The "Fish Tissue PCBs" subtab allows users to interactively explore fish tissue PCB data raw data. Where fish tissue PCB data exist for a chosen station, the subtab provides a a tabular output of data for the site. Any exceedances of the two DEQ screening values are highlighted in orange or purple.
+
+![](images/riverine45.png)
