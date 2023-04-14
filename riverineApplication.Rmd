@@ -69,6 +69,7 @@ Information specific to the current assessment cycle is presented below the gene
 
 **Pro Tip: The "Station Table Results" table is editable by the user. This is helpful when the user wants to minimize the number of applications running throughout a given assessment session. Should the assessor determine that an automated result presented in the table requires changing, they may triple-click (click three times in rapid succession) on the cell that needs the change to reveal a text entry box. The user may edit that cell to whatever they desire, preferably following the rules outlined in the Data Entry Manual. Regardless whether any cells were manipulated, the user may use the Copy/CSV/Excel buttons above the table to copy the table information to their clipboard or download the information as the chose file format.**
 
+![](images/riverinebonus.png)
 
 The "Assessment Unit Raw Data Review and Visualization" area organizes all the standardized statewide datasets organized for automated assessment uses in one area to expedite data review for individual stations. The area is divided into multiple tabs, each with subtabs. These hierarchical tabs organize the conventionals data and all associated parameter modules, benthic data, metals data, and toxics data. Future iterations of this application may include more data review areas as the underlying data sources undergo rigorous organizational steps in order to be sourced by the automated applications and scripts.
 
@@ -86,6 +87,8 @@ The "Conventionals" tab provides visualization and analysis modules for each par
 
 The "Raw Data" subtab presents all the conventionals data filtered to the current cycle. Users may download or copy this information to their clipboard for investigation in other programs. The Data Summary section provides AU and station record counts.
 
+**If the chosen assessment unit contains over 1,000 rows of data, only the data for the selected site will be loaded in the raw data table to expedite application loading. A warning message will be displayed in bold above the table to indicate when this filtering is happening.**
+
 ![](images/riverine9.png)
 
 #### Temperature
@@ -93,6 +96,8 @@ The "Raw Data" subtab presents all the conventionals data filtered to the curren
 The "Temperature" subtab displays an interactive graph of all temperature data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the "WQS for Analysis" drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
 
 A low flow flag appears when the station selected contains data (Temperature, pH, or DO) collected on the same date where a USGS gage in the major river basin (James, York, Potomac, etc.) fell below the gage-specific 7Q10 calculation. Red bold language appears to indicate the chosen station contains data that might have been collected during a low flow event. The data that is flagged for 7Q10 is represented with a red halo behind it in the interactive plot. Users may find out more information about the proximity of this flagged gage to the station, flow statistics, and USGS NWIS links inside the modal visible by clicking the "Review Low Flow Information" button. The table at the bottom of that modal recalculates the station's exceedance statistics based on the assumption that the data flagged with the 7Q10 flag should not be used for assessment. It is up to the assessor to determine whether or not this data should be assessed or not due to flow on the day the sample was collected. 
+
+The two tables lie below the interactive plot. The table on the left highlights any measure that are above the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site.
 
 ![](images/riverine10.png)
 
@@ -103,6 +108,8 @@ The "pH" subtab displays an interactive graph of all pH data for the chosen stat
 The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to visualize thresholds of potential stress to aquatic organisms for increased data context.
 
 A low flow flag appears when the station selected contains data (Temperature, pH, or DO) collected on the same date where a USGS gage in the major river basin (James, York, Potomac, etc.) fell below the gage-specific 7Q10 calculation. Red bold language appears to indicate the chosen station contains data that might have been collected during a low flow event. The data that is flagged for 7Q10 is represented with a red halo behind it in the interactive plot. Users may find out more information about the proximity of this flagged gage to the station, flow statistics, and USGS NWIS links inside the modal visible by clicking the "Review Low Flow Information" button. The table at the bottom of that modal recalculates the station's exceedance statistics based on the assumption that the data flagged with the 7Q10 flag should not be used for assessment. It is up to the assessor to determine whether or not this data should be assessed or not due to flow on the day the sample was collected. 
+
+The two tables lie below the interactive plot. The table on the left highlights any measure that are outside the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site.
 
 ![](images/riverine11.png)
 
@@ -115,6 +122,8 @@ The "DO" subtab displays an interactive graph of all dissolved oxygen data for t
 The "Display Benthic Stressor Analysis Colors on Plot" checkbox allows users to visualize thresholds of potential stress to aquatic organisms for increased data context.
 
 A low flow flag appears when the station selected contains data (Temperature, pH, or DO) collected on the same date where a USGS gage in the major river basin (James, York, Potomac, etc.) fell below the gage-specific 7Q10 calculation. Red bold language appears to indicate the chosen station contains data that might have been collected during a low flow event. The data that is flagged for 7Q10 is represented with a red halo behind it in the interactive plot. Users may find out more information about the proximity of this flagged gage to the station, flow statistics, and USGS NWIS links inside the modal visible by clicking the "Review Low Flow Information" button. The table at the bottom of that modal recalculates the station's exceedance statistics based on the assumption that the data flagged with the 7Q10 flag should not be used for assessment. It is up to the assessor to determine whether or not this data should be assessed or not due to flow on the day the sample was collected. 
+
+The two tables lie below the interactive plot. The table on the left highlights any measure that are below the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site.
 
 ![](images/riverine12.png)
 

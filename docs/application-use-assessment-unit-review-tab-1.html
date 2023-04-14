@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>DEQ Water Quality Automated Assessment User Guide</title>
+  <title>6.4 Application Use: Assessment Unit Review Tab | DEQ Water Quality Automated Assessment User Guide</title>
   <meta name="description" content="A companion document describing the WQA automated assessment methodology." />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="DEQ Water Quality Automated Assessment User Guide" />
+  <meta property="og:title" content="6.4 Application Use: Assessment Unit Review Tab | DEQ Water Quality Automated Assessment User Guide" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="openscapes/series" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="DEQ Water Quality Automated Assessment User Guide" />
+  <meta name="twitter:title" content="6.4 Application Use: Assessment Unit Review Tab | DEQ Water Quality Automated Assessment User Guide" />
   
   <meta name="twitter:description" content="A companion document describing the WQA automated assessment methodology." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="HowToUseDocument.html"/>
+<link rel="prev" href="application-use-lake-selection-tab.html"/>
+<link rel="next" href="bioassessment-applications-how-to.html"/>
 <script src="libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -303,23 +303,91 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">DEQ Water Quality Automated Assessment User Guide</h1>
-<p class="author"><em>DEQ Automated Assessment Team</em></p>
-<p class="date"><em>Last Updated: 2023-04-14</em></p>
+<div id="application-use-assessment-unit-review-tab-1" class="section level2" number="6.4">
+<h2><span class="header-section-number">6.4</span> Application Use: Assessment Unit Review Tab</h2>
+<p>After selecting a lake to investigate on the <code>Lake Selection</code> tab, the <code>Assessment Unit Review</code> tab is where the user will find the most interactive analytical tools. The tab provides a drill-down view of all assessment data related to the selected lake. Users explore the chosen lake using a hierarchical schema from lake -&gt; AUs within the lake -&gt; Stations within the AU.
+The table at the top of the tab reminds the user which lake is currently selected for investigation, the VAHU6(s) the lake falls in, and whether or not the lake is attributed to a WQS segment tagged as a Section 187 lake. The “Assessment Unit Selection” drop down allows users to choose from all AUs within the chosen lake. These AUs are retrieved from the final AU spatial layer from the previous cycle. The table immediately below this drop down provides AU information for the chosen AU from the previous cycle as a summary of use attainment and AU comments in the most previous cycle. If, during the assessment process, an AU is split or renamed to a name not contained within the previous cycle final AU spatial layer and the Station Table uploaded to the application contains this new/changed AU, the previous final AU spatial layer will not contain information about this AU. However, the application will still allow the user to perform all expected analyses without this information.</p>
+<p>Based on the AU selected, all stations attributed to the AU are available in the subsequent “Station Selection” drop down. The stations available in the drop down are limited to stations with an ID305B_1:ID305B_10 designation equal to the selected AU as provided in the uploaded Station Table. Once a station is selected, all further visualizations and analyses pertain to that station. In the subsequent panel, current and previous information about the selected station are provided. On the left, a table provides station and WQS information, organizing AU and station type designations (pulled from the uploaded Station Table) and WQS information (pulled from pinned data on the R server, originally provided by the regional assessor during the previous metadata steps). A thumbnail map identifies the station and all associated AUs. The table on the right provides Station Table results from the two most previous assessment cycles to collate relevant historical information about the station in one area.</p>
+<p><img src="images/lakes3.png" /></p>
+<p>Information specific to the current assessment cycle is presented below the general station information panel. The “Station Table Results” table outputs the site specific results for direct export to the Station Table. It also serves to highlight where exceedances are present and should be reviewed in the individual parameter visualization tabs below. If no station table appears, then there is no data within the assessment window for the selected station. Please investigate the Historical Station Information table above for information as to why this station is included in the application. In the “Station Table Results” table, parameters are highlighted in different colors to indicate further review may be necessary. Parameters highlighted in yellow have at least one violation of a standard or criteria. Parameters highlighted in red exceed the 10.5% exceedance rate. Both scenarios warrant further investigation and may require comments in the Station Table and CEDS WQA.</p>
+<p><strong>Pro Tip: The “Station Table Results” table is editable by the user. This is helpful when the user wants to minimize the number of applications running throughout a given assessment session. Should the assessor determine that an automated result presented in the table requires changing, they may triple-click (click three times in rapid succession) on the cell that needs the change to reveal a text entry box. The user may edit that cell to whatever they desire, preferably following the rules outlined in the Data Entry Manual. Regardless whether any cells were manipulated, the user may use the Copy/CSV/Excel buttons above the table to copy the table information to their clipboard or download the information as the chose file format.</strong></p>
+<p><img src="images/lakes4.png" /></p>
+<p>The “Assessment Unit Raw Data Review and Visualization” area organizes all the standardized statewide datasets organized for automated assessment uses in one area to expedite data review for individual stations. The area is divided into multiple tabs, each with subtabs. These hierarchical tabs organize the conventionals data and all associated parameter modules, metals data, and toxics data. Future iterations of this application may include more data review areas as the underlying data sources undergo rigorous organizational steps in order to be sourced by the automated applications and scripts.</p>
+<p>By clicking any of the above mentioned tabs, users may begin to dig into different types of data for a chosen station.</p>
+<p><img src="images/lakes5.png" /></p>
+<div id="conventionals-data-tab-1" class="section level3" number="6.4.1">
+<h3><span class="header-section-number">6.4.1</span> Conventionals Data Tab</h3>
+<p>The “Conventionals” tab provides visualization and analysis modules for each parameter with waterbody-specific criteria or standards.</p>
+<div id="raw-data-1" class="section level4" number="6.4.1.1">
+<h4><span class="header-section-number">6.4.1.1</span> Raw Data</h4>
+<p>The “Raw Data” subtab presents all the conventionals data filtered to the current cycle. Users may download or copy this information to their clipboard for investigation in other programs. The Data Summary section provides AU and station record counts.</p>
+<p><strong>If the chosen assessment unit contains over 1,000 rows of data, only the data for the selected site will be loaded in the raw data table to expedite application loading. A warning message will be displayed in bold above the table to indicate when this filtering is happening.</strong></p>
+<p><img src="images/lakes5.png" /></p>
 </div>
-<div id="Introduction" class="section level1" number="1">
-<h1><span class="header-section-number">Chapter 1</span> Introduction</h1>
-<p>This manual serves as a companion document to DEQ’s Water Quality Assessment (WQA) automated assessment methodology for completion of the biennial <a href="https://www.deq.virginia.gov/water/water-quality/assessments/integrated-report">305b/303d Integrated Report</a>. Virginia is among a handful of state agencies that have organized concerted efforts to systematically automate and expedite the water quality assessment process. These entities have all taken different approaches to best meet their state-specific analysis and reporting needs. Through the <a href="https://github.com/USEPA/TADA">Tools for Automated Data Assessment (TADA) working group</a>, EPA is organizing an effort to share code and create national tools to assist partners with assessment analyses. Considering the technological advances in water monitoring that have increased the quantity and types of data requiring consideration during an assessment period, as well as the static or decreasing staff time allocated to the assessment process, automation appears the only solution to keep up with Clean Water Act requirements and keep the public informed of the status of waterbody health and restoration timelines for those waterbodies not meeting water quality standards. By embracing automated assessment procedures, entities aim to provide constituents with higher quality, standardized, and transparent water quality assessment results while adhering to federally mandated deadlines.</p>
-<p>Virginia has taken a hybrid approach to the process of automating the water quality assessments. DEQ relies upon an automated process to manipulate hundreds of thousands of water quality data collected throughout the state during a given assessment period (six year window). These scripts evaluate each record for exceedances of appropriate Water Quality Standards. Regional assessment staff may use interactive web-based analytical tools provide more context to tabular results of exceedance analyses to assist with Quality Assurance/Quality Control (QA/QC) prior to submitting data to EPA’s <a href="https://www.epa.gov/waterdata/attains" target="_blank">Assessment, Total Maximum Daily Load (TMDL) Tracking and Implementation System (ATTAINS)</a> system through DEQ’s internal <a href="https://ceds.deq.virginia.gov/ui#" target="_blank">Comprehensive Environmental Data System (CEDS)</a>. This approach maximizes the benefits of each partner in the assessment process, allowing computers to excel at systematic and expedited data manipulation and analysis at scale and allowing humans to digest multiple lines of evidence to identify any potential data collection or analysis errors or areas of environmental concern.</p>
+<div id="thermocline" class="section level4" number="6.4.1.2">
+<h4><span class="header-section-number">6.4.1.2</span> Thermocline</h4>
+<p>The “Thermocline” subtab displays an interactive graph of all thermocline analysis results for the chosen station. To reveal a thermocline plot for a given sample date, users must click on a row in the table corresponding to the date of interest. Users may review and download raw parameter data by clicking the “Review Raw Parameter Data” button to reveal a modal dialog box with a table and various copy/download options.</p>
+<p>Once a thermocline plot is visible, users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across the temperature, dissolved oxygen, and pH modules. A red horizontal line indicates the thermocline depth. Hovering over each point reveals more information about each piece of data.</p>
+<p><img src="images/lakes6.png" /></p>
 </div>
+<div id="temperature-2" class="section level4" number="6.4.1.3">
+<h4><span class="header-section-number">6.4.1.3</span> Temperature</h4>
+<p>The “Temperature” subtab displays an interactive graph of all temperature data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the “WQS for Analysis” drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the “Review Raw Parameter Data” button to reveal a modal dialog box with a table and various copy/download options.</p>
+<p>Users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across the temperature, dissolved oxygen, and pH modules. A black horizontal line indicates the station temperature standard. Hovering over each point reveals more information about each piece of data. The legend on the right of the plot allows users to turn plot layers on/off interactively by clicking on them to offer better data understanding.</p>
+<p>The two tables lie below the interactive plot. The table on the left highlights any measure that are above the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site.</p>
+<p>If more than one station exists in the selected AU, the “AU Assessment” box will detail exceedances and exceedance statistics for all data pooled in the selected AU.</p>
+<p><img src="images/lakes7.png" /></p>
+</div>
+<div id="ph-2" class="section level4" number="6.4.1.4">
+<h4><span class="header-section-number">6.4.1.4</span> pH</h4>
+<p>The “pH” subtab displays an interactive graph of all pH data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the “WQS for Analysis” drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the “Review Raw Parameter Data” button to reveal a modal dialog box with a table and various copy/download options.</p>
+<p>Users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across the temperature, dissolved oxygen, and pH modules. A black horizontal line indicates the station temperature standard. Hovering over each point reveals more information about each piece of data. The legend on the right of the plot allows users to turn plot layers on/off interactively by clicking on them to offer better data understanding.</p>
+<p>The two tables lie below the interactive plot. The table on the left highlights any measure that are outside the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site. Analyzing the exceedance rate of just epilimnion samples can assist in determining if lake turnover may be the contributing to pH exceedances. A table of individual pH exceedance statistics for the selected site in the epilimnion lies below the total exceedance statistics table.</p>
+<p>If more than one station exists in the selected AU, the “AU Assessment” box will detail exceedances and exceedance statistics for all data pooled in the selected AU. Analyzing the exceedance rate of just epilimnion samples can assist in determining if lake turnover may be the contributing to pH exceedances. A table of individual pH exceedance statistics for the selected AU in the epilimnion lies below the AU total exceedance statistics table.</p>
+<p><img src="images/lakes9.png" /></p>
+</div>
+<div id="dissolved-oxygen-2" class="section level4" number="6.4.1.5">
+<h4><span class="header-section-number">6.4.1.5</span> Dissolved Oxygen</h4>
+<p>The “DO” subtab displays an interactive graph of all dissolved oxygen data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the “WQS for Analysis” drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the “Review Raw Parameter Data” button to reveal a modal dialog box with a table and various copy/download options. Daily average DO exceedances and summary statistics are visible below the raw data analysis.</p>
+<p>Users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across the temperature, dissolved oxygen, and pH modules. A black horizontal line indicates the station temperature standard. Hovering over each point reveals more information about each piece of data. The legend on the right of the plot allows users to turn plot layers on/off interactively by clicking on them to offer better data understanding.</p>
+<p>The two tables lie below the interactive plot. The table on the left highlights any measure that are below the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site. Analyzing the exceedance rate of just epilimnion samples can assist in determining if lake turnover may be the contributing to DO exceedances. A table of individual DO exceedance statistics for the selected site in the epilimnion lies below the total exceedance statistics table.</p>
+<p>If more than one station exists in the selected AU, the “AU Assessment” box will detail exceedances and exceedance statistics for all data pooled in the selected AU. Analyzing the exceedance rate of just epilimnion samples can assist in determining if lake turnover may be the contributing to DO exceedances. A table of individual DO exceedance statistics for the selected AU in the epilimnion lies below the AU total exceedance statistics table.</p>
+<p><img src="images/lakes8.png" /></p>
+<p>The “Zoomed Plot By Sample Date” button reveals a modal dialog box with plotting feature that allows users to interactively explore DO vs temperature plots for each individual sample date to better understand data at the selected site.</p>
+<p><img src="images/lakes8.5.png" /></p>
+</div>
+<div id="specific-conductance-1" class="section level4" number="6.4.1.6">
+<h4><span class="header-section-number">6.4.1.6</span> Specific Conductance</h4>
+<p>The “Specific Conductance” subtab displays an interactive graph of all specific conductivity data for the chosen station. Users may review and download raw parameter data by clicking the “Review Raw Parameter Data” button to reveal a modal dialog box with a table and various copy/download options.</p>
+<p>Users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across the temperature, dissolved oxygen, and pH modules. A black horizontal line indicates the station temperature standard. Hovering over each point reveals more information about each piece of data. The legend on the right of the plot allows users to turn plot layers on/off interactively by clicking on them to offer better data understanding.</p>
+<p><img src="images/lakes10.png" /></p>
+</div>
+<div id="e.-coli-1" class="section level4" number="6.4.1.7">
+<h4><span class="header-section-number">6.4.1.7</span> E. Coli</h4>
+<p>The “E. Coli” subtab has two nested tabs, one for single station analysis and one for E. Coli analysis over an entire AU (for AUs with multiple stations).</p>
+<p>The “Single Station Analysis” subtab displays an interactive graph of all E.coli data for the chosen station. The most recent two years of the assessment period are highlighted on the graph in gray to illustrate the data that are considered for assessment decisions per assessment guidance. Users may review and download raw parameter data by clicking the “Review Raw Parameter Data” button to reveal a modal dialog box with a table and various copy/download options. The next two tables highlight any exceedances (STV or geomean) of the new recreation E.coli standard (STV= 410 CFU / 100 mL, geomean = 126 CFU / 100 mL with additional sampling requirements) on the left table and then summarizes the rolling windows to suggest an assessment decision with standardized language for input into CEDS WQA.</p>
+<p><img src="images/lakes11.png" /></p>
+<p>The new bacteria standards are complicated. The “New Recreation Standard In Depth Analysis” section unpacks these rolling windows across the entire dataset to better explain the suggested assessment result above. The table to the left allows users to select any sample and plots a graph on the right with all data contained within that data point’s 90 day rolling window. The table highlights all data collected within the most recent two years of the assessment period (data valid for assessment decisions) in gray. The interactive plot on the right plots the STV and geomean criteria as well as all data and the window calculated geomean. The orange line corresponds to the window geomean; wide black dashed line corresponds to the geomean criteria; thin black dashed line corresponds to the STV limit. Below the plot is a table with specific assessment logic regarding the data included in the selected 90 day window. The Valid Assessment Window field is a boolean result communicating whether the chosen data window is valid for assessment (contain all unique data). Implementing this check ensures rolling window calculations do not proceed beyond the addition of new bacteria data.</p>
+<p>The “Analyzed Data (Each window with an individual STV and geomean assessment decisions)” offers detailed information on STV and geomean assessments for every 90 day window in the dataset. Data valid for recreational use assessment are colored in gray.</p>
+<p><img src="images/lakes12.png" /></p>
+<p>The results of the “old E.coli standard” is presented at the bottom of the modal to communicate how the data compare to previous assessment cycles.</p>
+<p>The “Assessment Unit Analysis” subtab displays an interactive graph of all E.coli data for the chosen AU. Raw data from each station in the selected AU is presented in a different color. The most recent two years of the assessment period are highlighted on the graph in gray to illustrate the data that are considered for assessment decisions per assessment guidance. Users may review and download raw parameter data by clicking the “Review Raw Parameter Data” button to reveal a modal dialog box with a table and various copy/download options. The next two tables highlight any exceedances (STV or geomean) of the new recreation E.coli standard (STV= 410 CFU / 100 mL, geomean = 126 CFU / 100 mL with additional sampling requirements) on the left table and then summarizes the rolling windows to suggest an assessment decision with standardized language for input into CEDS WQA. <strong>Note: for AU assessments, the daily median of E. coli values collect in the AU is compared against the E. coli criteria.</strong></p>
+<p><img src="images/lakes13.png" /></p>
+<p>The new bacteria standards are complicated. The “New Recreation Standard In Depth Analysis” section unpacks the <strong>AU daily median E. coli</strong> rolling windows across the entire dataset to better explain the suggested assessment result above. The table to the left allows users to select any <strong>Daily E. coli Median</strong> and plots a graph on the right with all <strong>AU median data</strong> contained within that data point’s 90 day rolling window. The table highlights all data collected within the most recent two years of the assessment period (data valid for assessment decisions) in gray. The interactive plot on the right plots the STV and geomean criteria as well as all <strong>AU median data</strong> and the window calculated geomean. The orange line corresponds to the window geomean; wide black dashed line corresponds to the geomean criteria; thin black dashed line corresponds to the STV limit. Below the plot is a table with specific assessment logic regarding the data included in the selected 90 day window. The Valid Assessment Window field is a boolean result communicating whether the chosen data window is valid for assessment (contain all unique data). Implementing this check ensures rolling window calculations do not proceed beyond the addition of new bacteria data.</p>
+<p>The “Analyzed Data (Each window with an individual STV and geomean assessment decisions)” offers detailed information on STV and geomean assessments for every 90 day window in the dataset. Data valid for recreational use assessment are colored in gray.</p>
+<p><img src="images/lakes14.png" /></p>
+
+</div>
+</div>
+</div>
+<!-- </div> -->
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="HowToUseDocument.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="application-use-lake-selection-tab.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="bioassessment-applications-how-to.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

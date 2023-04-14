@@ -4,14 +4,13 @@
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 The [Lakes Assessment App](https://rconnect.deq.virginia.gov/IR2024lakesAssessmentApp/) is located on the R server. **The linked version of the application is in draft development stage with DRAFT DATA until after the data solicitation deadline and final product release. Expect this release in late April 2023.**
 
-The purpose of this tool is to expand upon the Station Table summary provided by the automated assessment methodology. A single parameter summary (or in the case of metals, toxics, etc. a single summary of multiple parameters) does not do justice to the data analyzed by the automated assessment process. The Lakes Assessment App provides an interactive data analysis experience to improve users' understanding of automated assessment analyses and decisions. The intended audience is any DEQ employee from regional assessors, field staff to managers, providing better data understanding through interactive data visualizations, descriptive standardized application and WQA guidance explanations, and statewide applicability. 
+The purpose of this tool is to expand upon the Station Table summary provided by the automated assessment methodology. A single parameter summary (or in the case of metals, toxics, etc. a single summary of multiple parameters) does not do justice to the data analyzed by the automated assessment process. The Lakes Assessment App provides an interactive data analysis experience to improve users' understanding of automated assessment analyses and decisions. The intended audience is any DEQ employee from regional assessors, field staff to managers, providing better data understanding through interactive data visualizations, descriptive standardized application and WQA guidance explanations, and statewide applicability.
 
-A notable benefit of these standardized tools is the increased accessibility of assessment decisions. No longer are assessment tools limited to regional assessment staff, resulting in bottlenecks when assessment questions arise. These self-service tools articulate assessment procedures to guide data and decision discussions across multiple end users as needed for timely decisions. 
+A notable benefit of these standardized tools is the increased accessibility of assessment decisions. No longer are assessment tools limited to regional assessment staff, resulting in bottlenecks when assessment questions arise. These self-service tools articulate assessment procedures to guide data and decision discussions across multiple end users as needed for timely decisions.
 
-This tool is a companion to the Station Table throughout the decision-making process. Upon beginning the assessment review period, regional assessment staff download a copy of the statewide Station Table (available inside either the Riverine or Lakes App). This copy is manipulated locally by regional assessment staff as decisions are reviewed (using these interactive applications) and entered into WQA CEDS. The next sections will detail typical workflow procedures to using this tool for data exploration and/or assessment. 
+This tool is a companion to the Station Table throughout the decision-making process. Upon beginning the assessment review period, regional assessment staff download a copy of the statewide Station Table (available inside either the Riverine or Lakes App). This copy is manipulated locally by regional assessment staff as decisions are reviewed (using these interactive applications) and entered into WQA CEDS. The next sections will detail typical workflow procedures to using this tool for data exploration and/or assessment.
 
 ## Application Orientation
 
@@ -19,12 +18,11 @@ This application brings station-level automated analyses- provided in the Statio
 
 ## Application Use: Data Upload Tab
 
-
-The `Data Upload` tab is the first screen to appear on application load. The purpose of this screen is to orient users to basic application usage and data sources and to provide a location to upload the Station Table. The Station Table is key to running any subsequent parts of this application. Users may download the latest copy of the statewide Station Table using the `Download statewide example dataset to upload to the tool.` button at the bottom of the screen. Helptext below the download button indicates the last time the Station Table template was updated. 
+The `Data Upload` tab is the first screen to appear on application load. The purpose of this screen is to orient users to basic application usage and data sources and to provide a location to upload the Station Table. The Station Table is key to running any subsequent parts of this application. Users may download the latest copy of the statewide Station Table using the `Download statewide example dataset to upload to the tool.` button at the bottom of the screen. Helptext below the download button indicates the last time the Station Table template was updated.
 
 The Station Table must be uploaded to the application each time the tool is used. The reason the tool requires an upload of the Station Table each use is to allow flexibility for regional assessment staff to change station assessment unit (AU) designations throughout the assessment process. If this dataset were sourced from the R server like all other datasets used by the Lakes App, then assessors would need to notify the Assessment Data Analyst each time a station AU changes, is split, or requires additional AUs. By allowing the regional assessment staff to edit this information in a .csv, the application allows self-service changes to station organization.
 
-Users may upload the entire statewide Station Table to the `Browse` button in the tool or a version filtered and saved locally with just the region of interest. 
+Users may upload the entire statewide Station Table to the `Browse` button in the tool or a version filtered and saved locally with just the region of interest.
 
 ![](images/lakes1.png)
 
@@ -36,33 +34,160 @@ Once this data is available to the application, the user may further refine data
 
 ![](images/lakes2.png)
 
-
 The main panel of the `Lake Selection` tab details information about the selected lake. The interactive map describes spatially where the lake falls within the state. Subsequent tables detail the AUs and stations within the VAHU6. The "Assessment Units in Selected Lake" table lists all AUs that fall inside the selected lake, retrieved from the previous Assessment cycle spatial layer. The "Stations in Selected Lake that were sampled in current window" table identifies all stations that fall within the lake with data in the current Assessment cycle. Stations in this table that lack most of the metadata are likely sampled only by programs that do not enter data into CEDS (e.g. PCB or Fish Tissue data). This can be confirmed in the Data_Source field where a "Data from outside conventionals query" flag will be noted. These stations can still be analyzed using the application, but they will lack data in the typical field and analyte analysis modules.
 
 The last table identifies stations in selected lake that have no data in the current window but were carried over from last cycle due to an IM designation in one of the previous IR status fields or the previous IR Station Table reports the station was carried over from a more previous cycle. The purpose of this table is to identify which stations in the selected lake are carried over from a previous cycle and require review before carrying forward another cycle. These stations can be viewed in the application and Station Table, but none of the parameter modules will display data as no data is available in the current window.
 
-**To view a station in the Lakes App, each station must have at least one ID305B field with a valid lake AU and WATER_TYPE must equal to RESERVOIR. Riverine and estuarine stations can reside in the uploaded Station Table, but only stations that comply with the logic set out above will be able to be analyzed in the Lakes App."
-
+\*\*To view a station in the Lakes App, each station must have at least one ID305B field with a valid lake AU and WATER_TYPE must equal to RESERVOIR. Riverine and estuarine stations can reside in the uploaded Station Table, but only stations that comply with the logic set out above will be able to be analyzed in the Lakes App."
 
 ## Application Use: Assessment Unit Review Tab
 
-After selecting a lake to investigate on the `Lake Selection` tab, the `Assessment Unit Review` tab is where the user will find the most interactive analytical tools. The tab provides a drill-down view of all assessment data related to the selected lake. Users explore the chosen lake using a hierarchical schema from lake -> AUs within the lake -> Stations within the AU. 
-The table at the top of the tab reminds the user which lake is currently selected for investigation, the VAHU6(s) the lake falls in, and whether or not the lake is attributed to a WQS segment tagged as a Section 187 lake. The "Assessment Unit Selection" drop down allows users to choose from all AUs within the chosen lake. These AUs are retrieved from the final AU spatial layer from the previous cycle. The table immediately below this drop down provides AU information for the chosen AU from the previous cycle as a summary of use attainment and AU comments in the most previous cycle. If, during the assessment process, an AU is split or renamed to a name not contained within the previous cycle final AU spatial layer and the Station Table uploaded to the application contains this new/changed AU, the previous final AU spatial layer will not contain information about this AU. However, the application will still allow the user to perform all expected analyses without this information. 
+After selecting a lake to investigate on the `Lake Selection` tab, the `Assessment Unit Review` tab is where the user will find the most interactive analytical tools. The tab provides a drill-down view of all assessment data related to the selected lake. Users explore the chosen lake using a hierarchical schema from lake -\> AUs within the lake -\> Stations within the AU. The table at the top of the tab reminds the user which lake is currently selected for investigation, the VAHU6(s) the lake falls in, and whether or not the lake is attributed to a WQS segment tagged as a Section 187 lake. The "Assessment Unit Selection" drop down allows users to choose from all AUs within the chosen lake. These AUs are retrieved from the final AU spatial layer from the previous cycle. The table immediately below this drop down provides AU information for the chosen AU from the previous cycle as a summary of use attainment and AU comments in the most previous cycle. If, during the assessment process, an AU is split or renamed to a name not contained within the previous cycle final AU spatial layer and the Station Table uploaded to the application contains this new/changed AU, the previous final AU spatial layer will not contain information about this AU. However, the application will still allow the user to perform all expected analyses without this information.
 
-Based on the AU selected, all stations attributed to the AU are available in the subsequent "Station Selection" drop down. The stations available in the drop down are limited to stations with an ID305B_1:ID305B_10 designation equal to the selected AU as provided in the uploaded Station Table. Once a station is selected, all further visualizations and analyses pertain to that station. In the subsequent panel, current and previous information about the selected station are provided. On the left, a table provides station and WQS information, organizing AU and station type designations (pulled from the uploaded Station Table) and WQS information (pulled from pinned data on the R server, originally provided by the regional assessor during the previous metadata steps). A thumbnail map identifies the station and all associated AUs. The table on the right provides Station Table results from the two most previous assessment cycles to collate relevant historical information about the station in one area. 
+Based on the AU selected, all stations attributed to the AU are available in the subsequent "Station Selection" drop down. The stations available in the drop down are limited to stations with an ID305B_1:ID305B_10 designation equal to the selected AU as provided in the uploaded Station Table. Once a station is selected, all further visualizations and analyses pertain to that station. In the subsequent panel, current and previous information about the selected station are provided. On the left, a table provides station and WQS information, organizing AU and station type designations (pulled from the uploaded Station Table) and WQS information (pulled from pinned data on the R server, originally provided by the regional assessor during the previous metadata steps). A thumbnail map identifies the station and all associated AUs. The table on the right provides Station Table results from the two most previous assessment cycles to collate relevant historical information about the station in one area.
 
 ![](images/lakes3.png)
 
-Information specific to the current assessment cycle is presented below the general station information panel. The "Station Table Results" table outputs the site specific results for direct export to the Station Table. It also serves to highlight where exceedances are present and should be reviewed in the individual parameter visualization tabs below. If no station table appears, then there is no data within the assessment window for the selected station. Please investigate the Historical Station Information table above for information as to why this station is included in the application. In the "Station Table Results" table, parameters are highlighted in different colors to indicate further review may be necessary. Parameters highlighted in yellow have at least one violation of a standard or criteria. When BENTHIC_STAT is highlighted, it indicates there is benthic data available for that site and the assessor should review that information with information presented in the `Benthic` tab below and their Regional Biologist. Parameters highlighted in red exceed the 10.5% exceedance rate. Both scenarios warrant further investigation and may require comments in the Station Table and CEDS WQA.
+Information specific to the current assessment cycle is presented below the general station information panel. The "Station Table Results" table outputs the site specific results for direct export to the Station Table. It also serves to highlight where exceedances are present and should be reviewed in the individual parameter visualization tabs below. If no station table appears, then there is no data within the assessment window for the selected station. Please investigate the Historical Station Information table above for information as to why this station is included in the application. In the "Station Table Results" table, parameters are highlighted in different colors to indicate further review may be necessary. Parameters highlighted in yellow have at least one violation of a standard or criteria. Parameters highlighted in red exceed the 10.5% exceedance rate. Both scenarios warrant further investigation and may require comments in the Station Table and CEDS WQA.
 
 **Pro Tip: The "Station Table Results" table is editable by the user. This is helpful when the user wants to minimize the number of applications running throughout a given assessment session. Should the assessor determine that an automated result presented in the table requires changing, they may triple-click (click three times in rapid succession) on the cell that needs the change to reveal a text entry box. The user may edit that cell to whatever they desire, preferably following the rules outlined in the Data Entry Manual. Regardless whether any cells were manipulated, the user may use the Copy/CSV/Excel buttons above the table to copy the table information to their clipboard or download the information as the chose file format.**
 
+![](images/lakes4.png)
 
-The "Assessment Unit Raw Data Review and Visualization" area organizes all the standardized statewide datasets organized for automated assessment uses in one area to expedite data review for individual stations. The area is divided into multiple tabs, each with subtabs. These hierarchical tabs organize the conventionals data and all associated parameter modules, benthic data, metals data, and toxics data. Future iterations of this application may include more data review areas as the underlying data sources undergo rigorous organizational steps in order to be sourced by the automated applications and scripts.
+The "Assessment Unit Raw Data Review and Visualization" area organizes all the standardized statewide datasets organized for automated assessment uses in one area to expedite data review for individual stations. The area is divided into multiple tabs, each with subtabs. These hierarchical tabs organize the conventionals data and all associated parameter modules, metals data, and toxics data. Future iterations of this application may include more data review areas as the underlying data sources undergo rigorous organizational steps in order to be sourced by the automated applications and scripts.
 
 By clicking any of the above mentioned tabs, users may begin to dig into different types of data for a chosen station.
 
-![](images/riverine8.png)
-
+![](images/lakes5.png)
 
 ### Conventionals Data Tab
+
+The "Conventionals" tab provides visualization and analysis modules for each parameter with waterbody-specific criteria or standards.
+
+#### Raw Data
+
+The "Raw Data" subtab presents all the conventionals data filtered to the current cycle. Users may download or copy this information to their clipboard for investigation in other programs. The Data Summary section provides AU and station record counts.
+
+**If the chosen assessment unit contains over 1,000 rows of data, only the data for the selected site will be loaded in the raw data table to expedite application loading. A warning message will be displayed in bold above the table to indicate when this filtering is happening.**
+
+![](images/lakes5.png)
+
+#### Thermocline
+
+The "Thermocline" subtab displays an interactive graph of all thermocline analysis results for the chosen station. To reveal a thermocline plot for a given sample date, users must click on a row in the table corresponding to the date of interest. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+Once a thermocline plot is visible, users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across most modules. A red horizontal line indicates the thermocline depth. Hovering over each point reveals more information about each piece of data.
+
+![](images/lakes6.png)
+
+#### Temperature
+
+The "Temperature" subtab displays an interactive graph of all temperature data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the "WQS for Analysis" drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+Users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across most modules. A black horizontal line indicates the station temperature standard. Hovering over each point reveals more information about each piece of data. The legend on the right of the plot allows users to turn plot layers on/off interactively by clicking on them to offer better data understanding.
+
+The two tables lie below the interactive plot. The table on the left highlights any measure that are above the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site.
+
+An AU level assessment lies below the station-level assessment and applies to assessment units with more than one station. This area details exceedances and exceedance statistics for all data pooled in the selected AU.
+
+![](images/lakes7.png)
+
+#### pH
+
+The "pH" subtab displays an interactive graph of all pH data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the "WQS for Analysis" drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+Users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across most modules. A black horizontal line indicates the station pH standard. Hovering over each point reveals more information about each piece of data. The legend on the right of the plot allows users to turn plot layers on/off interactively by clicking on them to offer better data understanding.
+
+The two tables lie below the interactive plot. The table on the left highlights any measure that are outside the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site. Analyzing the exceedance rate of just epilimnion samples can assist in determining if lake turnover may be the contributing to pH exceedances. A table of individual pH exceedance statistics for the selected site in the epilimnion lies below the total exceedance statistics table.
+
+An AU level assessment lies below the station-level assessment and applies to assessment units with more than one station. This area details exceedances and exceedance statistics for all data pooled in the selected AU. Analyzing the exceedance rate of just epilimnion samples can assist in determining if lake turnover may be the contributing to pH exceedances. A table of individual pH exceedance statistics for the selected AU in the epilimnion lies below the AU total exceedance statistics table.
+
+![](images/lakes9.png)
+
+#### Dissolved Oxygen
+
+The "DO" subtab displays an interactive graph of all dissolved oxygen data for the chosen station as well as the applicable WQS. Users may change the WQS assigned to the station and reassess on the fly using the "WQS for Analysis" drop down menu. This feature controls all the exceedance and summary statistics in the station area of the modal. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. Daily average DO exceedances and summary statistics are visible below the raw data analysis.
+
+Users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across most modules. A black horizontal line indicates the station dissolved oxygen standard. Hovering over each point reveals more information about each piece of data. The legend on the right of the plot allows users to turn plot layers on/off interactively by clicking on them to offer better data understanding.
+
+The two tables lie below the interactive plot. The table on the left highlights any measure that are below the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site. Analyzing the exceedance rate of just epilimnion samples can assist in determining if lake turnover may be the contributing to DO exceedances. A table of individual DO exceedance statistics for the selected site in the epilimnion lies below the total exceedance statistics table.
+
+An AU level assessment lies below the station-level assessment and applies to assessment units with more than one station. This area details exceedances and exceedance statistics for all data pooled in the selected AU. Analyzing the exceedance rate of just epilimnion samples can assist in determining if lake turnover may be the contributing to DO exceedances. A table of individual DO exceedance statistics for the selected AU in the epilimnion lies below the AU total exceedance statistics table.
+
+![](images/lakes8.png)
+
+The "Zoomed Plot By Sample Date" button reveals a modal dialog box with plotting feature that allows users to interactively explore DO vs temperature plots for each individual sample date to better understand data at the selected site.
+
+![](images/lakes8.5.png)
+
+#### Specific Conductance
+
+The "Specific Conductance" subtab displays an interactive graph of all specific conductivity data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options.
+
+Users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across most modules. Hovering over each point reveals more information about each piece of data. The legend on the right of the plot allows users to turn plot layers on/off interactively by clicking on them to offer better data understanding.
+
+![](images/lakes10.png)
+
+#### E. Coli
+
+The "E. Coli" subtab has two nested tabs, one for single station analysis and one for E. Coli analysis over an entire AU (for AUs with multiple stations).
+
+The "Single Station Analysis" subtab displays an interactive graph of all E.coli data for the chosen station. The most recent two years of the assessment period are highlighted on the graph in gray to illustrate the data that are considered for assessment decisions per assessment guidance. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. The next two tables highlight any exceedances (STV or geomean) of the new recreation E.coli standard (STV= 410 CFU / 100 mL, geomean = 126 CFU / 100 mL with additional sampling requirements) on the left table and then summarizes the rolling windows to suggest an assessment decision with standardized language for input into CEDS WQA.
+
+![](images/lakes11.png)
+
+The new bacteria standards are complicated. The "New Recreation Standard In Depth Analysis" section unpacks these rolling windows across the entire dataset to better explain the suggested assessment result above. The table to the left allows users to select any sample and plots a graph on the right with all data contained within that data point's 90 day rolling window. The table highlights all data collected within the most recent two years of the assessment period (data valid for assessment decisions) in gray. The interactive plot on the right plots the STV and geomean criteria as well as all data and the window calculated geomean. The orange line corresponds to the window geomean; wide black dashed line corresponds to the geomean criteria; thin black dashed line corresponds to the STV limit. Below the plot is a table with specific assessment logic regarding the data included in the selected 90 day window. The Valid Assessment Window field is a boolean result communicating whether the chosen data window is valid for assessment (contain all unique data). Implementing this check ensures rolling window calculations do not proceed beyond the addition of new bacteria data.
+
+The "Analyzed Data (Each window with an individual STV and geomean assessment decisions)" offers detailed information on STV and geomean assessments for every 90 day window in the dataset. Data valid for recreational use assessment are colored in gray.
+
+![](images/lakes12.png)
+
+The results of the "old E.coli standard" is presented at the bottom of the modal to communicate how the data compare to previous assessment cycles.
+
+The "Assessment Unit Analysis" subtab displays an interactive graph of all E.coli data for the chosen AU. Raw data from each station in the selected AU is presented in a different color. The most recent two years of the assessment period are highlighted on the graph in gray to illustrate the data that are considered for assessment decisions per assessment guidance. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. The next two tables highlight any exceedances (STV or geomean) of the new recreation E.coli standard (STV= 410 CFU / 100 mL, geomean = 126 CFU / 100 mL with additional sampling requirements) on the left table and then summarizes the rolling windows to suggest an assessment decision with standardized language for input into CEDS WQA. **Note: for AU assessments, the daily median of E. coli values collect in the AU is compared against the E. coli criteria.**
+
+![](images/lakes13.png)
+
+The new bacteria standards are complicated. The "New Recreation Standard In Depth Analysis" section unpacks the **AU daily median E. coli** rolling windows across the entire dataset to better explain the suggested assessment result above. The table to the left allows users to select any **Daily E. coli Median** and plots a graph on the right with all **AU median data** contained within that data point's 90 day rolling window. The table highlights all data collected within the most recent two years of the assessment period (data valid for assessment decisions) in gray. The interactive plot on the right plots the STV and geomean criteria as well as all **AU median data** and the window calculated geomean. The orange line corresponds to the window geomean; wide black dashed line corresponds to the geomean criteria; thin black dashed line corresponds to the STV limit. Below the plot is a table with specific assessment logic regarding the data included in the selected 90 day window. The Valid Assessment Window field is a boolean result communicating whether the chosen data window is valid for assessment (contain all unique data). Implementing this check ensures rolling window calculations do not proceed beyond the addition of new bacteria data.
+
+The "Analyzed Data (Each window with an individual STV and geomean assessment decisions)" offers detailed information on STV and geomean assessments for every 90 day window in the dataset. Data valid for recreational use assessment are colored in gray.
+
+![](images/lakes14.png)
+
+#### Chlorophyll a
+
+The "Chlorophyll a" subtab displays an interactive graph of all chlorophyll a data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. The "Lacustrine Zone Designation for Analysis" drop down indicates whether or not the station is attributed to the lacustrine zone of the lake in the uploaded Station Table. Users can easily toggle this to their desired setting to analyze chlorophyll a on the fly. Chlorophyll a exceedances are only analyzed if the station is deemed in the lacustrine zone and the lake has designated chlorophyll a criteria (Section 187 lakes).
+
+Users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across most modules. A black horizontal line indicates the station chlorophyll a criteria. Hovering over each point reveals more information about each piece of data. The legend on the right of the plot allows users to turn plot layers on/off interactively by clicking on them to offer better data understanding.
+
+The two tables lie below the interactive plot. The table on the left highlights any measure that are outside the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site. In Section 187 lakes, the 90th percentile of annual chlorophyll a values (collected from April-October) are compared against a lake-specific chlorophyll a criteria.
+
+An AU level assessment lies below the station-level assessment and applies to assessment units with more than one station. This area details exceedances and exceedance statistics for all data pooled in the selected AU. 
+
+![](images/lakes15.png)
+
+#### Total Phosphorus
+
+The "Total Phosphorus" subtab displays an interactive graph of all total phosphorus data for the chosen station. Users may review and download raw parameter data by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. The "Lacustrine Zone Designation for Analysis" drop down indicates whether or not the station is attributed to the lacustrine zone of the lake in the uploaded Station Table. Users can easily toggle this to their desired setting to analyze total phosphorus on the fly. Total phosphorus exceedances are only analyzed if the station is deemed in the lacustrine zone and the lake has designated total phosphorus criteria (Section 187 lakes).
+
+Users may interactively explore the data using the plotly plot. All measures in the epilimnion are colored green while all hypolimnion measures are colored blue. This color schema is consistent across most modules. A black horizontal line indicates the station total phosphorus criteria. Hovering over each point reveals more information about each piece of data. The legend on the right of the plot allows users to turn plot layers on/off interactively by clicking on them to offer better data understanding.
+
+The two tables lie below the interactive plot. The table on the left highlights any measure that are outside the criteria for the selected site while the table on the right displays the exceedance statistics for the selected site.  In Section 187 lakes, the annual median total phosphorus values (collected from April-October) are compared against a lake-specific total phosphorus criteria.
+
+An AU level assessment lies below the station-level assessment and applies to assessment units with more than one station. This area details exceedances and exceedance statistics for all data pooled in the selected AU. 
+
+![](images/lakes16.png)
+
+#### Trophic State Index
+
+The "Trophic State Index" subtab displays an interactive graph of the calculated trophic state index (TSI) for the chosen station. Users may review and download raw parameter data that goes into the calculation by clicking the "Review Raw Parameter Data" button to reveal a modal dialog box with a table and various copy/download options. The "Section 187 Lake" checkbox is automatically selected if the lake is designated as a Section 187 lake in the attached WQS metadata. Users can easily toggle this to their desired setting to analyze TSI on the fly. TSI is only analyzed if the station resides in a non-Section 187 lake.
+
+Users may interactively explore the calculated results using the plotly plot. Using the "TSI Parameter To Plot" drop down above the plot, users may select one of secchi depth, chlorophyll a, or total phosphorus to plot calculated TSI values against lake classification threshold ranges. Behind the TSI calculated results, the hypereutrophic threshold is colored in red, eutrophic in yellow, mesotrophic in green, and oligotrophic in blue. A black horizontal line indicates the overall TSI for the selected parameter. Hovering over each point reveals more information about each piece of data. 
+
+The table below the interactive plot displays the mean secchi depth, chlorophyll a, and total phosphorus measures along with the calculated TSI  secchi depth, chlorophyll a, and total phosphorus results. 
+
+An AU level assessment lies below the station-level assessment and applies to assessment units with more than one station. This area details exceedances and exceedance statistics for all data pooled in the selected AU. 
+
+![](images/lakes17.png)
+
+

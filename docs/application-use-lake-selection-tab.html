@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>DEQ Water Quality Automated Assessment User Guide</title>
+  <title>6.3 Application Use: Lake Selection Tab | DEQ Water Quality Automated Assessment User Guide</title>
   <meta name="description" content="A companion document describing the WQA automated assessment methodology." />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="DEQ Water Quality Automated Assessment User Guide" />
+  <meta property="og:title" content="6.3 Application Use: Lake Selection Tab | DEQ Water Quality Automated Assessment User Guide" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="openscapes/series" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="DEQ Water Quality Automated Assessment User Guide" />
+  <meta name="twitter:title" content="6.3 Application Use: Lake Selection Tab | DEQ Water Quality Automated Assessment User Guide" />
   
   <meta name="twitter:description" content="A companion document describing the WQA automated assessment methodology." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="HowToUseDocument.html"/>
+<link rel="prev" href="application-use-data-upload-tab-1.html"/>
+<link rel="next" href="application-use-assessment-unit-review-tab-1.html"/>
 <script src="libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -303,23 +303,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">DEQ Water Quality Automated Assessment User Guide</h1>
-<p class="author"><em>DEQ Automated Assessment Team</em></p>
-<p class="date"><em>Last Updated: 2023-04-14</em></p>
-</div>
-<div id="Introduction" class="section level1" number="1">
-<h1><span class="header-section-number">Chapter 1</span> Introduction</h1>
-<p>This manual serves as a companion document to DEQ’s Water Quality Assessment (WQA) automated assessment methodology for completion of the biennial <a href="https://www.deq.virginia.gov/water/water-quality/assessments/integrated-report">305b/303d Integrated Report</a>. Virginia is among a handful of state agencies that have organized concerted efforts to systematically automate and expedite the water quality assessment process. These entities have all taken different approaches to best meet their state-specific analysis and reporting needs. Through the <a href="https://github.com/USEPA/TADA">Tools for Automated Data Assessment (TADA) working group</a>, EPA is organizing an effort to share code and create national tools to assist partners with assessment analyses. Considering the technological advances in water monitoring that have increased the quantity and types of data requiring consideration during an assessment period, as well as the static or decreasing staff time allocated to the assessment process, automation appears the only solution to keep up with Clean Water Act requirements and keep the public informed of the status of waterbody health and restoration timelines for those waterbodies not meeting water quality standards. By embracing automated assessment procedures, entities aim to provide constituents with higher quality, standardized, and transparent water quality assessment results while adhering to federally mandated deadlines.</p>
-<p>Virginia has taken a hybrid approach to the process of automating the water quality assessments. DEQ relies upon an automated process to manipulate hundreds of thousands of water quality data collected throughout the state during a given assessment period (six year window). These scripts evaluate each record for exceedances of appropriate Water Quality Standards. Regional assessment staff may use interactive web-based analytical tools provide more context to tabular results of exceedance analyses to assist with Quality Assurance/Quality Control (QA/QC) prior to submitting data to EPA’s <a href="https://www.epa.gov/waterdata/attains" target="_blank">Assessment, Total Maximum Daily Load (TMDL) Tracking and Implementation System (ATTAINS)</a> system through DEQ’s internal <a href="https://ceds.deq.virginia.gov/ui#" target="_blank">Comprehensive Environmental Data System (CEDS)</a>. This approach maximizes the benefits of each partner in the assessment process, allowing computers to excel at systematic and expedited data manipulation and analysis at scale and allowing humans to digest multiple lines of evidence to identify any potential data collection or analysis errors or areas of environmental concern.</p>
+<div id="application-use-lake-selection-tab" class="section level2" number="6.3">
+<h2><span class="header-section-number">6.3</span> Application Use: Lake Selection Tab</h2>
+<p>The <code>Lake Selection</code> tab allows users to choose a particular region to investigate further. Using the drop down menu in the sidebar panel, users must choose one assessment region and then click <code>Retrieve Assessment Units From Server</code> in order to proceed with any analyses. Based on the assessment region selected, the application then extracts the appropriate spatial data from standardized datasets saved on the R server and provides that information to the application. A progress message is visible in the lower right of the screen while this data transaction occurs.</p>
+<p>Once this data is available to the application, the user may further refine data by using a dynamic filtering drop down on the sidebar panel. Users may select from only the lakes within the selected assessment region. An interactive map dynamically updates to display the user selection on the main panel of the application. Additional information about the each AU and station within the lake may be found in the popup table revealed upon clicking on a each item in the interactive map. Users may zoom in/out, change baselayers or data layers plotted, and hover/click on map items using the interactive leaflet map in the main panel of the application.</p>
+<p><img src="images/lakes2.png" /></p>
+<p>The main panel of the <code>Lake Selection</code> tab details information about the selected lake. The interactive map describes spatially where the lake falls within the state. Subsequent tables detail the AUs and stations within the VAHU6. The “Assessment Units in Selected Lake” table lists all AUs that fall inside the selected lake, retrieved from the previous Assessment cycle spatial layer. The “Stations in Selected Lake that were sampled in current window” table identifies all stations that fall within the lake with data in the current Assessment cycle. Stations in this table that lack most of the metadata are likely sampled only by programs that do not enter data into CEDS (e.g. PCB or Fish Tissue data). This can be confirmed in the Data_Source field where a “Data from outside conventionals query” flag will be noted. These stations can still be analyzed using the application, but they will lack data in the typical field and analyte analysis modules.</p>
+<p>The last table identifies stations in selected lake that have no data in the current window but were carried over from last cycle due to an IM designation in one of the previous IR status fields or the previous IR Station Table reports the station was carried over from a more previous cycle. The purpose of this table is to identify which stations in the selected lake are carried over from a previous cycle and require review before carrying forward another cycle. These stations can be viewed in the application and Station Table, but none of the parameter modules will display data as no data is available in the current window.</p>
+<p>**To view a station in the Lakes App, each station must have at least one ID305B field with a valid lake AU and WATER_TYPE must equal to RESERVOIR. Riverine and estuarine stations can reside in the uploaded Station Table, but only stations that comply with the logic set out above will be able to be analyzed in the Lakes App."</p>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="HowToUseDocument.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="application-use-data-upload-tab-1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="application-use-assessment-unit-review-tab-1.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

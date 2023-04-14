@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>DEQ Water Quality Automated Assessment User Guide</title>
+  <title>6.2 Application Use: Data Upload Tab | DEQ Water Quality Automated Assessment User Guide</title>
   <meta name="description" content="A companion document describing the WQA automated assessment methodology." />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="DEQ Water Quality Automated Assessment User Guide" />
+  <meta property="og:title" content="6.2 Application Use: Data Upload Tab | DEQ Water Quality Automated Assessment User Guide" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="openscapes/series" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="DEQ Water Quality Automated Assessment User Guide" />
+  <meta name="twitter:title" content="6.2 Application Use: Data Upload Tab | DEQ Water Quality Automated Assessment User Guide" />
   
   <meta name="twitter:description" content="A companion document describing the WQA automated assessment methodology." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="HowToUseDocument.html"/>
+<link rel="prev" href="application-orientation-2.html"/>
+<link rel="next" href="application-use-lake-selection-tab.html"/>
 <script src="libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -303,23 +303,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">DEQ Water Quality Automated Assessment User Guide</h1>
-<p class="author"><em>DEQ Automated Assessment Team</em></p>
-<p class="date"><em>Last Updated: 2023-04-14</em></p>
-</div>
-<div id="Introduction" class="section level1" number="1">
-<h1><span class="header-section-number">Chapter 1</span> Introduction</h1>
-<p>This manual serves as a companion document to DEQ’s Water Quality Assessment (WQA) automated assessment methodology for completion of the biennial <a href="https://www.deq.virginia.gov/water/water-quality/assessments/integrated-report">305b/303d Integrated Report</a>. Virginia is among a handful of state agencies that have organized concerted efforts to systematically automate and expedite the water quality assessment process. These entities have all taken different approaches to best meet their state-specific analysis and reporting needs. Through the <a href="https://github.com/USEPA/TADA">Tools for Automated Data Assessment (TADA) working group</a>, EPA is organizing an effort to share code and create national tools to assist partners with assessment analyses. Considering the technological advances in water monitoring that have increased the quantity and types of data requiring consideration during an assessment period, as well as the static or decreasing staff time allocated to the assessment process, automation appears the only solution to keep up with Clean Water Act requirements and keep the public informed of the status of waterbody health and restoration timelines for those waterbodies not meeting water quality standards. By embracing automated assessment procedures, entities aim to provide constituents with higher quality, standardized, and transparent water quality assessment results while adhering to federally mandated deadlines.</p>
-<p>Virginia has taken a hybrid approach to the process of automating the water quality assessments. DEQ relies upon an automated process to manipulate hundreds of thousands of water quality data collected throughout the state during a given assessment period (six year window). These scripts evaluate each record for exceedances of appropriate Water Quality Standards. Regional assessment staff may use interactive web-based analytical tools provide more context to tabular results of exceedance analyses to assist with Quality Assurance/Quality Control (QA/QC) prior to submitting data to EPA’s <a href="https://www.epa.gov/waterdata/attains" target="_blank">Assessment, Total Maximum Daily Load (TMDL) Tracking and Implementation System (ATTAINS)</a> system through DEQ’s internal <a href="https://ceds.deq.virginia.gov/ui#" target="_blank">Comprehensive Environmental Data System (CEDS)</a>. This approach maximizes the benefits of each partner in the assessment process, allowing computers to excel at systematic and expedited data manipulation and analysis at scale and allowing humans to digest multiple lines of evidence to identify any potential data collection or analysis errors or areas of environmental concern.</p>
+<div id="application-use-data-upload-tab-1" class="section level2" number="6.2">
+<h2><span class="header-section-number">6.2</span> Application Use: Data Upload Tab</h2>
+<p>The <code>Data Upload</code> tab is the first screen to appear on application load. The purpose of this screen is to orient users to basic application usage and data sources and to provide a location to upload the Station Table. The Station Table is key to running any subsequent parts of this application. Users may download the latest copy of the statewide Station Table using the <code>Download statewide example dataset to upload to the tool.</code> button at the bottom of the screen. Helptext below the download button indicates the last time the Station Table template was updated.</p>
+<p>The Station Table must be uploaded to the application each time the tool is used. The reason the tool requires an upload of the Station Table each use is to allow flexibility for regional assessment staff to change station assessment unit (AU) designations throughout the assessment process. If this dataset were sourced from the R server like all other datasets used by the Lakes App, then assessors would need to notify the Assessment Data Analyst each time a station AU changes, is split, or requires additional AUs. By allowing the regional assessment staff to edit this information in a .csv, the application allows self-service changes to station organization.</p>
+<p>Users may upload the entire statewide Station Table to the <code>Browse</code> button in the tool or a version filtered and saved locally with just the region of interest.</p>
+<p><img src="images/lakes1.png" /></p>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="HowToUseDocument.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="application-orientation-2.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="application-use-lake-selection-tab.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
